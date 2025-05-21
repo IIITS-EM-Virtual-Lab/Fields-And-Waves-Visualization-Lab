@@ -1,0 +1,151 @@
+.pow-container {
+    margin: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.pow-container h1 {
+    font-size: 2.5em; /* Increased font size */
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #1a202c;
+}
+
+.pow-container h2 {
+    font-size: 2em; /* Increased font size */
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 40px; /* Added margin-bottom for gap between topics */
+    color: #2d3748;
+}
+
+.pow-container p {
+    font-size: 1em;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    color: #4a5568;
+}
+
+.pow-container ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 20px;
+}
+
+.pow-container li {
+    margin-bottom: 10px;
+}
+
+.pow-container img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+}
+
+.pow-container .iframe-container {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pow-container iframe {
+    border: 1px solid #e4e4e4;
+    border-radius: 4px;
+}
+
+.pow-container .text-2xl {
+    font-size: 2em; /* Increased font size */
+    font-weight: bold;
+    margin-top: 20px;
+    color: #2d3748;
+}
+
+.pow-container .text-xl {
+    font-size: 1.75em; /* Increased font size */
+    font-weight: bold;
+    margin-top: 20px;
+    color: #2d3748;
+}
+
+.pow-container .text-lg {
+    font-size: 1.25em; /* Increased font size */
+    line-height: 1.6;
+    margin-bottom: 10px;
+    color: #4a5568;
+}
+
+.pow-container .leading-relaxed {
+    line-height: 1.6;
+}
+
+.pow-container .font-bold {
+    font-weight: bold;
+}
+
+.pow-container .font-extrabold {
+    font-weight: 800;
+}
+
+.pow-container .uppercase {
+    text-transform: uppercase;
+}
+
+.pow-container .text-center {
+    text-align: center;
+}
+
+.pow-container .py-6 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.pow-container .mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.pow-container .mt-6 {
+    margin-top: 1.5rem;
+}
+
+.pow-container .mt-8 {
+    margin-top: 2rem;
+}
+
+.pow-container .mb-4 {
+    margin-bottom: 1rem;
+}
+
+.pow-container .ml-6 {
+    margin-left: 1.5rem;
+}
+
+.pow-container .space-y-2 > * + * {
+    margin-top: 0.5rem;
+}
+
+.pow-container .p-10 {
+    padding: 2.5rem;
+}
+
+.pow-container .flex {
+    display: flex;
+}
+
+.pow-container .justify-center {
+    justify-content: center;
+}
+
+.pow-container .items-center {
+    align-items: center;
+}
+
+/* Added margin-bottom for gap between topics */
+.pow-container .topic {
+    margin-bottom: 40px;
+}

@@ -1,0 +1,151 @@
+.wave-container {
+    margin: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.wave-container h1 {
+    font-size: 2.5em; /* Increased font size */
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #1a202c;
+}
+
+.wave-container h2 {
+    font-size: 2em; /* Increased font size */
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 40px; /* Added margin-bottom for gap between topics */
+    color: #2d3748;
+}
+
+.wave-container p {
+    font-size: 1em;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    color: #4a5568;
+}
+
+.wave-container ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 20px;
+}
+
+.wave-container li {
+    margin-bottom: 10px;
+}
+
+.wave-container img {
+    max-width: 100%;
+    height: auto;
+    margin: 10px 0;
+}
+
+.wave-container .iframe-container {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wave-container iframe {
+    border: 1px solid #e4e4e4;
+    border-radius: 4px;
+}
+
+.wave-container .text-2xl {
+    font-size: 2em; /* Increased font size */
+    font-weight: bold;
+    margin-top: 20px;
+    color: #2d3748;
+}
+
+.wave-container .text-xl {
+    font-size: 1.75em; /* Increased font size */
+    font-weight: bold;
+    margin-top: 20px;
+    color: #2d3748;
+}
+
+.wave-container .text-lg {
+    font-size: 1.25em; /* Increased font size */
+    line-height: 1.6;
+    margin-bottom: 10px;
+    color: #4a5568;
+}
+
+.wave-container .leading-relaxed {
+    line-height: 1.6;
+}
+
+.wave-container .font-bold {
+    font-weight: bold;
+}
+
+.wave-container .font-extrabold {
+    font-weight: 800;
+}
+
+.wave-container .uppercase {
+    text-transform: uppercase;
+}
+
+.wave-container .text-center {
+    text-align: center;
+}
+
+.wave-container .py-6 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.wave-container .mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.wave-container .mt-6 {
+    margin-top: 1.5rem;
+}
+
+.wave-container .mt-8 {
+    margin-top: 2rem;
+}
+
+.wave-container .mb-4 {
+    margin-bottom: 1rem;
+}
+
+.wave-container .ml-6 {
+    margin-left: 1.5rem;
+}
+
+.wave-container .space-y-2 > * + * {
+    margin-top: 0.5rem;
+}
+
+.wave-container .p-10 {
+    padding: 2.5rem;
+}
+
+.wave-container .flex {
+    display: flex;
+}
+
+.wave-container .justify-center {
+    justify-content: center;
+}
+
+.wave-container .items-center {
+    align-items: center;
+}
+
+/* Added margin-bottom for gap between topics */
+.wave-container .topic {
+    margin-bottom: 40px;
+}
