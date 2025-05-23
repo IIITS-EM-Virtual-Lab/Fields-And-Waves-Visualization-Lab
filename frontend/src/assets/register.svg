@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <style>
+    .st0{fill:#F0F0F0;}
+    .st1{fill:#5995FD;}
+    .st2{fill:#FFFFFF;}
+  </style>
+  <circle class="st0" cx="250" cy="250" r="250"/>
+  <g transform="translate(100,100)">
+    <path class="st1" d="M150,0C67.2,0,0,67.2,0,150s67.2,150,150,150s150-67.2,150-150S232.8,0,150,0z M230,160h-70v70
+      c0,5.5-4.5,10-10,10s-10-4.5-10-10v-70H70c-5.5,0-10-4.5-10-10s4.5-10,10-10h70V70c0-5.5,4.5-10,10-10s10,4.5,10,10v70h70
+      c5.5,0,10,4.5,10,10S235.5,160,230,160z"/>
+  </g>
+</svg> 

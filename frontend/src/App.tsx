@@ -1,4 +1,7 @@
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
+import { ReactNode } from 'react';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from './store/slices/authSlice';
 import Home from "@/pages/Home";
 import Content from "@/pages/Content";
 import Header from "@/components/Header";
@@ -31,6 +34,21 @@ import WaveReflection from './pages/wave-propagation/wave_reflection';
 import TimeVaryingPotential from './pages/maxwell-equations/time-varying-potential';
 import EMFS from "./pages/maxwell-equations/emfs"; 
 import DisplacementCurrent from "./pages/maxwell-equations/displacement-current";
+import Auth from "./pages/Auth";
+
+// Protected Route component
+interface ProtectedRouteProps {
+  children: ReactNode;
+}
+
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+  return children;
+};
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -40,39 +58,144 @@ const AppRoutes = () => {
       <ScrollToTop />
       <Header />
       <Routes>
+        <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<Home />} />
-        <Route path="/content/" element={<ContentLayout />}>
+        <Route path="/content/" element={
+          <ProtectedRoute>
+            <ContentLayout />
+          </ProtectedRoute>
+        }>
           <Route path=":id/" element={<Content />} />
         </Route>
         <Route path="/contributors" element={<Scalars />} />
-        <Route path="/scalars-and-vectors" element={<Scalars />} />
-        <Route path="/vector-addition" element={<VectorAdditionPage />} />
-        <Route path="/vector-multiplication" element={<VectorMultiplicationPage />} />
-        <Route path="/triple-product" element={<TripleProductPage />} />
-        <Route path="/vector-calculus-intro" element={<VectorCalculusIntro />} />
-        <Route path="/cylindrical-coordinates" element={<CylindricalCoordinatesPage />} />
-        <Route path="/spherical-coordinates" element={<SphericalCoordinatesPage />} />
-        <Route path="/del-operator" element={<DelOperatorPage />} />
-        <Route path="/electrostatics-intro" element={<CoulombsLawPage />} />
-        <Route path="/electric-field-and-flux-density" element={<ElectricFluxPage />} />
-        <Route path="/field-operations" element={<GradientPage />} />
-        <Route path="/electric-potential" element={<ElectricPotentialPage />} />
-        <Route path="/gauss-law" element={<GaussLawPage />} />
-        <Route path="/gauss-law-contd" element={<GaussLawContdPage />} />
-        <Route path="/electric-dipole" element={<ElectricDipolePage />} />
-        <Route path="/ampere-law" element={<AmpereLawPage />} />
-        <Route path="/faraday-law" element={<FaradayLawPage />} />
-        <Route path="/time-varying-potential" element={<TimeVaryingPotential />} />
-        <Route path="/transformer-motional-emf" element={<EMFS />} />
-        <Route path="/gauss-law-magnetism" element={<GaussLawMagnestismPage />} />
+        <Route path="/scalars-and-vectors" element={
+          <ProtectedRoute>
+            <Scalars />
+          </ProtectedRoute>
+        } />
+        <Route path="/vector-addition" element={
+          <ProtectedRoute>
+            <VectorAdditionPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/vector-multiplication" element={
+          <ProtectedRoute>
+            <VectorMultiplicationPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/triple-product" element={
+          <ProtectedRoute>
+            <TripleProductPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/vector-calculus-intro" element={
+          <ProtectedRoute>
+            <VectorCalculusIntro />
+          </ProtectedRoute>
+        } />
+        <Route path="/cylindrical-coordinates" element={
+          <ProtectedRoute>
+            <CylindricalCoordinatesPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/spherical-coordinates" element={
+          <ProtectedRoute>
+            <SphericalCoordinatesPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/del-operator" element={
+          <ProtectedRoute>
+            <DelOperatorPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/electrostatics-intro" element={
+          <ProtectedRoute>
+            <CoulombsLawPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/electric-field-and-flux-density" element={
+          <ProtectedRoute>
+            <ElectricFluxPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/field-operations" element={
+          <ProtectedRoute>
+            <GradientPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/electric-potential" element={
+          <ProtectedRoute>
+            <ElectricPotentialPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/gauss-law" element={
+          <ProtectedRoute>
+            <GaussLawPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/gauss-law-contd" element={
+          <ProtectedRoute>
+            <GaussLawContdPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/electric-dipole" element={
+          <ProtectedRoute>
+            <ElectricDipolePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/ampere-law" element={
+          <ProtectedRoute>
+            <AmpereLawPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/faraday-law" element={
+          <ProtectedRoute>
+            <FaradayLawPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/time-varying-potential" element={
+          <ProtectedRoute>
+            <TimeVaryingPotential />
+          </ProtectedRoute>
+        } />
+        <Route path="/transformer-motional-emf" element={
+          <ProtectedRoute>
+            <EMFS />
+          </ProtectedRoute>
+        } />
+        <Route path="/gauss-law-magnetism" element={
+          <ProtectedRoute>
+            <GaussLawMagnestismPage />
+          </ProtectedRoute>
+        } />
         <Route path="/about" element={<About />} />
-        <Route path="/types-of-waves" element={<TypeOfWaves />} />
-        <Route path="/plane-wave-analysis" element={<WaveAnalysis />} />
-        <Route path="/wave-power-energy" element={<PowVector />} />
-        <Route path="/wave-reflection" element={<WaveReflection />} />
-        <Route path="/displacement-current" element={<DisplacementCurrent />} />
+        <Route path="/types-of-waves" element={
+          <ProtectedRoute>
+            <TypeOfWaves />
+          </ProtectedRoute>
+        } />
+        <Route path="/plane-wave-analysis" element={
+          <ProtectedRoute>
+            <WaveAnalysis />
+          </ProtectedRoute>
+        } />
+        <Route path="/wave-power-energy" element={
+          <ProtectedRoute>
+            <PowVector />
+          </ProtectedRoute>
+        } />
+        <Route path="/wave-reflection" element={
+          <ProtectedRoute>
+            <WaveReflection />
+          </ProtectedRoute>
+        } />
+        <Route path="/displacement-current" element={
+          <ProtectedRoute>
+            <DisplacementCurrent />
+          </ProtectedRoute>
+        } />
       </Routes>
-      {location.pathname !== "/scalars-and-vectors" && <Footer />}
+      {location.pathname !== "/scalars-and-vectors" && location.pathname !== "/auth" && <Footer />}
     </>
   );
 };
