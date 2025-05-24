@@ -8,6 +8,13 @@ import registerImg from '../assets/register.svg';
 import { setCredentials } from '../store/slices/authSlice';
 import ChargeButton from '../components/ChargeButton';
 
+interface ValidationErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
 const Auth = () => {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
@@ -17,6 +24,8 @@ const Auth = () => {
     email: '',
     password: ''
   });
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [isFormValid, setIsFormValid] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -44,6 +53,66 @@ const Auth = () => {
     }
   }, [showOTP]);
 
+  const validateName = (name: string): string | undefined => {
+    if (name.length < 3) {
+      return 'Name must be at least 3 characters long';
+    }
+    if (!/^[a-zA-Z\s]{3,}$/.test(name)) {
+      return 'Name must contain at least 3 alphabets';
+    }
+    return undefined;
+  };
+
+  const validateEmail = (email: string): string | undefined => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return 'Please enter a valid email address';
+    }
+    return undefined;
+  };
+
+  const validatePassword = (password: string): string | undefined => {
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return undefined;
+  };
+
+  const validateConfirmPassword = (password: string, confirmPassword: string): string | undefined => {
+    if (password !== confirmPassword) {
+      return 'Passwords do not match';
+    }
+    return undefined;
+  };
+
+  const validateForm = () => {
+    const name = signupNameRef.current?.value || '';
+    const email = signupEmailRef.current?.value || '';
+    const password = signupPasswordRef.current?.value || '';
+    const confirmPassword = signupConfirmPasswordRef.current?.value || '';
+
+    const errors: ValidationErrors = {};
+    
+    const nameError = validateName(name);
+    if (nameError) errors.name = nameError;
+
+    const emailError = validateEmail(email);
+    if (emailError) errors.email = emailError;
+
+    const passwordError = validatePassword(password);
+    if (passwordError) errors.password = passwordError;
+
+    const confirmPasswordError = validateConfirmPassword(password, confirmPassword);
+    if (confirmPasswordError) errors.confirmPassword = confirmPasswordError;
+
+    setValidationErrors(errors);
+    setIsFormValid(Object.keys(errors).length === 0);
+  };
+
+  const handleInputChange = () => {
+    validateForm();
+  };
+
   const handleLoginSubmit = async () => {
     try {
       const response = await axios.post(`http://localhost:5000/api/auth/login`, {
@@ -68,8 +137,8 @@ const Auth = () => {
   };
 
   const handleSignupSubmit = async () => {
-    if (signupPasswordRef.current?.value !== signupConfirmPasswordRef.current?.value) {
-      alert("Passwords don't match!");
+    validateForm();
+    if (!isFormValid) {
       return;
     }
 
@@ -196,32 +265,52 @@ const Auth = () => {
                 type="text"
                 placeholder="Name"
                 ref={signupNameRef}
+                onChange={handleInputChange}
                 required
+                className={validationErrors.name ? 'error' : ''}
               />
+              {validationErrors.name && (
+                <div className="error-message">{validationErrors.name}</div>
+              )}
             </div>
             <div className="input-field">
               <input
                 type="email"
                 placeholder="Email"
                 ref={signupEmailRef}
+                onChange={handleInputChange}
                 required
+                className={validationErrors.email ? 'error' : ''}
               />
+              {validationErrors.email && (
+                <div className="error-message">{validationErrors.email}</div>
+              )}
             </div>
             <div className="input-field">
               <input
                 type="password"
                 placeholder="Password"
                 ref={signupPasswordRef}
+                onChange={handleInputChange}
                 required
+                className={validationErrors.password ? 'error' : ''}
               />
+              {validationErrors.password && (
+                <div className="error-message">{validationErrors.password}</div>
+              )}
             </div>
             <div className="input-field">
               <input
                 type="password"
                 placeholder="Confirm Password"
                 ref={signupConfirmPasswordRef}
+                onChange={handleInputChange}
                 required
+                className={validationErrors.confirmPassword ? 'error' : ''}
               />
+              {validationErrors.confirmPassword && (
+                <div className="error-message">{validationErrors.confirmPassword}</div>
+              )}
             </div>
             <ChargeButton onConnect={handleSignupSubmit} buttonText="Sign Up" />
           </form>
@@ -266,7 +355,7 @@ const Auth = () => {
         <div className="panel right-panel">
           <div className="content">
             <h3>One of us?</h3>
-            <a onClick={() => setIsSignUpMode(false)}>Sign in and continue your journey with us!</a>
+            <a onClick={() => setIsSignUpMode(true)}>Sign in and continue your journey with us!</a>
           </div>
           <img src={registerImg} className="image" alt="register" />
         </div>
