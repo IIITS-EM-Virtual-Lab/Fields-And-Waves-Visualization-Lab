@@ -1,4 +1,4 @@
-const About = () => {
+const Contact = () => {
   return (
     <main className=" px-12">
       <div
@@ -9,7 +9,7 @@ const About = () => {
         }}
       ></div>
       <div className="flex items-center h-[40vh]">
-        <div className="w-1/2  text-4xl font-extrabold p-8">About Us</div>
+        <div className="w-1/2  text-4xl font-extrabold p-8">Contact Us</div>
         <div className="w-1/2">
           <img src="/assets/hero.png" />
         </div>
@@ -45,4 +45,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default Contact;
