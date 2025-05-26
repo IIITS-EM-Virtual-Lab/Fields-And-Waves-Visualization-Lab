@@ -26,6 +26,7 @@ const Auth = () => {
   });
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [isFormValid, setIsFormValid] = useState(false);
+  const [resetButton, setResetButton] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -118,21 +119,36 @@ const Auth = () => {
       const response = await axios.post(`http://localhost:5000/api/auth/login`, {
         email: loginEmailRef.current?.value,
         password: loginPasswordRef.current?.value,
+      }, {
+        validateStatus: function (status) {
+          return status >= 200 && status < 500;
+        }
       });
 
-      dispatch(setCredentials({
-        token: response.data.token,
-        client: response.data.client
-      }));
-
-      alert(response.data.message);
-      navigate('/');
-    } catch (error: any) {
-      if (error.response) {
-        alert(error.response.data.error);
+      if (response.data.success) {
+        dispatch(setCredentials({
+          token: response.data.data.token,
+          client: response.data.data.user
+        }));
+        alert(response.data.message);
+        navigate('/');
       } else {
-        alert('Something went wrong!');
+        setResetButton(true);
+        setTimeout(() => {
+          alert(response.data.message);
+        }, 1000);
+        setTimeout(() => {
+          setResetButton(false);
+        }, 1000);
       }
+    } catch (error: any) {
+      setResetButton(true);
+      setTimeout(() => {
+        alert('Something went wrong!');
+      }, 1000);
+      setTimeout(() => {
+        setResetButton(false);
+      }, 1000);
     }
   };
 
@@ -254,7 +270,7 @@ const Auth = () => {
                 required
               />
             </div>
-            <ChargeButton onConnect={handleLoginSubmit} buttonText="Login" />
+            <ChargeButton onConnect={handleLoginSubmit} buttonText="Login" reset={resetButton} />
           </form>
 
           {/* Sign Up Form */}
