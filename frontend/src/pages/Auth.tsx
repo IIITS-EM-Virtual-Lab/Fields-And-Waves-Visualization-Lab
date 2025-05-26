@@ -57,7 +57,7 @@ const Auth = () => {
       }));
 
       alert(response.data.message);
-      navigate('/');
+      navigate('/home');
     } catch (error: any) {
       if (error.response) {
         alert(error.response.data.error);

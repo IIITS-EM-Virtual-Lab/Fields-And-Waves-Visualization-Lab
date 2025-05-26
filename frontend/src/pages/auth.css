@@ -134,7 +134,7 @@ a:hover {
 }
 
 .btn:hover {
-  background-color: #4d84e2;
+  background-color: #bbdfff;
 }
 
 .btn.transparent {
@@ -190,12 +190,12 @@ a:hover {
 
 .left-panel {
   pointer-events: all;
-  background: linear-gradient(45deg, #5995fd, #4d84e2);
+  background: linear-gradient(45deg, #bbdfff, #bbdfff);
 }
 
 .right-panel {
   pointer-events: none;
-  background: linear-gradient(45deg, #4d84e2, #5995fd);
+  background: linear-gradient(45deg, #bbdfff, #bbdfff);
 }
 
 .image {
