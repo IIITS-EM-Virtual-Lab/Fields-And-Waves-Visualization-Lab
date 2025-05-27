@@ -99,6 +99,8 @@ a:hover {
   display: flex;
   align-items: center;
   padding: 0 1rem;
+  position: relative;
+  margin-bottom: 1rem;
 }
 
 .input-field input {
@@ -116,6 +118,19 @@ a:hover {
 .input-field input::placeholder {
   color: #aaa;
   font-weight: 500;
+}
+
+.input-field input.error {
+  border: 2px solid #ff3860;
+  color: #ff3860;
+}
+
+.error-message {
+  color: #ff3860;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  margin-left: 1rem;
+  text-align: left;
 }
 
 .btn {

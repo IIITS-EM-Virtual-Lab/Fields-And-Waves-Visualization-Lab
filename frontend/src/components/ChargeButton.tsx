@@ -4,6 +4,7 @@ import './ChargeButton.css';
 interface ChargeButtonProps {
   onConnect: () => void;
   buttonText: string;
+  reset?: boolean;
 }
 
 interface Position {
@@ -11,7 +12,7 @@ interface Position {
   y: number;
 }
 
-const ChargeButton: React.FC<ChargeButtonProps> = ({ onConnect, buttonText }) => {
+const ChargeButton: React.FC<ChargeButtonProps> = ({ onConnect, buttonText, reset = false }) => {
   const [isDraggingPositive, setIsDraggingPositive] = useState(false);
   const [isDraggingNegative, setIsDraggingNegative] = useState(false);
   const [positivePosition, setPositivePosition] = useState<Position>({ x: 0, y: 0 });
@@ -21,6 +22,15 @@ const ChargeButton: React.FC<ChargeButtonProps> = ({ onConnect, buttonText }) =>
   const positiveRef = useRef<HTMLDivElement>(null);
   const negativeRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ startX: number; startY: number }>({ startX: 0, startY: 0 });
+
+  // Reset effect
+  useEffect(() => {
+    if (reset) {
+      setIsConnected(false);
+      setPositivePosition({ x: 0, y: 0 });
+      setNegativePosition({ x: 0, y: 0 });
+    }
+  }, [reset]);
 
   const handleMouseDown = (e: React.MouseEvent, isPositive: boolean) => {
     if (isPositive) {
