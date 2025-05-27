@@ -131,7 +131,7 @@ const Auth = () => {
       }));
 
       alert(response.data.message);
-      navigate('/');
+      navigate('/home');
     } catch (error: any) {
       setResetButton(true);
       setTimeout(() => {
@@ -220,7 +220,7 @@ const Auth = () => {
           client: response.data.client
         }));
         alert('Registration successful!');
-        navigate('/');
+        navigate('/auth');
       } else {
         alert(response.data.message || 'Verification failed');
       }
@@ -362,7 +362,7 @@ const Auth = () => {
         <div className="panel right-panel">
           <div className="content">
             <h3>One of us?</h3>
-            <a onClick={() => setIsSignUpMode(true)}>Sign in and continue your journey with us!</a>
+            <a onClick={() => setIsSignUpMode(false)}>Sign in and continue your journey with us!</a>
           </div>
           <img src={registerImg} className="image" alt="register" />
         </div>
