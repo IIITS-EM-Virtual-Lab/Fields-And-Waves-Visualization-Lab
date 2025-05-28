@@ -37,6 +37,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/lib/scrollToTop";
 import Auth from "./pages/Auth";
+import Welcome from "@/pages/welcome";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -58,10 +59,11 @@ const AppRoutes = () => {
       <div className="pt-20">
         <Routes>
           <Route path="/auth" element={<Auth />} />
-
+          <Route path="/" element={<Welcome />} />
           {/* Sidebar applied to all major educational routes including Home */}
           <Route element={<ContentLayout />}>
-            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            
             <Route path="/vector-addition" element={<ProtectedRoute><VectorAdditionPage /></ProtectedRoute>} />
             <Route path="/scalars-and-vectors" element={<ProtectedRoute><Scalars /></ProtectedRoute>} />
             <Route path="/vector-multiplication" element={<ProtectedRoute><VectorMultiplicationPage /></ProtectedRoute>} />

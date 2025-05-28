@@ -1,7 +1,9 @@
 const Footer = () => {
   return (
-    <footer className="bg-[#b1dafd] text-black text-xs py-4 px-6 w-full text-center shadow-inner ">
-      © Copyright Virtual Electromagnetics Laboratory, IIIT Sri City. All Rights Reserved.
+    <footer className="w-full bg-[#bbdfff] text-sm text-gray-700 px-6 py-2 shadow-inner">
+      <p className="text-center">
+        © 2025 Virtual Electromagnetics Laboratory, IIIT Sri City. All Rights Reserved.
+      </p>
     </footer>
   );
 };
