@@ -6,7 +6,7 @@ const ContentLayout = () => {
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex flex-col flex-1">
-        <main className="flex-grow p-6 ml-60">
+        <main className="flex-grow pt-0 p-6 ml-60 bg-[#bbdfff]">
           <Outlet />
         </main>
        

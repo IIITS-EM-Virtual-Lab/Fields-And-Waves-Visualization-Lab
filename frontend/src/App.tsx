@@ -38,6 +38,7 @@ import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/lib/scrollToTop";
 import Auth from "./pages/Auth";
 import Welcome from "@/pages/welcome";
+import ProfilePage from "@/pages/ProfilePage";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -60,10 +61,10 @@ const AppRoutes = () => {
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/" element={<Welcome />} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           {/* Sidebar applied to all major educational routes including Home */}
           <Route element={<ContentLayout />}>
             <Route path="/home" element={<Home />} />
-            
             <Route path="/vector-addition" element={<ProtectedRoute><VectorAdditionPage /></ProtectedRoute>} />
             <Route path="/scalars-and-vectors" element={<ProtectedRoute><Scalars /></ProtectedRoute>} />
             <Route path="/vector-multiplication" element={<ProtectedRoute><VectorMultiplicationPage /></ProtectedRoute>} />

@@ -86,20 +86,10 @@ exports.verifyAndSignup = async (req, res) => {
     // Remove OTP from cache
     removeOTP(email);
 
-    // Generate token
-    const token = generateToken(user._id);
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
-      data: {
-        token,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email
-        }
-      }
+      message: 'User registered successfully',  
     });
 
   } catch (error) {

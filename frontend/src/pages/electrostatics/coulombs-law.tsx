@@ -1,23 +1,67 @@
-import { Button } from "@/components/ui/button";
-
-const CoulombsLawPage = () => {
-  return (
-    <div className="px-48 flex flex-col border-t border-slate-300">
-      <div>
-        <div className="p-10 flex justify-center items-center">
-          <iframe
-            src="https://www.geogebra.org/material/iframe/id/154678/width/873/height/500/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-            width="873px"
-            height="500px"
-          ></iframe>
-        </div>
-        <div className="p-10 flex justify-center items-center">
-          <iframe
+          {/* <iframe
             src="https://www.geogebra.org/classic/NQwe7K89?embed"
             width="1073px"
             height="800px"
-          ></iframe>
+          ></iframe> */}
+
+import { Button } from "@/components/ui/button";
+import { ReactP5Wrapper } from "@p5-wrapper/react";
+import { CoulombP5Sketch } from "@/p5/CoulombP5Sketch";
+
+
+const CoulombsLawPage = () => {
+  return (
+      <div className="min-h-screen bg-gradient-to-b from-[#bbdfff] to-white py-12 px-6">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-3xl font-bold text-center text-gray-900 mb-6">
+          Coulomb's Law
+        </h1>
+        <p className="text-md text-gray-800 text-justify mb-8 leading-relaxed">
+          Coulomb's Law describes the electrostatic interaction between electrically charged particles. It states that the magnitude of the electrostatic force between two point charges is directly proportional to the product of their charges and inversely proportional to the square of the distance between them.
+        </p>
+
+        <div className="mb-12">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            GeoGebra Simulation
+          </h2>
+          <div className="aspect-video shadow-md rounded-lg overflow-hidden border border-gray-300">
+            <iframe
+              title="Coulomb's Law Simulation"
+              // src="https://www.geogebra.org/material/iframe/id/154678/width/873/height/500/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
+              src="https://www.geogebra.org/classic/NQwe7K89?embed"
+              width="873px"
+              height="500px"
+              allowFullScreen
+              loading="lazy"
+            />
+          </div>
         </div>
+
+        <div className="mb-12">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            PhET Simulation
+          </h2>
+          <div className="aspect-video shadow-md rounded-lg border border-gray-300">
+            <iframe
+              title="PhET Coulomb Simulation"
+              src="https://phet.colorado.edu/sims/html/charges-and-fields/latest/charges-and-fields_en.html"
+              width="873px"
+              height="500px"
+              allowFullScreen
+              loading="lazy"
+            />
+          </div>
+        </div>
+
+        <div className="mb-12">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+           Custom P5.js Simulation
+        </h2>
+        <div className="shadow-md rounded-lg border border-gray-300 overflow-hidden">
+        <ReactP5Wrapper sketch={CoulombP5Sketch} />
+        </div>
+        </div>
+
 
         <div>
           <span>Coulombs Law:</span>

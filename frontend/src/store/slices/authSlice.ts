@@ -1,11 +1,21 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../store";
 
+// Define the shape of the client/user object
+interface Client {
+  name: string;
+  email: string;
+  // Add other fields if you store more info like id, role, etc.
+}
+
+// Define the shape of the auth slice state
 interface AuthState {
   token: string | null;
-  client: any | null;
+  client: Client | null;
   isAuthenticated: boolean;
 }
 
+// Initial state
 const initialState: AuthState = {
   token: null,
   client: null,
@@ -13,12 +23,12 @@ const initialState: AuthState = {
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{ token: string; client: any }>
+      action: PayloadAction<{ token: string; client: Client }>
     ) => {
       const { token, client } = action.payload;
       state.token = token;
@@ -35,9 +45,10 @@ const authSlice = createSlice({
 
 export const { setCredentials, logout } = authSlice.actions;
 
-export default authSlice.reducer;
-
 // Selectors
-export const selectCurrentUser = (state: { auth: AuthState }) => state.auth.client;
-export const selectCurrentToken = (state: { auth: AuthState }) => state.auth.token;
-export const selectIsAuthenticated = (state: { auth: AuthState }) => state.auth.isAuthenticated; 
+export const selectCurrentUser = (state: RootState) => state.auth.client;
+export const selectCurrentToken = (state: RootState) => state.auth.token;
+export const selectIsAuthenticated = (state: RootState) =>
+  state.auth.isAuthenticated;
+
+export default authSlice.reducer;

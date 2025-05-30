@@ -125,10 +125,16 @@ const Auth = () => {
         }
       });
 
+      const user = response.data.data.user;
+
       dispatch(setCredentials({
-        token: response.data.token,
-        client: response.data.client
+        token: response.data.data.token,
+        client: {
+          name: user.name,
+          email: user.email
+        }
       }));
+
 
       alert(response.data.message);
       navigate('/home');
@@ -162,6 +168,10 @@ const Auth = () => {
         name: signupNameRef.current?.value,
         email: signupEmailRef.current?.value,
         password: signupPasswordRef.current?.value,
+      }, {
+        validateStatus: function (status) {
+          return status >= 200 && status < 500;
+        }
       });
 
       if (response.data.success) {
@@ -215,12 +225,8 @@ const Auth = () => {
       });
 
       if (response.data.success) {
-        dispatch(setCredentials({
-          token: response.data.token,
-          client: response.data.client
-        }));
-        alert('Registration successful!');
-        navigate('/auth');
+        alert(response.data.message);
+        window.location.reload();
       } else {
         alert(response.data.message || 'Verification failed');
       }
