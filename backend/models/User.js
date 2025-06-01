@@ -16,8 +16,20 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
-    minlength: 6
+    required: function() {
+      return !this.isGoogleUser; // Password only required for non-Google users
+    }
+  },
+  isGoogleUser: {
+    type: Boolean,
+    default: false
+  },
+  profilePicture: {
+    type: String
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
 });
 

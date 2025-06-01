@@ -38,7 +38,6 @@ import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/lib/scrollToTop";
 import Auth from "./pages/Auth";
 import Welcome from "@/pages/welcome";
-import ProfilePage from "@/pages/ProfilePage";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -60,6 +59,7 @@ const AppRoutes = () => {
       <div className="pt-20">
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/google/callback" element={<GoogleCallback />} />
           <Route path="/" element={<Welcome />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           {/* Sidebar applied to all major educational routes including Home */}

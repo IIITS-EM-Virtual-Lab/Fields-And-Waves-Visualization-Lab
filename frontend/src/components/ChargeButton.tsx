@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, ReactNode } from 'react';
 import './ChargeButton.css';
 
 interface ChargeButtonProps {
   onConnect: () => void;
-  buttonText: string;
+  buttonText: ReactNode;
   reset?: boolean;
 }
 

@@ -7,6 +7,8 @@ import loginImg from '../assets/login.svg';
 import registerImg from '../assets/register.svg';
 import { setCredentials } from '../store/slices/authSlice';
 import ChargeButton from '../components/ChargeButton';
+import { Button } from '../components/ui/button';
+import { FaGoogle } from "react-icons/fa";
 
 interface ValidationErrors {
   name?: string;
@@ -27,6 +29,8 @@ const Auth = () => {
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [resetButton, setResetButton] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -244,6 +248,20 @@ const Auth = () => {
     setOtp(['', '', '', '', '', '']);
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/auth/google');
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        setError('Failed to get Google auth URL');
+      }
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      setError('Failed to initiate Google sign-in');
+    }
+  };
+
   return (
     <div className={`auth-container ${isSignUpMode ? 'sign-up-mode' : ''} ${showOTP ? 'otp-mode' : ''}`} style={{ backgroundColor: '#f6f5f7' }}>
       <div className="forms-container">
@@ -268,6 +286,14 @@ const Auth = () => {
               />
             </div>
             <ChargeButton onConnect={handleLoginSubmit} buttonText="Login" reset={resetButton} />
+            
+            {/* Google Sign In Button */}
+            <div className="google-signin-container">
+              <Button onClick={handleGoogleSignIn}>
+                <FaGoogle className="google-icon" />
+                <span style={{ marginLeft: '10px' }}>Sign in with Google</span>
+              </Button>
+            </div>
           </form>
 
           {/* Sign Up Form */}
