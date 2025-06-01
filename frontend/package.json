@@ -32,7 +32,8 @@
     "react-router-hash-link": "^2.4.3",
     "sort-by": "^1.2.0",
     "tailwind-merge": "^2.2.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "vtk.js": "^33.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.19",

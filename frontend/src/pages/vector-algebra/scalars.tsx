@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 
 const Scalars = () => {
+
   return (
     <div className="px-48 flex flex-col border-t border-slate-300">
       <div className="text-xl font-black uppercase text-center py-10">
