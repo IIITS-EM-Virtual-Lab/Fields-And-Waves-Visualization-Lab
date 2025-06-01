@@ -245,7 +245,11 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/auth/google');
-      window.location.href = response.data.url;
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        setError('Failed to get Google auth URL');
+      }
     } catch (error) {
       console.error('Google sign-in error:', error);
       setError('Failed to initiate Google sign-in');

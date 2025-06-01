@@ -214,7 +214,7 @@ exports.getGoogleAuthURL = async (req, res) => {
   }
 };
 
-// Google OAuth callback
+// Handle Google OAuth callback
 exports.handleGoogleCallback = async (req, res) => {
   try {
     const { code } = req.query;
@@ -224,7 +224,7 @@ exports.handleGoogleCallback = async (req, res) => {
       process.env.GOOGLE_REDIRECT_URI
     );
 
-    // Get tokens
+    // Exchange code for tokens
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
@@ -246,27 +246,22 @@ exports.handleGoogleCallback = async (req, res) => {
       });
     }
 
-    // Generate token using the same function as other auth methods
+    // Generate token
     const token = generateToken(user._id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        token,
-        client: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          profilePicture: user.profilePicture
-        }
-      }
-    });
+    // Redirect to frontend with token and user data
+    const frontendUrl = new URL('http://localhost:5173/auth/google/callback');
+    frontendUrl.searchParams.set('token', token);
+    frontendUrl.searchParams.set('user', JSON.stringify({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      profilePicture: user.profilePicture
+    }));
+
+    res.redirect(frontendUrl.toString());
   } catch (error) {
-    console.error('Google OAuth Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Google authentication failed'
-    });
+    console.error('Error in Google callback:', error);
+    res.redirect('http://localhost:5173/auth?error=Google authentication failed');
   }
 };
