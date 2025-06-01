@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { generateOTP, sendOTPEmail, storeOTP, verifyOTP, removeOTP } = require('../utils/emailService');
+const { OAuth2Client } = require('google-auth-library');
 require('dotenv').config();
 
 // JWT Secret Key
@@ -183,6 +184,89 @@ exports.getCurrentUser = async (req, res) => {
       success: false,
       message: 'Error fetching user data',
       error: error.message
+    });
+  }
+};
+
+// Google OAuth URL generation
+exports.getGoogleAuthURL = async (req, res) => {
+  try {
+    const oauth2Client = new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    );
+
+    const scopes = [
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email'
+    ];
+
+    const url = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: scopes
+    });
+
+    res.status(200).json({ url });
+  } catch (error) {
+    console.error('Error generating Google auth URL:', error);
+    res.status(500).json({ error: 'Failed to generate Google auth URL' });
+  }
+};
+
+// Google OAuth callback
+exports.handleGoogleCallback = async (req, res) => {
+  try {
+    const { code } = req.query;
+    const oauth2Client = new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    );
+
+    // Get tokens
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    // Get user info
+    const userInfoResponse = await oauth2Client.request({
+      url: 'https://www.googleapis.com/oauth2/v3/userinfo'
+    });
+
+    const { email, name, picture } = userInfoResponse.data;
+
+    // Find or create user
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        email,
+        name,
+        profilePicture: picture,
+        isGoogleUser: true
+      });
+    }
+
+    // Generate token using the same function as other auth methods
+    const token = generateToken(user._id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      data: {
+        token,
+        client: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          profilePicture: user.profilePicture
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Google OAuth Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Google authentication failed'
     });
   }
 };

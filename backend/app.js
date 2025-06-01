@@ -24,6 +24,8 @@ app.post('/api/auth/initiate-signup', authController.initiateSignup);
 app.post('/api/auth/verify-and-signup', authController.verifyAndSignup);
 app.post('/api/auth/login', authController.login);
 app.get('/api/auth/me', auth, authController.getCurrentUser);
+app.get('/api/auth/google', authController.getGoogleAuthURL);
+app.get('/api/auth/google/callback', authController.handleGoogleCallback);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
