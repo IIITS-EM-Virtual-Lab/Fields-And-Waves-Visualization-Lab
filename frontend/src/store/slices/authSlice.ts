@@ -9,11 +9,12 @@ interface Client {
 }
 
 // Define the shape of the auth slice state
-interface AuthState {
+export interface AuthState {
   token: string | null;
   client: Client | null;
   isAuthenticated: boolean;
 }
+
 
 // Initial state
 const initialState: AuthState = {

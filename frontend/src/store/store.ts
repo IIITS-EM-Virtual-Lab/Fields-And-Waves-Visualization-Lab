@@ -1,8 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './slices/authSlice';
+import authReducer, { AuthState } from './slices/authSlice';
 
-// Load state from localStorage
-function loadFromLocalStorage() {
+// Define structure of persisted state
+interface PersistedState {
+  auth: AuthState;
+}
+
+// Load from localStorage
+function loadFromLocalStorage(): PersistedState | undefined {
   try {
     const serializedState = localStorage.getItem('reduxState');
     if (serializedState === null) return undefined;
@@ -13,8 +18,8 @@ function loadFromLocalStorage() {
   }
 }
 
-// Save state to localStorage
-function saveToLocalStorage(state: RootState) {
+// Save to localStorage
+function saveToLocalStorage(state: PersistedState) {
   try {
     const serializedState = JSON.stringify(state);
     localStorage.setItem('reduxState', serializedState);
@@ -29,7 +34,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
   },
-  preloadedState: persistedState, // Load from localStorage on startup
+  preloadedState: persistedState,
 });
 
 store.subscribe(() => {
@@ -37,4 +42,5 @@ store.subscribe(() => {
 });
 
 export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch; 
+export type AppDispatch = typeof store.dispatch;
+export default store;
