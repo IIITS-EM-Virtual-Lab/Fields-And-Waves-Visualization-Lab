@@ -137,7 +137,8 @@ exports.login = async (req, res) => {
         user: {
           id: user._id,
           name: user.name,
-          email: user.email
+          email: user.email,
+          isAdmin: user.isAdmin
         }
       }
     });
@@ -232,7 +233,8 @@ exports.handleGoogleCallback = async (req, res) => {
         email,
         name,
         profilePicture: picture,
-        isGoogleUser: true
+        isGoogleUser: true,
+        isAdmin: false // Set default admin status
       });
     }
 
@@ -246,7 +248,8 @@ exports.handleGoogleCallback = async (req, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
-      profilePicture: user.profilePicture
+      profilePicture: user.profilePicture,
+      isAdmin: user.isAdmin // Include isAdmin field
     }));
 
     res.redirect(frontendUrl.toString());

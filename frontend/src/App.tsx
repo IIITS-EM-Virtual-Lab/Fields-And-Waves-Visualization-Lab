@@ -38,6 +38,8 @@ import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/lib/scrollToTop";
 import Auth from "./pages/Auth";
 import Welcome from "@/pages/welcome";
+import GoogleCallback from "./pages/GoogleCallback";
+import ProfilePage from "./pages/ProfilePage.tsx";
 
 interface ProtectedRouteProps {
   children: ReactNode;

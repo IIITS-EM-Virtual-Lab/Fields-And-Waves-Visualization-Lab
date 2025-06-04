@@ -4,6 +4,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const authController = require('./controllers/Auth');
 const auth = require('./middleware/auth');
+const userRoutes = require('./routes/userRoutes');
+const quizRoutes = require('./routes/quiz');
 
 // Load environment variables
 dotenv.config();
@@ -23,9 +25,13 @@ mongoose.connect(process.env.MONGODB_URI)
 app.post('/api/auth/initiate-signup', authController.initiateSignup);
 app.post('/api/auth/verify-and-signup', authController.verifyAndSignup);
 app.post('/api/auth/login', authController.login);
-app.get('/api/auth/me', auth, authController.getCurrentUser);
+app.get('/api/auth/me', auth.auth, authController.getCurrentUser);
 app.get('/api/auth/google', authController.getGoogleAuthURL);
 app.get('/api/auth/google/callback', authController.handleGoogleCallback);
+
+// Use routes
+app.use('/api/users', userRoutes);
+app.use('/api/quizzes', quizRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

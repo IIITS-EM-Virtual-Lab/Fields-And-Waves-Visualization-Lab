@@ -2,9 +2,11 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 
 // Define the shape of the client/user object
-interface Client {
+export interface Client {
   name: string;
   email: string;
+  profilePicture?: string;
+  isAdmin?: boolean;
   // Add other fields if you store more info like id, role, etc.
 }
 
