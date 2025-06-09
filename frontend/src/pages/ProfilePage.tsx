@@ -639,24 +639,22 @@ const ProfilePage = () => {
                         <td>{user.email}</td>
                         <td>{user.isAdmin ? 'Admin' : 'User'}</td>
                         <td className="action-buttons">
-                          {!user.isAdmin && (
-                            <>
-                              <button
-                                className="action-button toggle-admin"
-                                onClick={() => handleToggleAdmin(user._id, user.isAdmin)}
-                                title="Make Admin"
-                              >
-                                <FaUserShield />
-                              </button>
-                              <button
-                                className="action-button delete"
-                                onClick={() => handleDeleteUser(user._id)}
-                                title="Delete User"
-                              >
-                                <FaTrash />
-                              </button>
-                            </>
-                          )}
+                          <button
+                            className={`action-button toggle-admin ${user.isAdmin ? 'disabled' : ''}`}
+                            onClick={() => handleToggleAdmin(user._id, user.isAdmin)}
+                            title={user.isAdmin ? "User is already an admin" : "Make Admin"}
+                            disabled={user.isAdmin}
+                          >
+                            <FaUserShield />
+                          </button>
+                          <button
+                            className={`action-button delete ${user.isAdmin ? 'disabled' : ''}`}
+                            onClick={() => handleDeleteUser(user._id)}
+                            title={user.isAdmin ? "Cannot delete admin user" : "Delete User"}
+                            disabled={user.isAdmin}
+                          >
+                            <FaTrash />
+                          </button>
                         </td>
                       </tr>
                     ))}

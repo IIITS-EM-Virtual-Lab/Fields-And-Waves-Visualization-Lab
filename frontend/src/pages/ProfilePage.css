@@ -234,6 +234,17 @@
   background-color: #f8d7da;
 }
 
+.action-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #ccc;
+}
+
+.action-button.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 .action-button svg {
   width: 16px;
   height: 16px;
