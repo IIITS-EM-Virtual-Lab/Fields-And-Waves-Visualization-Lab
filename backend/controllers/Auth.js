@@ -108,7 +108,8 @@ exports.login = async (req, res) => {
         user: {
           id: user._id,
           name: user.name,
-          email: user.email
+          email: user.email,
+          isAdmin: user.isAdmin
         }
       }
     });
@@ -155,16 +156,22 @@ exports.handleGoogleCallback = async (req, res) => {
         name,
         email,
         profilePicture: picture,
-        isGoogleUser: true
+        isGoogleUser: true,
+        isAdmin: false // Set default admin status
       });
     }
 
     const token = generateToken(user._id);
 
-    const redirect = new URL(process.env.FRONTEND_URL + '/login');
-    redirect.searchParams.set('token', token);
-    redirect.searchParams.set('name', user.name);
-    redirect.searchParams.set('email', user.email);
+    // Redirect to frontend with token and user data
+    const frontendUrl = new URL('http://localhost:5173/auth/google/callback');
+    frontendUrl.searchParams.set('token', token);
+    frontendUrl.searchParams.set('user', JSON.stringify({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      profilePicture: user.profilePicture
+    }));
 
     res.redirect(redirect.toString());
   } catch (err) {

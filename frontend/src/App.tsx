@@ -34,10 +34,18 @@ import ContentLayout from "@/pages/ContentLayout";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/lib/scrollToTop";
-import Login from './pages/login';
-import Signup from './pages/signup';
+import Auth from "./pages/Auth";
+import Welcome from "@/pages/welcome";
 
-import ProfilePage from "./pages/ProfilePage";
+interface ProtectedRouteProps {
+  children: ReactNode;
+}
+
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  if (!isAuthenticated) return <Navigate to="/auth" replace />;
+  return children;
+};
 
 const AppRoutes = () => {
   const location = useLocation();
