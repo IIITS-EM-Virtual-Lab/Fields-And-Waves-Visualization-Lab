@@ -1,68 +1,62 @@
-const nodemailer = require('nodemailer');
 const NodeCache = require('node-cache');
+const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-require('dotenv').config();
 
-// Cache to store OTPs with 10 minutes expiry
-const otpCache = new NodeCache({ stdTTL: 600 });
+const otpCache = new NodeCache({ stdTTL: 600 }); // 10 minutes
 
-// Create transporter for sending emails
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
-  }
-});
-
-// Generate 6 digit OTP
+// 1. Generate a random 6-digit OTP
 const generateOTP = () => {
-    return crypto.randomInt(100000, 999999).toString();
+  return crypto.randomInt(100000, 999999).toString();
 };
 
-// Send OTP email
-const sendOTPEmail = async (email, otp) => {
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: 'Email Verification OTP',
-    html: `
-      <h1>Email Verification</h1>
-      <p>Your OTP for email verification is: <strong>${otp}</strong></p>
-      <p>This OTP will expire in 10 minutes.</p>
-    `
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    return true;
-  } catch (error) {
-    console.error('Error sending email:', error);
-    return false;
-  }
+// 2. Store OTP with user data (email => {otp, name, password})
+const storeOTP = (email, data) => {
+  otpCache.set(email, data);
 };
 
-// Store OTP in cache
-const storeOTP = (email, otp) => {
-  otpCache.set(email, otp);
-};
-
-// Verify OTP
+// 3. Verify OTP
 const verifyOTP = (email, otp) => {
-  const storedOTP = otpCache.get(email);
-  if (!storedOTP) return false;
-  return storedOTP === otp;
+  const stored = otpCache.get(email);
+  if (!stored) return false;
+
+  const parsed = JSON.parse(stored);
+  if (parsed.email !== email) return false;
+  if (parsed.otp !== otp) return false;
+
+  return stored; // this gets parsed later in Auth.js
 };
 
-// Remove OTP from cache after successful verification
+
+// 4. Remove OTP after use
 const removeOTP = (email) => {
   otpCache.del(email);
 };
 
+// 5. Send OTP via email
+const sendOTPEmail = async (email, otp) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD
+    }
+  });
+
+  const mailOptions = {
+    from: `"VE Lab" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: 'Your VE Lab OTP Code',
+    html: `<p>Your OTP is: <b>${otp}</b>. It will expire in 10 minutes.</p>`
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// 6. Export everything
 module.exports = {
   generateOTP,
   sendOTPEmail,
   storeOTP,
   verifyOTP,
   removeOTP
-}; 
+};

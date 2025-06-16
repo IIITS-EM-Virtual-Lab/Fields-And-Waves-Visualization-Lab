@@ -1,9 +1,8 @@
+// src/components/ui/Footer.tsx
 const Footer = () => {
   return (
-    <footer className="w-full bg-[#bbdfff] text-sm text-gray-700 px-6 py-2 shadow-inner">
-      <p className="text-center">
-        © 2025 Virtual Electromagnetics Laboratory, IIIT Sri City. All Rights Reserved.
-      </p>
+    <footer className="bg-[#003366] text-white py-4 text-center text-sm">
+      © 2025 Virtual Electromagnetics Laboratory, IIIT Sri City. All Rights Reserved.
     </footer>
   );
 };

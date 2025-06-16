@@ -11,7 +11,7 @@ import { CoulombP5Sketch } from "@/p5/CoulombP5Sketch";
 
 const CoulombsLawPage = () => {
   return (
-      <div className="min-h-screen bg-gradient-to-b from-[#bbdfff] to-white py-12 px-6">
+      <div className="min-h-screen bg-white py-12 px-6">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold text-center text-gray-900 mb-6">
           Coulomb's Law
@@ -27,8 +27,8 @@ const CoulombsLawPage = () => {
           <div className="aspect-video shadow-md rounded-lg overflow-hidden border border-gray-300">
             <iframe
               title="Coulomb's Law Simulation"
-              // src="https://www.geogebra.org/material/iframe/id/154678/width/873/height/500/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-              src="https://www.geogebra.org/classic/NQwe7K89?embed"
+              src="https://www.geogebra.org/material/iframe/id/154678/width/873/height/500/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
+              // src="https://www.geogebra.org/classic/NQwe7K89?embed"
               width="873px"
               height="500px"
               allowFullScreen
@@ -37,7 +37,7 @@ const CoulombsLawPage = () => {
           </div>
         </div>
 
-        <div className="mb-12">
+        {/* <div className="mb-12">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             PhET Simulation
           </h2>
@@ -51,7 +51,7 @@ const CoulombsLawPage = () => {
               loading="lazy"
             />
           </div>
-        </div>
+        </div> */}
 
         <div className="mb-12">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
