@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
-import { ReactNode } from 'react';
+// import { useSelector } from "react-redux";
+// import { ReactNode } from 'react';
 
 import Home from "@/pages/Home";
 import Contact from "@/pages/Contact";
@@ -34,18 +35,19 @@ import ContentLayout from "@/pages/ContentLayout";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/lib/scrollToTop";
-import Auth from "./pages/Auth";
-import Welcome from "@/pages/welcome";
+import Login from "./pages/login";
+import Signup from "./pages/signup";
+import ProfilePage from "./pages/ProfilePage";
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
+// interface ProtectedRouteProps {
+//   children: ReactNode;
+// }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  if (!isAuthenticated) return <Navigate to="/auth" replace />;
-  return children;
-};
+// const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+//   const isAuthenticated = useSelector(selectIsAuthenticated);
+//   if (!isAuthenticated) return <Navigate to="/auth" replace />;
+//   return children;
+// };
 
 const AppRoutes = () => {
   const location = useLocation();
