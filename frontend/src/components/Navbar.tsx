@@ -1,66 +1,184 @@
-import { Link, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { selectIsAuthenticated } from "@/store/slices/authSlice";
-import ProfileDropdown from "@/components/ui/ProfileDropdown";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  selectIsAuthenticated,
+  selectCurrentUser,
+  logout,
+} from "@/store/slices/authSlice";
+import { ChevronDown, Search } from "lucide-react";
+
+const exploreModules = [
+  {
+    title: "Vector Algebra",
+    items: [
+      { name: "Scalars", path: "/scalars-and-vectors" },
+      { name: "Addition", path: "/vector-addition" },
+      { name: "Multiplication", path: "/vector-multiplication" },
+      { name: "Triple Product", path: "/triple-product" },
+    ],
+  },
+  {
+    title: "Vector Calculus",
+    items: [
+      { name: "Intro", path: "/vector-calculus-intro" },
+      { name: "Del Operator", path: "/del-operator" },
+      { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates" },
+      { name: "Spherical Coordinates", path: "/spherical-coordinates" },
+    ],
+  },
+  {
+    title: "Electrostatics",
+    items: [
+      { name: "Intro", path: "/electrostatics-intro" },
+      { name: "Electric Dipole", path: "/electric-dipole" },
+      { name: "Electric Potential", path: "/electric-potential" },
+      { name: "Electric Field & Flux", path: "/electric-field-and-flux-density" },
+      { name: "Field Operations", path: "/field-operations" },
+      { name: "Gauss Law", path: "/gauss-law" },
+    ],
+  },
+  {
+    title: "Maxwell Equations",
+    items: [
+      { name: "Gauss Law Contd", path: "/gauss-law-contd" },
+      { name: "Gauss Law Magnetism", path: "/gauss-law-magnetism" },
+      { name: "Ampere Law", path: "/ampere-law" },
+      { name: "Faraday Law", path: "/faraday-law" },
+      { name: "Displacement Current", path: "/displacement-current" },
+      { name: "Time Varying Potential", path: "/time-varying-potential" },
+      { name: "EMF", path: "/transformer-motional-emf" },
+    ],
+  },
+  {
+    title: "Wave Propagation",
+    items: [
+      { name: "Types of Waves", path: "/types-of-waves" },
+      { name: "Wave Power Energy", path: "/wave-power-energy" },
+      { name: "Plane Wave Analysis", path: "/plane-wave-analysis" },
+      { name: "Wave Reflection", path: "/wave-reflection" },
+    ],
+  },
+];
 
 const Navbar = () => {
-  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  const [showExplore, setShowExplore] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const navItems = [
-    { name: "Home", path: "/home" },
-    { name: "Modules", path: "/home/#modules" },
-    { name: "About", path: "/home/#about" },
-    { name: "Contact", path: "/contact" },
-  ];
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !(dropdownRef.current as HTMLElement).contains(event.target as Node)
+      ) {
+        setShowExplore(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
 
   return (
-    <header className="bg-[#bbdfff] fixed top-0 left-0 w-full shadow z-50">
-      <div className="relative flex items-center justify-between px-6 py-4 w-full">
-        {/* Logo section - left aligned */}
-        <div className="flex items-center space-x-4">
-          <img src="/assets/logo.png" alt="EM Lab Logo" className="h-12 w-12" />
-          <div>
-            <h1 className="text-xl font-bold text-red-700">
-              Virtual Electromagnetics Laboratory
-            </h1>
-            <p className="text-sm text-gray-800">
-              Indian Institute of Information Technology Sri City
-            </p>
+    <header className="bg-white fixed top-0 left-0 w-full z-50 border-b border-gray-200 font-sans">
+      <div className="max-w-[1200px] mx-auto h-[72px] flex items-center justify-between px-5 text-[18px] text-[#1a1a1a]">
+        {/* Left Section */}
+        <div className="flex items-center gap-6 relative">
+          {/* Explore Dropdown */}
+          <div ref={dropdownRef}>
+            <button
+              className="text-[#2563eb] font-semibold text-[18px] flex items-center gap-1 hover:underline"
+              onClick={() => setShowExplore((prev) => !prev)}
+            >
+              Explore <ChevronDown size={16} />
+            </button>
+
+            {showExplore && (
+              <div className="absolute top-[48px] left-0 w-[900px] bg-white border border-gray-200 shadow-xl p-6 flex gap-12 text-sm z-50">
+                {exploreModules.map((mod, i) => (
+                  <div key={i}>
+                    <h4 className="text-[#1a1a1a] font-semibold mb-2 text-[16px] leading-[1.2]">{mod.title}</h4>
+                    <ul className="space-y-1">
+                      {mod.items.map((sub, j) => (
+                        <li
+                          key={j}
+                          className="text-[#2563eb] text-[14px] hover:underline cursor-pointer"
+                          onClick={() => {
+                            navigate(sub.path);
+                            setShowExplore(false);
+                          }}
+                        >
+                          {sub.name}
+                        </li>
+                      ))}
+                      </ul>
+
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Search */}
+          <div className="hidden md:flex items-center border border-[#0f172a] rounded px-3 py-1.5">
+            <Search size={18} className="text-[#2563eb] mr-2" />
+            <input
+              type="text"
+              placeholder="Search"
+              className="outline-none text-[16px] text-[#2563eb] bg-transparent w-36 font-medium"
+            />
           </div>
         </div>
 
-        {/* Centered Navigation Links */}
-        <nav className="absolute left-1/2 transform -translate-x-1/2 flex gap-10 text-md font-medium text-gray-800">
-          {navItems.map((item) =>
-            isAuthenticated ? (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`hover:text-blue-700 transition ${
-                  location.pathname === item.path ? "text-blue-700" : ""
-                }`}
+        {/* Center Logo */}
+        <div className="flex items-center gap-2 ml-[-80px] cursor-pointer" onClick={() => navigate("/")}>
+          <img src="/assets/logo.png" alt="Logo" className="h-6 w-6" />
+          <h1 className="text-[#a00032] font-lato font-bold text-[20px]">
+            Virtual Electromagnetics Lab
+          </h1>
+        </div>
+
+        {/* Right Section */}
+        <div className="flex items-center gap-4 text-[16px] font-semibold">
+          {!isAuthenticated ? (
+            <>
+              <button onClick={() => navigate("/login")} className="text-[#2563eb] hover:underline">
+                Log in
+              </button>
+              <button
+                onClick={() => navigate("/signup")}
+                className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-5 py-1.5 rounded text-[16px]"
               >
-                {item.name}
-              </Link>
-            ) : (
-              <span
-                key={item.path}
-                className="text-gray-400 cursor-not-allowed"
-                title="Login to access"
-              >
-                {item.name}
-              </span>
+                Sign up
+              </button>
+            </>
+          ) : (
+            user && (
+              <>
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="px-4 py-1 bg-gray-100 rounded-full text-[#1a1a1a] font-medium"
+                >
+                  {user.name}
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded text-sm"
+                >
+                  Sign Out
+                </button>
+              </>
             )
           )}
-        </nav>
-
-        {/* Rightmost profile dropdown */}
-        {isAuthenticated && (
-          <div className="ml-auto">
-            <ProfileDropdown />
-          </div>
-        )}
+        </div>
       </div>
     </header>
   );

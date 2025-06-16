@@ -1,7 +1,5 @@
-import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { ReactNode } from 'react';
-import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from './store/slices/authSlice';
 
 import Home from "@/pages/Home";
 import Contact from "@/pages/Contact";
@@ -36,18 +34,10 @@ import ContentLayout from "@/pages/ContentLayout";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/lib/scrollToTop";
-import Auth from "./pages/Auth";
-import Welcome from "@/pages/welcome";
+import Login from './pages/login';
+import Signup from './pages/signup';
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
-
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  if (!isAuthenticated) return <Navigate to="/auth" replace />;
-  return children;
-};
+import ProfilePage from "./pages/ProfilePage";
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -58,51 +48,49 @@ const AppRoutes = () => {
       <Navbar />
       <div className="pt-20">
         <Routes>
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/auth/google/callback" element={<GoogleCallback />} />
-          <Route path="/" element={<Welcome />} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          {/* Sidebar applied to all major educational routes including Home */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/profilepage" element={<ProfilePage />} />
+          
           <Route element={<ContentLayout />}>
             <Route path="/home" element={<Home />} />
-            <Route path="/vector-addition" element={<ProtectedRoute><VectorAdditionPage /></ProtectedRoute>} />
-            <Route path="/scalars-and-vectors" element={<ProtectedRoute><Scalars /></ProtectedRoute>} />
-            <Route path="/vector-multiplication" element={<ProtectedRoute><VectorMultiplicationPage /></ProtectedRoute>} />
-            <Route path="/triple-product" element={<ProtectedRoute><TripleProductPage /></ProtectedRoute>} />
+            <Route path="/vector-addition" element={<VectorAdditionPage />} />
+            <Route path="/scalars-and-vectors" element={<Scalars />} />
+            <Route path="/vector-multiplication" element={<VectorMultiplicationPage />} />
+            <Route path="/triple-product" element={<TripleProductPage />} />
 
-            <Route path="/vector-calculus-intro" element={<ProtectedRoute><VectorCalculusIntro /></ProtectedRoute>} />
-            <Route path="/cylindrical-coordinates" element={<ProtectedRoute><CylindricalCoordinatesPage /></ProtectedRoute>} />
-            <Route path="/spherical-coordinates" element={<ProtectedRoute><SphericalCoordinatesPage /></ProtectedRoute>} />
-            <Route path="/del-operator" element={<ProtectedRoute><DelOperatorPage /></ProtectedRoute>} />
+            <Route path="/vector-calculus-intro" element={<VectorCalculusIntro />} />
+            <Route path="/cylindrical-coordinates" element={<CylindricalCoordinatesPage />} />
+            <Route path="/spherical-coordinates" element={<SphericalCoordinatesPage />} />
+            <Route path="/del-operator" element={<DelOperatorPage />} />
 
-            <Route path="/electrostatics-intro" element={<ProtectedRoute><CoulombsLawPage /></ProtectedRoute>} />
-            <Route path="/electric-dipole" element={<ProtectedRoute><ElectricDipolePage /></ProtectedRoute>} />
-            <Route path="/electric-potential" element={<ProtectedRoute><ElectricPotentialPage /></ProtectedRoute>} />
-            <Route path="/electric-field-and-flux-density" element={<ProtectedRoute><ElectricFluxPage /></ProtectedRoute>} />
-            <Route path="/field-operations" element={<ProtectedRoute><GradientPage /></ProtectedRoute>} />
-            <Route path="/gauss-law" element={<ProtectedRoute><GaussLawPage /></ProtectedRoute>} />
+            <Route path="/electrostatics-intro" element={<CoulombsLawPage />} />
+            <Route path="/electric-dipole" element={<ElectricDipolePage />} />
+            <Route path="/electric-potential" element={<ElectricPotentialPage />} />
+            <Route path="/electric-field-and-flux-density" element={<ElectricFluxPage />} />
+            <Route path="/field-operations" element={<GradientPage />} />
+            <Route path="/gauss-law" element={<GaussLawPage />} />
 
-            <Route path="/gauss-law-contd" element={<ProtectedRoute><GaussLawContdPage /></ProtectedRoute>} />
-            <Route path="/gauss-law-magnetism" element={<ProtectedRoute><GaussLawMagnestismPage /></ProtectedRoute>} />
-            <Route path="/ampere-law" element={<ProtectedRoute><AmpereLawPage /></ProtectedRoute>} />
-            <Route path="/faraday-law" element={<ProtectedRoute><FaradayLawPage /></ProtectedRoute>} />
-            <Route path="/time-varying-potential" element={<ProtectedRoute><TimeVaryingPotential /></ProtectedRoute>} />
-            <Route path="/transformer-motional-emf" element={<ProtectedRoute><EMFS /></ProtectedRoute>} />
-            <Route path="/displacement-current" element={<ProtectedRoute><DisplacementCurrent /></ProtectedRoute>} />
+            <Route path="/gauss-law-contd" element={<GaussLawContdPage />} />
+            <Route path="/gauss-law-magnetism" element={<GaussLawMagnestismPage />} />
+            <Route path="/ampere-law" element={<AmpereLawPage />} />
+            <Route path="/faraday-law" element={<FaradayLawPage />} />
+            <Route path="/time-varying-potential" element={<TimeVaryingPotential />} />
+            <Route path="/transformer-motional-emf" element={<EMFS />} />
+            <Route path="/displacement-current" element={<DisplacementCurrent />} />
 
-            <Route path="/types-of-waves" element={<ProtectedRoute><TypeOfWaves /></ProtectedRoute>} />
-            <Route path="/plane-wave-analysis" element={<ProtectedRoute><WaveAnalysis /></ProtectedRoute>} />
-            <Route path="/wave-power-energy" element={<ProtectedRoute><PowVector /></ProtectedRoute>} />
-            <Route path="/wave-reflection" element={<ProtectedRoute><WaveReflection /></ProtectedRoute>} />
+            <Route path="/types-of-waves" element={<TypeOfWaves />} />
+            <Route path="/plane-wave-analysis" element={<WaveAnalysis />} />
+            <Route path="/wave-power-energy" element={<PowVector />} />
+            <Route path="/wave-reflection" element={<WaveReflection />} />
           </Route>
 
-          {/* Other pages outside sidebar */}
-          <Route path="/content/:id" element={<ProtectedRoute><Content /></ProtectedRoute>} />
+          <Route path="/content/:id" element={<Content />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>
 
-      {/* ✅ No footer on login page */}
       {location.pathname !== "/auth" && <Footer />}
     </>
   );
