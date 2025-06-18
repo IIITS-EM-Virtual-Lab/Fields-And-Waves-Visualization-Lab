@@ -140,9 +140,9 @@ const Navbar = () => {
 
         {/* Center Logo */}
         <div className="flex items-center gap-2 ml-[-80px] cursor-pointer" onClick={() => navigate("/")}>
-          <img src="/assets/logo.png" alt="Logo" className="h-6 w-6" />
+          <img src="/logo.png" alt="Logo" className="h-6 w-6" />
           <h1 className="text-[#a00032] font-lato font-bold text-[20px]">
-            Virtual Electromagnetics Lab
+            Fields and Waves Visualization Lab
           </h1>
         </div>
 

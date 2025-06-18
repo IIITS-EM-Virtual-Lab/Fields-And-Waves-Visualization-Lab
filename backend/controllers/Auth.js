@@ -9,6 +9,7 @@ const {
   removeOTP
 } = require('../utils/emailService');
 const { OAuth2Client } = require('google-auth-library');
+const { fromArrayBufferToHex } = require('google-auth-library/build/src/crypto/crypto');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'defaultsecret';
 
@@ -173,7 +174,7 @@ exports.handleGoogleCallback = async (req, res) => {
       profilePicture: user.profilePicture
     }));
 
-    res.redirect(redirect.toString());
+    res.redirect(frontendUrl.toString());
   } catch (err) {
     console.error('Google auth error:', err);
     res.redirect(`${process.env.FRONTEND_URL}/login?error=GoogleAuthFailed`);

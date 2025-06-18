@@ -32,7 +32,29 @@ const sidebarData = [
       { name: "Spherical Coordinates", path: "/spherical-coordinates" },
     ],
   },
-  // Add other topics as needed
+    {
+    topic: "Maxwell Equations",
+    icon: "/assets/maxwell.png",
+    subtopics: [
+      { name: "Gauss Law Contd", path: "/gauss-law-contd" },
+      { name: "Gauss Law Magnetism", path: "/gauss-law-magnetism" },
+      { name: "Ampere Law", path: "/ampere-law" },
+      { name: "Faraday Law", path: "/faraday-law" },
+      { name: "Displacement Current", path: "/displacement-current" },
+      { name: "Time Varying Potential", path: "/time-varying-potential" },
+      { name: "EMF", path: "/transformer-motional-emf" },
+    ],
+  },
+  {
+    topic: "Wave Propagation",
+    icon: "/assets/hero.png",
+    subtopics: [
+      { name: "Types of Waves", path: "/types-of-waves" },
+      { name: "Wave Power Energy", path: "/wave-power-energy" },
+      { name: "Plane Wave Analysis", path: "/plane-wave-analysis" },
+      { name: "Wave Reflection", path: "/wave-reflection" },
+    ],
+  },
 ];
 
 const Sidebar = () => {
