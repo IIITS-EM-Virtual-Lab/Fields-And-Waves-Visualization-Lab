@@ -164,14 +164,12 @@ exports.handleGoogleCallback = async (req, res) => {
     const token = generateToken(user._id);
 
     // Redirect to frontend with token and user data
-    const frontendUrl = new URL('http://localhost:5173/auth/google/callback');
+    const frontendUrl = new URL('http://localhost:5173/login');
     frontendUrl.searchParams.set('token', token);
-    frontendUrl.searchParams.set('user', JSON.stringify({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      profilePicture: user.profilePicture
-    }));
+    frontendUrl.searchParams.set('name', user.name);
+    frontendUrl.searchParams.set('email', user.email);
+    res.redirect(frontendUrl.toString());
+
 
     res.redirect(frontendUrl.toString());
   } catch (err) {
