@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+require('dotenv').config();
 const {
   generateOTP,
   sendOTPEmail,
@@ -99,6 +100,8 @@ exports.login = async (req, res) => {
 
     const token = generateToken(user._id);
     console.log("✅ Login successful for:", user.email);
+    console.log("Generated token:", token);
+    console.log("Token length:", token.length);
 
     res.status(200).json({
       success: true,
@@ -168,10 +171,9 @@ exports.handleGoogleCallback = async (req, res) => {
     frontendUrl.searchParams.set('token', token);
     frontendUrl.searchParams.set('name', user.name);
     frontendUrl.searchParams.set('email', user.email);
+    frontendUrl.searchParams.set('isAdmin', user.isAdmin);
     res.redirect(frontendUrl.toString());
 
-
-    res.redirect(frontendUrl.toString());
   } catch (err) {
     console.error('Google auth error:', err);
     res.redirect(`${process.env.FRONTEND_URL}/login?error=GoogleAuthFailed`);

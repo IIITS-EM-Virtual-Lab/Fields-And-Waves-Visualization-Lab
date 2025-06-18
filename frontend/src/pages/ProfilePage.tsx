@@ -122,6 +122,10 @@ const ProfilePage = () => {
     try {
       setLoading(true);
       setError('');
+      console.log('Token being sent:', token);
+      console.log('Token type:', typeof token);
+      console.log('Token length:', token ? token.length : 0);
+      
       const response = await axios.get('http://localhost:5000/api/users', {
         headers: {
           Authorization: `Bearer ${token}`

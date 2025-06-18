@@ -2,7 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const authController = require('./controllers/Auth');
-const auth = require('./middleware/auth');
+const { auth } = require('./middleware/auth');
+const userRoutes = require('./routes/userRoutes');
+const quizRoutes = require('./routes/quiz');
 const cors = require('cors');
 
 dotenv.config();
@@ -22,6 +24,10 @@ app.post('/api/auth/login', authController.login);
 app.get('/api/auth/me', auth, authController.getCurrentUser);
 app.get('/api/auth/google', authController.getGoogleAuthURL);
 app.get('/api/auth/google/callback', authController.handleGoogleCallback);
+
+// Use routesAdd commentMore actions
+app.use('/api/users', userRoutes);
+app.use('/api/quizzes', quizRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

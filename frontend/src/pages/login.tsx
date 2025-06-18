@@ -20,6 +20,7 @@ const Login = () => {
     const token = urlParams.get('token');
     const name = urlParams.get('name');
     const email = urlParams.get('email');
+    const isAdmin = urlParams.get('isAdmin');
     const error = urlParams.get('error');
 
     if (error) {
@@ -30,7 +31,11 @@ const Login = () => {
     if (token && name && email) {
       dispatch(setCredentials({
         token,
-        client: { name, email }
+        client: { 
+          name, 
+          email, 
+          isAdmin: isAdmin === 'true' 
+        }
       }));
       navigate('/home');
     }
@@ -55,7 +60,7 @@ const Login = () => {
 
       dispatch(setCredentials({
         token,
-        client: { name: user.name, email: user.email }
+        client: { name: user.name, email: user.email, isAdmin: user.isAdmin }
       }));
 
       navigate('/home');
