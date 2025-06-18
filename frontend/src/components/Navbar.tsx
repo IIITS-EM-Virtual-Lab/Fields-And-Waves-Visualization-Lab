@@ -69,6 +69,10 @@ const Navbar = () => {
   const [showExplore, setShowExplore] = useState(false);
   const dropdownRef = useRef(null);
 
+  // Debug logging
+  console.log('Navbar - isAuthenticated:', isAuthenticated);
+  console.log('Navbar - user:', user);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -164,7 +168,7 @@ const Navbar = () => {
             user && (
               <>
                 <button
-                  onClick={() => navigate("/profile")}
+                  onClick={() => navigate("/profilepage")}
                   className="px-4 py-1 bg-gray-100 rounded-full text-[#1a1a1a] font-medium"
                 >
                   {user.name}

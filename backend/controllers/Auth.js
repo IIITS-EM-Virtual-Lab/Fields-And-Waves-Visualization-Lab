@@ -52,8 +52,7 @@ exports.verifyAndSignup = async (req, res) => {
         .json({ success: false, message: 'Invalid OTP' });
 
     const { name, password } = JSON.parse(data);
-    const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed });
+    const user = await User.create({ name, email, password });
 
     removeOTP(email);
     res
