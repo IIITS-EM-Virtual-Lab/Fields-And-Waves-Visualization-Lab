@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import './login-signup.css';
 import { FaGoogle } from 'react-icons/fa';
@@ -6,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { setCredentials } from '../store/slices/authSlice'; // Adjust this import path if needed
 
 const Signup = () => {
+  const navigate = useNavigate();
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -13,6 +15,9 @@ const Signup = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [showOTP, setShowOTP] = useState(false);
   const [signupData, setSignupData] = useState({ name: '', email: '', password: '' });
+
+  // OTP refs
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const dispatch = useDispatch();
 
@@ -40,6 +45,16 @@ const Signup = () => {
     const updated = [...otp];
     updated[i] = value.slice(0, 1);
     setOtp(updated);
+
+    if (value && i < 5) {
+      otpRefs.current[i + 1]?.focus();
+    }
+  };
+
+  const handleOTPKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
   };
 
   const handleVerify = async () => {
@@ -53,13 +68,9 @@ const Signup = () => {
       });
 
       if (response.data.success) {
-        // ✅ Store token and user in Redux
-        dispatch(setCredentials({
-          client: response.data.client,  // or user, depending on your API
-          token: response.data.token
-        }));
+        
 
-        window.location.href = '/'; // Redirect to home after signup
+        navigate('/login'); // Redirect to home after signup
       } else {
         alert(response.data.message);
       }
@@ -106,6 +117,8 @@ const Signup = () => {
                 maxLength={1}
                 value={val}
                 onChange={(e) => handleOTPChange(i, e.target.value)}
+                onKeyDown={(e) => handleOTPKeyDown(i, e)}
+                ref={(el) => (otpRefs.current[i] = el)}
               />
             ))}
           </div>
