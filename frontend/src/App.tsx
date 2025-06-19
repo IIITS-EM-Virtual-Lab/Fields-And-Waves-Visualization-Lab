@@ -38,16 +38,7 @@ import ScrollToTop from "@/lib/scrollToTop";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import ProfilePage from "./pages/ProfilePage";
-
-// interface ProtectedRouteProps {
-//   children: ReactNode;
-// }
-
-// const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-//   const isAuthenticated = useSelector(selectIsAuthenticated);
-//   if (!isAuthenticated) return <Navigate to="/auth" replace />;
-//   return children;
-// };
+import ChapterQuiz from './pages/ChapterQuiz';
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -62,6 +53,7 @@ const AppRoutes = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/" element={<Home />} />
           <Route path="/profilepage" element={<ProfilePage />} />
+          <Route path="/quiz/:moduleName/:chapterName" element={<ChapterQuiz />} />
           
           <Route element={<ContentLayout />}>
             <Route path="/home" element={<Home />} />

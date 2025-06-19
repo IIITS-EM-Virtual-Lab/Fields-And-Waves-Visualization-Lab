@@ -127,6 +127,22 @@ exports.addQuestion = async (req, res) => {
     const { quizId } = req.params;
     const questionData = req.body;
 
+    // ✅ FIX: Parse stringified arrays if necessary
+    if (typeof questionData.options === 'string') {
+      try {
+        questionData.options = JSON.parse(questionData.options);
+      } catch {
+        questionData.options = [];
+      }
+    }
+    if (typeof questionData.correctAnswer === 'string') {
+      try {
+        questionData.correctAnswer = JSON.parse(questionData.correctAnswer);
+      } catch {
+        // fallback to plain string if it's a single correct answer
+      }
+    }
+
     // If there's an uploaded file, add its URL to the question data
     if (req.file) {
       questionData.imageUrl = req.file.path;
@@ -162,6 +178,23 @@ exports.updateQuestion = async (req, res) => {
   try {
     const { quizId, questionId } = req.params;
     const updateData = req.body;
+
+    // ✅ FIX: Parse stringified arrays if necessary
+    if (typeof updateData.options === 'string') {
+      try {
+        updateData.options = JSON.parse(updateData.options);
+      } catch {
+        updateData.options = [];
+      }
+    }
+    if (typeof updateData.correctAnswer === 'string') {
+      try {
+        updateData.correctAnswer = JSON.parse(updateData.correctAnswer);
+      } catch {
+        // keep as is if it's a plain string
+      }
+    }
+
 
     // If there's a new uploaded file, add its URL to the update data
     if (req.file) {

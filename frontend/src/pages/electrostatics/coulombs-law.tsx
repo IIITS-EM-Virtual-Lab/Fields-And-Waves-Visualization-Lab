@@ -7,9 +7,11 @@
 import { Button } from "@/components/ui/button";
 import { ReactP5Wrapper } from "@p5-wrapper/react";
 import { CoulombP5Sketch } from "@/p5/CoulombP5Sketch";
+import { useNavigate } from "react-router-dom";
 
 
 const CoulombsLawPage = () => {
+  const navigate = useNavigate();
   return (
       <div className="min-h-screen bg-white py-12 px-6">
       <div className="max-w-5xl mx-auto">
@@ -900,9 +902,13 @@ const CoulombsLawPage = () => {
         </svg>
       </div>
 
-      <div className="flex justify-end mb-48">
-        <Button className="px-6">Next</Button>
-      </div>
+         <Button onClick={() => navigate('/quiz/electrostatics/coulombs-law')}>
+  Take Test
+</Button>
+
+
+
+
     </div>
   );
 };
