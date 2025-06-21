@@ -434,11 +434,12 @@ const ProfilePage = () => {
                 const questionData = {
                   type: newQuestionType,
                   question: formData.get('question') as string,
-                  options: newQuestionType === 'MCQ' ? 
-                    (formData.get('options') as string).split('\n').filter(Boolean) : undefined,
-                  correctAnswer: newQuestionType === 'MCQ' ? 
-                    formData.get('correctAnswer') as string :
-                    (formData.get('correctAnswer') as string).split('\n').filter(Boolean),
+                  options: newQuestionType === 'MCQ'
+                    ? (formData.get('options') as string).split('\n').filter(Boolean)
+                    : [],
+                  correctAnswer: newQuestionType === 'MCQ'
+                    ? formData.get('correctAnswer') as string
+                    : (formData.get('correctAnswer') as string).split('\n').filter(Boolean),
                   explanation: formData.get('explanation') as string,
                   difficulty: formData.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD',
                   points: Number(formData.get('points'))
@@ -446,9 +447,9 @@ const ProfilePage = () => {
 
                 const apiFormData = new FormData();
                 Object.entries(questionData).forEach(([key, value]) => {
-                  if (key === 'options' || key === 'correctAnswer') {
+                  if ((key === 'options' || key === 'correctAnswer') && value !== undefined) {
                     apiFormData.append(key, JSON.stringify(value));
-                  } else {
+                  } else if (value !== undefined) {
                     apiFormData.append(key, value as string);
                   }
                 });
