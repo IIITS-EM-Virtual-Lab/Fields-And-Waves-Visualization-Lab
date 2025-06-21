@@ -13,16 +13,37 @@ const {
   deleteQuestion
 } = require('../controllers/Quiz');
 
-// Public routes
+// ✅ Route definitions
 router.get('/module/:moduleName', getModuleQuizzes);
 router.get('/module/:moduleName/chapter/:chapterName', getChapterQuiz);
 
-// Admin only routes
 router.post('/', auth, admin, createQuiz);
 router.put('/:quizId', auth, admin, updateQuiz);
 router.delete('/:quizId', auth, admin, deleteQuiz);
-router.post('/:quizId/questions', auth, admin, upload.single('image'), addQuestion);
-router.put('/:quizId/questions/:questionId', auth, admin, upload.single('image'), updateQuestion);
+
+// ✅ Upload with multiple fields
+router.post(
+  '/:quizId/questions',
+  auth,
+  admin,
+  upload.fields([
+    { name: 'questionImage', maxCount: 1 },
+    { name: 'solutionImage', maxCount: 1 }
+  ]),
+  addQuestion
+);
+
+router.put(
+  '/:quizId/questions/:questionId',
+  auth,
+  admin,
+  upload.fields([
+    { name: 'questionImage', maxCount: 1 },
+    { name: 'solutionImage', maxCount: 1 }
+  ]),
+  updateQuestion
+);
+
 router.delete('/:quizId/questions/:questionId', auth, admin, deleteQuestion);
 
-module.exports = router; 
+module.exports = router;

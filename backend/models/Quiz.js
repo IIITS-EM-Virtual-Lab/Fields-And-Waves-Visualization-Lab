@@ -37,6 +37,10 @@ const questionSchema = new mongoose.Schema({
   imageUrl: {
     type: String,
     required: false
+  },
+  solutionImageUrl: {           
+    type: String,
+    required: false
   }
 });
 

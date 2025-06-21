@@ -1,5 +1,7 @@
 const Quiz = require('../models/Quiz');
-const { cloudinary } = require('../config/cloudinary');
+const { v2: cloudinary } = require('cloudinary');
+const uploader = cloudinary.uploader;
+
 
 // Get all quizzes for a module
 exports.getModuleQuizzes = async (req, res) => {
@@ -121,107 +123,83 @@ exports.deleteQuiz = async (req, res) => {
   }
 };
 
-// Add question to a quiz
 exports.addQuestion = async (req, res) => {
   try {
-    const { quizId } = req.params;
-    const questionData = req.body;
+    console.log('📦 Incoming BODY:', req.body);
+    console.log('🖼 Incoming FILES:', req.files);
+    console.log('🧾 Params:', req.params);
 
-    // ✅ FIX: Parse stringified arrays if necessary
-    if (typeof questionData.options === 'string') {
-      try {
-        questionData.options = JSON.parse(questionData.options);
-      } catch {
-        questionData.options = [];
-      }
-    }
-    if (typeof questionData.correctAnswer === 'string') {
-      try {
-        questionData.correctAnswer = JSON.parse(questionData.correctAnswer);
-      } catch {
-        // fallback to plain string if it's a single correct answer
-      }
-    }
+    let {
+      question,
+      type,
+      options,
+      correctAnswer,
+      explanation,
+      difficulty,
+      points
+    } = req.body;
 
-    // If there's an uploaded file, add its URL to the question data
-    if (req.file) {
-      questionData.imageUrl = req.file.path;
-    }
+    const quiz = await Quiz.findById(req.params.quizId);
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
 
-    const quiz = await Quiz.findById(quizId);
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        message: 'Quiz not found'
-      });
+    try {
+      if (typeof options === 'string') options = JSON.parse(options);
+      if (typeof correctAnswer === 'string') correctAnswer = JSON.parse(correctAnswer);
+    } catch (parseErr) {
+      console.error('❌ JSON Parse Error:', parseErr);
+      return res.status(400).json({ message: 'Failed to parse options or correctAnswer', error: parseErr.message });
     }
 
-    quiz.questions.push(questionData);
+    const questionObj = {
+      question,
+      type,
+      options: options || [],
+      correctAnswer: correctAnswer || [],
+      explanation,
+      difficulty,
+      points: Number(points)
+    };
+
+    if (req.files?.questionImage?.[0]) {
+      questionObj.imageUrl = req.files.questionImage[0].path;
+    }
+
+    if (req.files?.solutionImage?.[0]) {
+      questionObj.solutionImageUrl = req.files.solutionImage[0].path;
+    }
+
+    quiz.questions.push(questionObj);
     await quiz.save();
 
-    res.status(201).json({
-      success: true,
-      data: quiz
-    });
-  } catch (error) {
-    console.error('Error adding question:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error adding question',
-      error: error.message
-    });
+    res.status(201).json({ message: 'Question added successfully', quiz });
+  } catch (err) {
+    console.error('❌ Final Catch Error:', err);
+    res.status(500).json({ message: 'Failed to add question', error: err.message });
   }
 };
 
-// Update a question
+
+// Update question with support for questionImage and solutionImage
 exports.updateQuestion = async (req, res) => {
   try {
     const { quizId, questionId } = req.params;
     const updateData = req.body;
 
-    // ✅ FIX: Parse stringified arrays if necessary
-    if (typeof updateData.options === 'string') {
-      try {
-        updateData.options = JSON.parse(updateData.options);
-      } catch {
-        updateData.options = [];
-      }
-    }
-    if (typeof updateData.correctAnswer === 'string') {
-      try {
-        updateData.correctAnswer = JSON.parse(updateData.correctAnswer);
-      } catch {
-        // keep as is if it's a plain string
-      }
-    }
-
-
-    // If there's a new uploaded file, add its URL to the update data
-    if (req.file) {
-      updateData.imageUrl = req.file.path;
-    }
+    if (typeof updateData.options === 'string') updateData.options = JSON.parse(updateData.options);
+    if (typeof updateData.correctAnswer === 'string') updateData.correctAnswer = JSON.parse(updateData.correctAnswer);
 
     const quiz = await Quiz.findById(quizId);
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        message: 'Quiz not found'
-      });
-    }
+    if (!quiz) return res.status(404).json({ success: false, message: 'Quiz not found' });
 
     const questionIndex = quiz.questions.findIndex(q => q._id.toString() === questionId);
-    if (questionIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        message: 'Question not found'
-      });
-    }
+    if (questionIndex === -1) return res.status(404).json({ success: false, message: 'Question not found' });
 
-    // If there's a new image and the old question had an image, delete the old image from Cloudinary
-    if (req.file && quiz.questions[questionIndex].imageUrl) {
-      const oldImageUrl = quiz.questions[questionIndex].imageUrl;
-      const publicId = oldImageUrl.split('/').pop().split('.')[0];
-      await cloudinary.uploader.destroy(publicId);
+    // ✅ Replace existing images if new ones are uploaded
+    if (req.files?.questionImage?.[0]) {
+      updateData.imageUrl = req.files.questionImage[0].path;
+    }
+    if (req.files?.solutionImage?.[0]) {
+      updateData.solutionImageUrl = req.files.solutionImage[0].path;
     }
 
     quiz.questions[questionIndex] = {
@@ -230,18 +208,10 @@ exports.updateQuestion = async (req, res) => {
     };
 
     await quiz.save();
-
-    res.status(200).json({
-      success: true,
-      data: quiz
-    });
+    res.status(200).json({ success: true, data: quiz });
   } catch (error) {
     console.error('Error updating question:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error updating question',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Error updating question', error: error.message });
   }
 };
 
@@ -249,42 +219,17 @@ exports.updateQuestion = async (req, res) => {
 exports.deleteQuestion = async (req, res) => {
   try {
     const { quizId, questionId } = req.params;
-
     const quiz = await Quiz.findById(quizId);
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        message: 'Quiz not found'
-      });
-    }
+    if (!quiz) return res.status(404).json({ success: false, message: 'Quiz not found' });
 
     const question = quiz.questions.find(q => q._id.toString() === questionId);
-    if (!question) {
-      return res.status(404).json({
-        success: false,
-        message: 'Question not found'
-      });
-    }
-
-    // If the question has an image, delete it from Cloudinary
-    if (question.imageUrl) {
-      const publicId = question.imageUrl.split('/').pop().split('.')[0];
-      await cloudinary.uploader.destroy(publicId);
-    }
+    if (!question) return res.status(404).json({ success: false, message: 'Question not found' });
 
     quiz.questions = quiz.questions.filter(q => q._id.toString() !== questionId);
     await quiz.save();
 
-    res.status(200).json({
-      success: true,
-      message: 'Question deleted successfully'
-    });
+    res.status(200).json({ success: true, message: 'Question deleted successfully' });
   } catch (error) {
-    console.error('Error deleting question:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error deleting question',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Error deleting question', error: error.message });
   }
-}; 
+};

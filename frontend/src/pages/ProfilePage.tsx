@@ -22,6 +22,7 @@ interface Question {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   points: number;
   imageUrl?: string;
+  solutionImageUrl?: string;
 }
 
 interface Quiz {
@@ -322,7 +323,7 @@ const ProfilePage = () => {
           </select>
         </div>
 
-        {/* Quiz Content */}
+               {/* Quiz Content */}
         {selectedModule && selectedChapter && (
           <div className="quiz-content">
             <div className="quiz-header">
@@ -355,6 +356,11 @@ const ProfilePage = () => {
                     {question.imageUrl && (
                       <div className="question-image">
                         <img src={question.imageUrl} alt="Question" />
+                      </div>
+                    )}
+                    {question.solutionImageUrl && (
+                      <div className="solution-image">
+                        <img src={question.solutionImageUrl} alt="Solution" />
                       </div>
                     )}
                     {question.type === 'MCQ' && question.options && (
@@ -422,10 +428,9 @@ const ProfilePage = () => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
                 
-                // Get the file input element
-                const imageInput = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement;
+                const questionImageInput = e.currentTarget.querySelector('input[name="questionImage"]') as HTMLInputElement;
+                const solutionImageInput = e.currentTarget.querySelector('input[name="solutionImage"]') as HTMLInputElement;
                 
-                // Create question data object
                 const questionData = {
                   type: newQuestionType,
                   question: formData.get('question') as string,
@@ -439,10 +444,7 @@ const ProfilePage = () => {
                   points: Number(formData.get('points'))
                 };
 
-                // Create FormData for API request
                 const apiFormData = new FormData();
-                
-                // Add question data
                 Object.entries(questionData).forEach(([key, value]) => {
                   if (key === 'options' || key === 'correctAnswer') {
                     apiFormData.append(key, JSON.stringify(value));
@@ -451,12 +453,13 @@ const ProfilePage = () => {
                   }
                 });
 
-                // Add image if it exists
-                if (imageInput?.files?.[0]) {
-                  apiFormData.append('image', imageInput.files[0]);
+                if (questionImageInput?.files?.[0]) {
+                  apiFormData.append('questionImage', questionImageInput.files[0]);
+                }
+                if (solutionImageInput?.files?.[0]) {
+                  apiFormData.append('solutionImage', solutionImageInput.files[0]);
                 }
 
-                // Call handleAddQuestion with the FormData
                 handleAddQuestion(apiFormData);
               }}>
                 <textarea
@@ -493,14 +496,14 @@ const ProfilePage = () => {
                     required
                   />
                 )}
-                
+
                 <textarea
                   name="explanation"
                   placeholder="Enter explanation for the correct answer"
                   defaultValue={editingQuestion?.explanation}
                   required
                 />
-                
+
                 <select
                   name="difficulty"
                   defaultValue={editingQuestion?.difficulty || 'EASY'}
@@ -519,48 +522,17 @@ const ProfilePage = () => {
                   min="1"
                   required
                 />
-                
-                <div className="image-upload-section">
-                  <label className="image-upload-label">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageSelect}
-                      className="image-upload-input"
-                      disabled={uploadingImage}
-                    />
-                    <span className="upload-button">
-                      {uploadingImage ? 'Uploading...' : imagePreview ? 'Change Image' : 'Upload Image (Optional)'}
-                    </span>
-                  </label>
-                  
-                  {imagePreview && (
-                    <div className="image-preview">
-                      <img src={imagePreview} alt="Preview" />
-                      <button
-                        type="button"
-                        className="remove-image-btn"
-                        onClick={() => setImagePreview(null)}
-                      >
-                        Remove Image
-                      </button>
-                    </div>
-                  )}
-                  
-                  {editingQuestion?.imageUrl && !imagePreview && (
-                    <div className="image-preview">
-                      <img src={editingQuestion.imageUrl} alt="Current" />
-                      <button
-                        type="button"
-                        className="remove-image-btn"
-                        onClick={() => setImagePreview(null)}
-                      >
-                        Remove Image
-                      </button>
-                    </div>
-                  )}
-                </div>
-                
+
+                <label>
+                  Upload Question Image:
+                  <input type="file" name="questionImage" accept="image/*" />
+                </label>
+
+                <label>
+                  Upload Solution Image:
+                  <input type="file" name="solutionImage" accept="image/*" />
+                </label>
+
                 <div className="modal-actions">
                   <button type="submit" className="save-btn">
                     {editingQuestion ? 'Update Question' : 'Add Question'}
@@ -583,6 +555,7 @@ const ProfilePage = () => {
       </div>
     );
   };
+
 
   const renderContent = () => {
     switch (activeTab) {
