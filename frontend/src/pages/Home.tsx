@@ -115,7 +115,7 @@ const Home = () => {
             </span>
           </p>
           <p className="text-md text-gray-600 max-w-md">
-            An open virtual lab to explore, experiment, and understand the
+            An open visualisation lab to explore, experiment, and understand the
             forces that shape our world.
           </p>
         </div>

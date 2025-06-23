@@ -13,7 +13,16 @@ interface Question {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   points: number;
   imageUrl?: string;
+  solutionImageUrl?: string;
 }
+
+const redirectMap: Record<string, string> = {
+  'electrostatics/coulombs-law': '/electrostatics-intro',
+  'electrostatics/electric-dipole': '/dipole-intro',
+  'electrostatics/electric-field': '/electric-field-intro',
+  // Add more mappings as needed
+};
+
 
 interface Quiz {
   _id: string;
@@ -80,27 +89,46 @@ const ChapterQuiz = () => {
   };
 
   const handleNext = () => {
-    if (!quiz) return;
-    const nextIndex = currentIndex + 1;
-    if (nextIndex >= quiz.questions.length) {
-      navigate(`/quiz/${moduleName}/${chapterName}`);
-      return;
-    }
-    setCurrentIndex(nextIndex);
-    setSelectedOption(null);
-    setLockedOptions([]);
-    setCorrectOption(null);
-    setSkipped(false);
-  };
+  if (!quiz) return;
+  const nextIndex = currentIndex + 1;
 
-  const renderExplanation = (opt: string) => {
-    if (correctOption === opt) {
-      return <div className="explanation correct"><strong>Correct:</strong> {currentQuestion?.explanation}</div>;
-    } else if (lockedOptions.includes(opt)) {
-      return <div className="explanation incorrect"><strong>Incorrect.</strong> Try again.</div>;
-    }
-    return null;
-  };
+  if (nextIndex >= quiz.questions.length) {
+    const key = `${moduleName}/${chapterName}`;
+    const redirectPath = redirectMap[key] || '/'; // fallback to home
+    navigate(redirectPath);
+    return;
+  }
+
+  setCurrentIndex(nextIndex);
+  setSelectedOption(null);
+  setLockedOptions([]);
+  setCorrectOption(null);
+  setSkipped(false);
+};
+
+
+const renderExplanation = (opt: string) => {
+  if (correctOption === opt) {
+    return (
+      <div className="explanation correct">
+        <strong>Correct:</strong> {currentQuestion?.explanation}
+        {currentQuestion?.solutionImageUrl && (
+          <div className="solution-image">
+            <img src={currentQuestion.solutionImageUrl} alt="Solution" />
+          </div>
+        )}
+      </div>
+    );
+  } else if (lockedOptions.includes(opt)) {
+    return (
+      <div className="explanation incorrect">
+        <strong>Incorrect.</strong> Try again.
+      </div>
+    );
+  }
+  return null;
+};
+
 
   if (loading || !quiz) return <div>Loading...</div>;
 
@@ -114,21 +142,20 @@ const ChapterQuiz = () => {
           <p><strong>{quiz.questions.length} questions • 30–45 minutes</strong></p>
           <button className="start-btn" onClick={() => setIntro(false)}>Let’s go</button>
         </div>
-        <footer className="footer">
-          © 2025 Virtual Electromagnetics Laboratory, IIIT Sri City. All Rights Reserved.
-        </footer>
       </div>
     );
   }
 
   return (
     <div className="quiz-page">
-      <h2 className="quiz-heading">Course Challenge</h2>
-
       <div className="quiz-container">
         <div className="quiz-card">
           <h3 className="question-text">{currentQuestion?.question}</h3>
-
+          {currentQuestion?.imageUrl && (
+            <div className="question-image">
+              <img src={currentQuestion.imageUrl} alt="Question" />
+            </div>
+          )}
           <p className="instruction">Choose 1 answer:</p>
           <div className="options-list">
             {currentQuestion?.options?.map((opt, i) => {
