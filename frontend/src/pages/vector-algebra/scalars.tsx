@@ -8,14 +8,14 @@ const Scalars = () => {
       <div className="text-xl font-black uppercase text-center py-10">
         Scalars And Vectors
       </div>
-      {/* <div className="pb-10">
+      <div className="pb-10">
         <div className="text-xl font-black uppercase text-center py-10">
           INTERACTIVE DEMO
         </div>
         <div className="flex justify-center">
           <VectorVisualizer />
         </div>
-      </div> */}
+      </div>
       <div>
         <div className="font-semibold text-lg underline underline-offset-2 mb-6">
           SCALARS

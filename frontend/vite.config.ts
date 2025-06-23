@@ -9,4 +9,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ["react-dom/client"], // 👈 this line is the fix!
+  },
+  ssr: {
+    noExternal: ['@react-three/fiber', '@react-three/drei'],
+  },  
 });
