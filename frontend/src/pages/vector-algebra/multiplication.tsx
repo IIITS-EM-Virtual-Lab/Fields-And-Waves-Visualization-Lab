@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import VectorMultiplier from "@/components/VectorMultiplier";
 
 const VectorMultiplicationPage = () => {
   return (
@@ -11,11 +12,12 @@ const VectorMultiplicationPage = () => {
           INTERACTIVE DEMO
         </div>
         <div className="flex justify-center">
-        <iframe
-      src="https://www.geogebra.org/classic/hv7u7qcb?embed"
-      width="1800"
-      height="800"
-    ></iframe>
+          {/* <iframe
+            src="https://www.geogebra.org/classic/hv7u7qcb?embed"
+            width="1800"
+            height="800"
+          ></iframe> */}
+          <VectorMultiplier />
         </div>
       </div>
       <div>

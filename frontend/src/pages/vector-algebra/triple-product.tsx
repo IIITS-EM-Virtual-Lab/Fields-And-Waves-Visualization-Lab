@@ -1,8 +1,17 @@
 import { Button } from "@/components/ui/button";
+import VectorTripleProduct from "@/components/VectorTripleProduct";
 
 const TripleProductPage = () => {
   return (
     <div className="px-48 flex flex-col border-t border-slate-300">
+      <div className="pb-10">
+        <div className="text-xl font-black uppercase text-center py-10">
+          INTERACTIVE DEMO
+        </div>
+        <div className="flex justify-center">
+          <VectorTripleProduct />
+        </div>
+      </div>
       <div className="text-xl font-black uppercase text-center py-10">
         Scalar Triple Product
       </div>
