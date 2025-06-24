@@ -21,12 +21,15 @@ function VectorMultiplier() {
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      <div style={{ border: '2px solid #2563eb', borderRadius: 8 }}>
-        <Canvas style={{ height: 500, width: 800 }}>
+      <div
+        className="relative overflow-hidden rounded-lg border-2 border-blue-600" 
+        style={{ height: 500, width: 800, zIndex: 0 }}
+      >
+          <Canvas style={{ height: '100%', width: '100%' }}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
           <OrbitControls />
-          <Axes length={20} width={3} fontPosition={5.5} fontSize={0.5} interval={1} xcolor="black" ycolor="black" zcolor="black" />
+          <Axes length={20} width={3} fontPosition={5.5} interval={1} xcolor="black" ycolor="black" zcolor="black" />
           <VectorArrow vector={[x1, y1, z1]} color='red' label='A'/>
           <VectorArrow vector={[x2, y2, z2]} color='blue' label='B'/>
           <VectorArrow vector={cross} color="green" label='A x B'/>

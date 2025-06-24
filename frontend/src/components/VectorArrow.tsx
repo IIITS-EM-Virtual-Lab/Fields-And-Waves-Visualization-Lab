@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import * as THREE from 'three';
-import { Text, Billboard } from '@react-three/drei';
+import { Html } from '@react-three/drei';
 
 type Props = {
   vector: [number, number, number];
@@ -60,15 +60,11 @@ function VectorArrow({ vector, color = 'hotpink', label }: Props) {
 
       {/* Optional Label */}
       {label && (
-          <Text
-            position={labelPosition}
-            fontSize={0.3}
-            color={color}
-            anchorX="center"
-            anchorY="middle"
-          >
+        <Html position={labelPosition} center distanceFactor={8}>
+          <div style={{ color, fontSize: '20px', userSelect: 'none', whiteSpace: 'nowrap' }}>
             {label}
-          </Text>
+          </div>
+        </Html>
       )}
     </group>
   );

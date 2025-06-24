@@ -1,14 +1,13 @@
-import { Line, Text } from '@react-three/drei';
+import { Line, Text, Html } from '@react-three/drei';
 
 type AxisProps = {
   axis: 'x' | 'y' | 'z';
   length: number;
   interval: number;
   color: string;
-  fontSize: number;
 };
 
-function AxisTicks({ axis, length, interval, color, fontSize }: AxisProps) {
+function AxisTicks({ axis, length, interval, color }: AxisProps) {
   const ticks = [];
   for (let i = -length; i <= length; i += interval) {
     if (i === 0) continue;
@@ -27,16 +26,16 @@ function AxisTicks({ axis, length, interval, color, fontSize }: AxisProps) {
       tickEnd = [0.1, i, 0];
     } else if (axis === 'z') {
       pos = [0, 0.2, i];
-      tickStart = [0, 0, i - 0.1];
-      tickEnd = [0, 0, i + 0.1];
+      tickStart = [0, -0.1, i];
+      tickEnd = [0, +0.1, i];
     }
 
     ticks.push(
       <group key={`${axis}-${i}`}>
         <Line points={[tickStart, tickEnd]} color={color} lineWidth={1} />
-        <Text position={pos as [number, number, number]} fontSize={fontSize} color={color}>
-          {i}
-        </Text>
+        <Html position={pos as [number, number, number]} center distanceFactor={8}>
+          <div style={{ color, fontSize: '20px', userSelect: 'none', whiteSpace: 'nowrap' }}>{i}</div>
+        </Html>
       </group>
     );
   }
@@ -48,14 +47,13 @@ type AxesProps = {
   length?: number;
   width?: number;
   fontPosition?: number;
-  fontSize?: number;
   interval?: number;
   xcolor?: string;
   ycolor?: string;
   zcolor?: string;
 };
 
-function Axes({ length=20, width=3, fontPosition=5.5, fontSize=1, interval=1, xcolor="black", ycolor="black", zcolor="black" }: AxesProps) {
+function Axes({ length=20, width=3, fontPosition=5.5, interval=1, xcolor="black", ycolor="black", zcolor="black" }: AxesProps) {
   return (
     <>
       {/* Axis lines */}
@@ -64,17 +62,29 @@ function Axes({ length=20, width=3, fontPosition=5.5, fontSize=1, interval=1, xc
       <Line points={[[0, 0, -length], [0, 0, length]]} color={zcolor} lineWidth={width} />
 
       {/* Ticks */}
-      <AxisTicks axis='x' length={length} interval={interval} color={xcolor} fontSize={fontSize/2} />
-      <AxisTicks axis='y' length={length} interval={interval} color={ycolor} fontSize={fontSize/2} />
-      <AxisTicks axis='z' length={length} interval={interval} color={zcolor} fontSize={fontSize/2} />
+      <AxisTicks axis='x' length={length} interval={interval} color={xcolor} />
+      <AxisTicks axis='y' length={length} interval={interval} color={ycolor} />
+      <AxisTicks axis='z' length={length} interval={interval} color={zcolor} />
 
       {/* Labels */}
-      <Text position={[fontPosition, 0.3, 0]} color={xcolor} fontSize={fontSize}>X</Text>
-      <Text position={[-fontPosition, 0.3, 0]} color={xcolor} fontSize={fontSize}>-X</Text>
-      <Text position={[0.3, fontPosition, 0]} color={ycolor} fontSize={fontSize}>Y</Text>
-      <Text position={[0.3, -fontPosition, 0]} color={ycolor} fontSize={fontSize}>-Y</Text>
-      <Text position={[0, 0.3, fontPosition]} color={zcolor} fontSize={fontSize}>Z</Text>
-      <Text position={[0, 0.3, -fontPosition]} color={zcolor} fontSize={fontSize}>-Z</Text>
+      <Html position={[fontPosition, 0.3, 0]} center distanceFactor={8}>
+        <div style={{ color: xcolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>X</div>
+      </Html>
+      <Html position={[-fontPosition, 0.3, 0]} center distanceFactor={8}>
+        <div style={{ color: xcolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>-X</div>
+      </Html>
+      <Html position={[0.3, fontPosition, 0]} center distanceFactor={8}>
+        <div style={{ color: ycolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>Y</div>
+      </Html>
+      <Html position={[0.3, -fontPosition, 0]} center distanceFactor={8}>
+        <div style={{ color: ycolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>-Y</div>
+      </Html>
+      <Html position={[0, 0.3, fontPosition]} center distanceFactor={8}>
+        <div style={{ color: zcolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>Z</div>
+      </Html>
+      <Html position={[0, 0.3, -fontPosition]} center distanceFactor={8}>
+        <div style={{ color: zcolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>-Z</div>
+      </Html>
     </>
   );
 }
