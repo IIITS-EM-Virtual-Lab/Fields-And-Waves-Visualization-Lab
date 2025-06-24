@@ -18,9 +18,9 @@ const modules = [
     icon: "/assets/vector-calculus.png",
     topics: [
       { name: "Intro", path: "/vector-calculus-intro" },
-      { name: "Del Operator", path: "/del-operator" },
       { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates" },
       { name: "Spherical Coordinates", path: "/spherical-coordinates" },
+      { name: "Del Operator", path: "/del-operator" },
     ],
   },
   {

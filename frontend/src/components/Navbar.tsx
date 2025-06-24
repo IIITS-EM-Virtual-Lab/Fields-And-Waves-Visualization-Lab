@@ -22,20 +22,20 @@ const exploreModules = [
     title: "Vector Calculus",
     items: [
       { name: "Intro", path: "/vector-calculus-intro" },
-      { name: "Del Operator", path: "/del-operator" },
       { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates" },
       { name: "Spherical Coordinates", path: "/spherical-coordinates" },
+      { name: "Del Operator", path: "/del-operator" },
     ],
   },
   {
     title: "Electrostatics",
     items: [
       { name: "Intro", path: "/electrostatics-intro" },
-      { name: "Electric Dipole", path: "/electric-dipole" },
-      { name: "Electric Potential", path: "/electric-potential" },
       { name: "Electric Field & Flux", path: "/electric-field-and-flux-density" },
       { name: "Field Operations", path: "/field-operations" },
+      { name: "Electric Potential", path: "/electric-potential" },
       { name: "Gauss Law", path: "/gauss-law" },
+      { name: "Electric Dipole", path: "/electric-dipole" },
     ],
   },
   {
@@ -43,8 +43,8 @@ const exploreModules = [
     items: [
       { name: "Gauss Law Contd", path: "/gauss-law-contd" },
       { name: "Gauss Law Magnetism", path: "/gauss-law-magnetism" },
-      { name: "Ampere Law", path: "/ampere-law" },
       { name: "Faraday Law", path: "/faraday-law" },
+      { name: "Ampere Law", path: "/ampere-law" },
       { name: "Displacement Current", path: "/displacement-current" },
       { name: "Time Varying Potential", path: "/time-varying-potential" },
       { name: "EMF", path: "/transformer-motional-emf" },
