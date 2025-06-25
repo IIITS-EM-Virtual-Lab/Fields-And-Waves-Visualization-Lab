@@ -1,8 +1,15 @@
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
+type CustomArrowProps = {
+    dir: THREE.Vector3,
+    origin: THREE.Vector3,
+    length: number,
+    color?: string,
+    headColor?: string
+};
 
-function CustomArrow({ dir, origin, length, color = "white", headColor = "green" }: any) {
+function CustomArrow({ dir, origin, length, color = "white", headColor = "green" }: CustomArrowProps) {
     const ref = useRef<THREE.Group>(null);
 
     useEffect(() => {

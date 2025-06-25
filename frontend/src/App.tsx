@@ -13,6 +13,7 @@ import VectorCalculusIntro from "./pages/vector-calculus/vector-calculus-intro";
 import CylindricalCoordinatesPage from "./pages/vector-calculus/cylindrical-coordinates";
 import SphericalCoordinatesPage from "./pages/vector-calculus/spherical-coordinates";
 import DelOperatorPage from "./pages/vector-calculus/del-operator";
+import CartesianCylindricalSphericalPage from "./pages/vector-calculus/cartesian-cylindrical-spherical";
 import CoulombsLawPage from "./pages/electrostatics/coulombs-law";
 import ElectricFluxPage from "./pages/electrostatics/electric-flux";
 import GradientPage from "./pages/electrostatics/gradient";
@@ -66,6 +67,7 @@ const AppRoutes = () => {
             <Route path="/cylindrical-coordinates" element={<CylindricalCoordinatesPage />} />
             <Route path="/spherical-coordinates" element={<SphericalCoordinatesPage />} />
             <Route path="/del-operator" element={<DelOperatorPage />} />
+            <Route path="/cartesian-cylindrical-spherical" element={<CartesianCylindricalSphericalPage />} />
 
             <Route path="/electrostatics-intro" element={<CoulombsLawPage />} />
             <Route path="/electric-dipole" element={<ElectricDipolePage />} />

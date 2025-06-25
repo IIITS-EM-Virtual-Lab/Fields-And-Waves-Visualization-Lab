@@ -3,8 +3,17 @@ import { Html } from '@react-three/drei';
 import { useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 
+type ChargeProps = {
+    charge: { position: THREE.Vector3; q: number },
+    index: number,
+    onDrag: (index: number, newPos: THREE.Vector3) => void,
+    setIsDragging: (dragging: boolean) => void,
+    onRemove: (index: number) => void,
+    trashMode: boolean
+};
 
-function Charge({ charge, index, onDrag, setIsDragging, onRemove, trashMode }: any) {
+
+function Charge({ charge, index, onDrag, setIsDragging, onRemove, trashMode }: ChargeProps) {
     const meshRef = useRef<THREE.Mesh>(null!);
     const [dragging, setDragging] = useState(false);
     const color = charge.q > 0 ? 'red' : 'blue';

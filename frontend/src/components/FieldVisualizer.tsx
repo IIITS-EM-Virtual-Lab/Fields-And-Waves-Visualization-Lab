@@ -1,7 +1,13 @@
 import * as THREE from 'three';
 import CustomArrow from './CustomArrow';
 
-function FieldVisualizer({ charges, visible, arrowColor }: any) {
+type FieldVisualizerProps = {
+    charges: { position: THREE.Vector3; q: number }[]
+    visible: boolean,
+    arrowColor: string
+};
+
+function FieldVisualizer({ charges, visible, arrowColor }: FieldVisualizerProps) {
     const arrows = [];
     if (!visible) return null;
     const spacing = 1;

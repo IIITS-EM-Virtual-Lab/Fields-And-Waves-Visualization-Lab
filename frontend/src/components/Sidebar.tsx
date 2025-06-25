@@ -30,6 +30,7 @@ const sidebarData = [
       { name: "Del Operator", path: "/del-operator" },
       { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates" },
       { name: "Spherical Coordinates", path: "/spherical-coordinates" },
+      { name: "Cartesian, Cylindrical and Spherical", path: "/cartesian-cylindrical-spherical"}
     ],
   },
     {
