@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
-import * as THREE from 'three';
 import { create, all } from 'mathjs';
 import Axes from './Axes';
 import VectorArrow from './VectorArrow';

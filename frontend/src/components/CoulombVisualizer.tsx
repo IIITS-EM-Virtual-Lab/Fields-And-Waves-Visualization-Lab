@@ -7,6 +7,28 @@ import FieldVisualizer from './FieldVisualizer';
 
 const initialCharges: { position: THREE.Vector3; q: number }[] = [];
 
+const k = 8.99e9; // Coulomb constant in Nm^2/C^2
+
+function computeForces(charges: { position: THREE.Vector3; q: number }[]) {
+    return charges.map((chargeA, i) => {
+        let netForce = new THREE.Vector3(0, 0, 0);
+
+        charges.forEach((chargeB, j) => {
+        if (i !== j) {
+            const r = new THREE.Vector3().subVectors(chargeB.position, chargeA.position);
+            const distance = r.length();
+            if (distance > 0.001) { // avoid divide-by-zero
+            const forceMagnitude = (k * chargeA.q * chargeB.q) / (distance * distance); // convert nC to C
+            const force = r.normalize().multiplyScalar(forceMagnitude);
+            netForce.add(force);
+            }
+        }
+        });
+
+        return netForce;
+    });
+}
+
 
 function CoulombVisualizer() {
     const [charges, setCharges] = useState(initialCharges);
@@ -14,6 +36,7 @@ function CoulombVisualizer() {
     const [inputCharge, setInputCharge] = useState(1);
     const [isDragging, setIsDragging] = useState(false);
     const [trashMode, setTrashMode] = useState(false);
+    const forces = computeForces(charges);
 
     const handleDrag = (index: number, newPos: THREE.Vector3) => {
         setCharges((prev) => {
@@ -29,29 +52,39 @@ function CoulombVisualizer() {
 
     const addNewCharge = (sign: number) => {
         const charge = {
-            position: new THREE.Vector3(0, -3, 0),
+            position: new THREE.Vector3(0, 0, 0),
             q: sign * Math.abs(inputCharge),
         };
         setCharges((prev) => [...prev, charge]);
     };
 
     useEffect(() => {
-        window.addEventListener('mousemove', (e) => {
+        const handleMouseMove = (e: MouseEvent) => {
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2(
-                (e.clientX / window.innerWidth) * 2 - 1,
-                -(e.clientY / window.innerHeight) * 2 + 1
+              (e.clientX / window.innerWidth) * 2 - 1,
+              -(e.clientY / window.innerHeight) * 2 + 1
             );
             raycaster.setFromCamera(mouse, (window as any).camera);
-            const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+        
+            // Create a plane **perpendicular to camera look direction**, passing through origin
+            const camera = (window as any).camera;
+            const cameraDirection = new THREE.Vector3();
+            camera.getWorldDirection(cameraDirection);
+            const plane = new THREE.Plane();
+            plane.setFromNormalAndCoplanarPoint(cameraDirection, new THREE.Vector3(0, 0, 0));
+        
             const point = new THREE.Vector3();
             raycaster.ray.intersectPlane(plane, point);
             (window as any).mouse3D = point;
-        });
+        };
+        
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
     }, []);
 
     return (
-        <div className="relative overflow-hidden w-full h-screen relative bg-white border-2 border-blue-600">
+        <div className="relative overflow-hidden w-full h-screen relative bg-white border-2 border-blue-600 z-0">
             <Canvas onCreated={({ camera }) => ((window as any).camera = camera)}>
                 <ambientLight intensity={0.5} />
                 <pointLight position={[10, 10, 10]} />
@@ -66,6 +99,7 @@ function CoulombVisualizer() {
                         setIsDragging={setIsDragging}
                         onRemove={handleRemoveCharge}
                         trashMode={trashMode}
+                        forceVector={forces[i]}
                     />
                 ))}
 
@@ -85,11 +119,11 @@ function CoulombVisualizer() {
 
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white rounded-lg p-4 shadow-md flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-red-600"></div>
+                    <div className="w-6 h-6 rounded-full bg-green-600"></div>
                     <button onClick={() => addNewCharge(1)} className="px-2 py-1 bg-blue-200 rounded">Add +</button>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-blue-600"></div>
+                    <div className="w-6 h-6 rounded-full bg-red-600"></div>
                     <button onClick={() => addNewCharge(-1)} className="px-2 py-1 bg-blue-200 rounded">Add -</button>
                 </div>
                 <input
