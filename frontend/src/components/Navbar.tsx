@@ -107,7 +107,7 @@ const Navbar = () => {
             </button>
 
             {showExplore && (
-              <div className="absolute top-[48px] left-0 w-[900px] bg-white border border-gray-200 shadow-xl p-6 flex gap-12 text-sm z-50">
+              <div className="absolute top-[48px] left-0 w-[1000px] bg-white border border-gray-200 shadow-xl p-6 flex gap-12 text-sm z-50">
                 {exploreModules.map((mod, i) => (
                   <div key={i}>
                     <h4 className="text-[#1a1a1a] font-semibold mb-2 text-[16px] leading-[1.2]">{mod.title}</h4>
@@ -121,7 +121,7 @@ const Navbar = () => {
                             setShowExplore(false);
                           }}
                         >
-                          {j+1}{". "}{sub.name}
+                          {sub.name}
                         </li>
                       ))}
                       </ul>

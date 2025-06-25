@@ -18,6 +18,20 @@ const sidebarData = [
       { name: "Intro", path: "/vector-calculus-intro" },
       { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates" },
       { name: "Spherical Coordinates", path: "/spherical-coordinates" },
+      { name: "Del Operator", path: "/del-operator" },
+      { name: "Cartesian, Cylindrical and Spherical", path: "/cartesian-cylindrical-spherical"},
+    ],
+  },
+    {
+    topic: "Electrostatics",
+    icon: "/assets/vector-calculus.png",
+    subtopics: [
+      { name: "Intro", path: "/electrostatics-intro" },
+      { name: "Electric Field & Flux", path: "/electric-field-and-flux-density" },
+      { name: "Field Operations", path: "/field-operations" },
+      { name: "Electric Potential", path: "/electric-potential" },
+      { name: "Gauss Law", path: "/gauss-law" },
+      { name: "Electric Dipole", path: "/electric-dipole" },
     ],
   },
     {
