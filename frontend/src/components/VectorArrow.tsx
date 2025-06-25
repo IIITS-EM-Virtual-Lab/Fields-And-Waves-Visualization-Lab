@@ -4,11 +4,12 @@ import { Html } from '@react-three/drei';
 
 type Props = {
   vector: [number, number, number];
+  origin?: [number, number, number];
   color?: string;
   label?: string;
 };
 
-function VectorArrow({ vector, color = 'hotpink', label }: Props) {
+function VectorArrow({ vector, origin = [0, 0, 0], color = 'hotpink', label }: Props) {
   const [shaftProps, coneProps, labelPosition] = useMemo(() => {
     const vec = new THREE.Vector3(...vector);
     const length = vec.length();
@@ -45,7 +46,7 @@ function VectorArrow({ vector, color = 'hotpink', label }: Props) {
   }, [vector, color]);
 
   return (
-    <group>
+    <group position={origin}>
       {/* Cylinder shaft */}
       <mesh position={shaftProps.position} quaternion={shaftProps.quaternion}>
         <cylinderGeometry args={[shaftProps.scale[0], shaftProps.scale[2], shaftProps.scale[1], 12]} />

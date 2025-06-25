@@ -1,4 +1,4 @@
-import { Line, Text, Html } from '@react-three/drei';
+import { Line, Html } from '@react-three/drei';
 
 type AxisProps = {
   axis: 'x' | 'y' | 'z';

@@ -25,6 +25,7 @@ const exploreModules = [
       { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates" },
       { name: "Spherical Coordinates", path: "/spherical-coordinates" },
       { name: "Del Operator", path: "/del-operator" },
+      { name: "Cartesian, Cylindrical and Spherical", path: "/cartesian-cylindrical-spherical"}
     ],
   },
   {
@@ -120,7 +121,7 @@ const Navbar = () => {
                             setShowExplore(false);
                           }}
                         >
-                          {sub.name}
+                          {j+1}{". "}{sub.name}
                         </li>
                       ))}
                       </ul>
