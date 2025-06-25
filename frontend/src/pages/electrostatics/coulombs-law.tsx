@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ReactP5Wrapper } from "@p5-wrapper/react";
 import { CoulombP5Sketch } from "@/p5/CoulombP5Sketch";
 import { useNavigate } from "react-router-dom";
+import CoulombVisualizer from "@/components/CoulombVisualizer";
 
 
 const CoulombsLawPage = () => {
@@ -21,7 +22,14 @@ const CoulombsLawPage = () => {
         <p className="text-md text-gray-800 text-justify mb-8 leading-relaxed">
           Coulomb's Law describes the electrostatic interaction between electrically charged particles. It states that the magnitude of the electrostatic force between two point charges is directly proportional to the product of their charges and inversely proportional to the square of the distance between them.
         </p>
-
+        <div className="pb-20">
+          <div className="text-xl font-black uppercase text-center py-10">
+            INTERACTIVE DEMO
+          </div>
+          <div className="flex justify-center">
+            <CoulombVisualizer />
+          </div>
+        </div>
         <div className="mb-12">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             GeoGebra Simulation
