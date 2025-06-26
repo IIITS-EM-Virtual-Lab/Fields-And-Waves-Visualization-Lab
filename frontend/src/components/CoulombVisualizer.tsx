@@ -18,7 +18,7 @@ function computeForces(charges: { position: THREE.Vector3; q: number }[]) {
             const r = new THREE.Vector3().subVectors(chargeB.position, chargeA.position);
             const distance = r.length();
             if (distance > 0.001) { // avoid divide-by-zero
-            const forceMagnitude = (k * chargeA.q * chargeB.q) / (distance * distance); // convert nC to C
+            const forceMagnitude = (k * chargeA.q * chargeB.q * 1e-18) / (distance * distance); // convert nC to C
             const force = r.normalize().multiplyScalar(forceMagnitude);
             netForce.add(force);
             }

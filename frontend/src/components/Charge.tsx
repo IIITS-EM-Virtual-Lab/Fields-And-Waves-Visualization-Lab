@@ -63,7 +63,7 @@ function Charge({ charge, index, onDrag, setIsDragging, onRemove, trashMode, for
             <meshStandardMaterial color={color} />
             <Html position={[0, 1, 0]} center distanceFactor={8}>
                 <div style={{ color: color, fontWeight: 'bold', fontSize: '18px', userSelect: 'none', whiteSpace: 'nowrap' }}>
-                    {charge.q > 0 ? '+' : ''}{charge.q}C
+                    {charge.q > 0 ? '+' : ''}{charge.q}nC
                 </div>
                 <div style={{ fontWeight: 'bold', color: color, fontSize: '18px', userSelect: 'none', whiteSpace: 'nowrap' }}>
                     ({livePosition.x.toFixed(2)}, {livePosition.y.toFixed(2)}, {livePosition.z.toFixed(2)})

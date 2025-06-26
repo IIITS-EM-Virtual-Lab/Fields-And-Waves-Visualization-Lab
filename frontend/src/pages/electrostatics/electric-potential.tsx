@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { BlockMath } from "react-katex";
+import ElectricPotentialVisualizer from "@/components/ElectricPotentialVisualizer";
+import ElectricPotentialGraph from "@/components/ElectricPotentialGraph";
 
 const ElectricPotentialPage = () => {
   return (
@@ -7,6 +9,17 @@ const ElectricPotentialPage = () => {
       <div className="text-xl font-black uppercase text-center py-10">
         Electric Potential
       </div>
+      <div className="pb-20">
+          <div className="text-xl font-black uppercase text-center py-10">
+            INTERACTIVE DEMO
+          </div>
+          <div className="flex justify-center">
+            <ElectricPotentialVisualizer />
+          </div>
+          <div className="flex justify-center">
+            <ElectricPotentialGraph />
+          </div>
+        </div>
       <div>
         Electrical potential, often referred to as voltage, is the measure of
         the electric potential energy per unit charge at a specific point in an
