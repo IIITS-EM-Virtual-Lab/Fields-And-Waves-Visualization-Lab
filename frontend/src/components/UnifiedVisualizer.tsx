@@ -90,7 +90,7 @@ function UnifiedVisualizer() {
                 { showSpherical && (
                     <mesh position={[0, 0, 0]}>
                         <sphereGeometry args={[r, 64, 64]} />
-                        <meshStandardMaterial color="pink" transparent opacity={0.5} depthWrite={false} />
+                        <meshStandardMaterial color="blue" transparent opacity={0.5} depthWrite={false} />
                     </mesh>
                 )}
 

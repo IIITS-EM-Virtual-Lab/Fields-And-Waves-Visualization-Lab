@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { BlockMath } from "react-katex";
+import ElectricFluxDensityVisualizer from "@/components/ElectricFluxDensityVisualizer";
 
 const ElectricFluxPage = () => {
   return (
@@ -7,6 +8,14 @@ const ElectricFluxPage = () => {
       <div className="text-xl font-black uppercase text-center py-10">
         Electric Flux Density
       </div>
+        <div className="pb-20">
+          <div className="text-xl font-black uppercase text-center py-10">
+            INTERACTIVE DEMO
+          </div>
+          <div className="flex justify-center">
+            <ElectricFluxDensityVisualizer />
+          </div>
+        </div>
       <div className="text-lg">
         <div>
           Electric flux is defined as the total number of electric lines of
