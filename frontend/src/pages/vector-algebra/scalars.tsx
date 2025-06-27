@@ -4,7 +4,7 @@ import VectorVisualizer from "@/components/VectorVisualizer";
 const Scalars = () => {
 
   return (
-    <div className="px-48 flex flex-col border-t border-slate-300">
+    <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
       <div className="text-xl font-black uppercase text-center py-10">
         Scalars And Vectors
       </div>
