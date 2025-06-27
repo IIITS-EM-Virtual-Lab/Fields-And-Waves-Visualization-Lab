@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import Axes from './Axes';
 import VectorArrow from './VectorArrow';
@@ -40,7 +40,7 @@ function ElectricPotentialVisualizer() {
         </div>
 
         <div>
-          <h2 className="font-bold mb-1">Test Particle Position:</h2>
+          <h2 className="font-bold mb-1">Test Particle Position(P):</h2>
           <label>X: <input type="number" value={px} onChange={(e) => setPx(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
           <label className="ml-2">Y: <input type="number" value={py} onChange={(e) => setPy(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
           <label className="ml-2">Z: <input type="number" value={pz} onChange={(e) => setPz(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
@@ -63,11 +63,22 @@ function ElectricPotentialVisualizer() {
             <sphereGeometry args={[0.2, 32, 32]} />
             <meshStandardMaterial color={q > 0 ? 'red' : 'blue'} />
           </mesh>
+          <Html position={[chargePosition.x+0.1, chargePosition.y+0.3, chargePosition.z+0.1]} center distanceFactor={8}>
+            <div style={{ color: q > 0 ? 'red' : 'blue', fontSize: '20px', userSelect: 'none', whiteSpace: 'nowrap' }}>
+              Charge
+            </div>
+          </Html>
+
+          <mesh position={chargePosition}>
+            <sphereGeometry args={[1, 64, 64]} />
+            <meshStandardMaterial color={q > 0 ? 'red' : 'blue'} transparent opacity={0.5} depthWrite={false} />
+          </mesh>
+
 
           <VectorArrow 
             vector={pointPosition.clone().sub(chargePosition).toArray()} 
             origin={chargePosition.toArray()} 
-            color='red' 
+            color={q > 0 ? 'red' : 'blue'} 
             label={`V = ${potential === Infinity ? '∞' : potential.toExponential(3)}V`}
             />
 
@@ -76,6 +87,11 @@ function ElectricPotentialVisualizer() {
             <sphereGeometry args={[0.1, 32, 32]} />
             <meshStandardMaterial color='gold' />
           </mesh>
+          <Html position={[pointPosition.x+0.1, pointPosition.y-0.2, pointPosition.z+0.1]} center distanceFactor={8}>
+            <div style={{ color: 'gold', fontSize: '20px', userSelect: 'none', whiteSpace: 'nowrap' }}>
+              P
+            </div>
+          </Html>
         </Canvas>
       </div>
     </div>
