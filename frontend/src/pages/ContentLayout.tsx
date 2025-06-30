@@ -1,23 +1,34 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
+import Footer from "@/components/Footer";
 
 const ContentLayout = () => {
   const location = useLocation();
-
-  // You can adjust this to match multiple paths if needed
   const showSidebar = location.pathname !== "/home";
 
   return (
-    <div className="flex min-h-screen">
-      {showSidebar && <Sidebar />}
-      <div className="flex flex-col flex-1">
-        <main className={`flex-grow pt-0 p-6 ${showSidebar ? "ml-60" : ""} bg-[#ffffff]`}>
-          <Outlet />
-        </main>
+    <div className="flex flex-col min-h-screen">
+      {/* Main content wrapper */}
+      <div className="flex flex-1">
+        {/* Sidebar: sticky positioning */}
+        {showSidebar && (
+          <aside className="w-96 bg-white border-r sticky top-0 h-screen overflow-y-auto">
+            <Sidebar />
+          </aside>
+        )}
+
+        {/* Main content: natural scroll with page */}
+        <div className="flex-1 bg-white">
+          <main className="p-6">
+            <Outlet />
+          </main>
+        </div>
       </div>
+
+      {/* Footer: at bottom of natural page flow */}
+      <Footer />
     </div>
   );
 };
-
 
 export default ContentLayout;

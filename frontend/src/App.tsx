@@ -1,6 +1,4 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
-// import { useSelector } from "react-redux";
-// import { ReactNode } from 'react';
 
 import Home from "@/pages/Home";
 import Contact from "@/pages/Contact";
@@ -33,7 +31,6 @@ import PowVector from './pages/wave-propagation/pow_vector';
 import WaveReflection from './pages/wave-propagation/wave_reflection';
 
 import ContentLayout from "@/pages/ContentLayout";
-import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/lib/scrollToTop";
 import Login from "./pages/login";
@@ -95,7 +92,7 @@ const AppRoutes = () => {
         </Routes>
       </div>
 
-      {location.pathname !== "/auth" && <Footer />}
+      {/* {location.pathname !== "/auth" && <Footer />} */}
     </>
   );
 };

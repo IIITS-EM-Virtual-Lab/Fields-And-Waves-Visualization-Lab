@@ -1,12 +1,4 @@
-          {/* <iframe
-            src="https://www.geogebra.org/classic/NQwe7K89?embed"
-            width="1073px"
-            height="800px"
-          ></iframe> */}
-
 import { Button } from "@/components/ui/button";
-import { ReactP5Wrapper } from "@p5-wrapper/react";
-import { CoulombP5Sketch } from "@/p5/CoulombP5Sketch";
 import { useNavigate } from "react-router-dom";
 import CoulombVisualizer from "@/components/CoulombVisualizer";
 
@@ -22,14 +14,6 @@ const CoulombsLawPage = () => {
         <p className="text-md text-gray-800 text-justify mb-8 leading-relaxed">
           Coulomb's Law describes the electrostatic interaction between electrically charged particles. It states that the magnitude of the electrostatic force between two point charges is directly proportional to the product of their charges and inversely proportional to the square of the distance between them.
         </p>
-        <div className="pb-20">
-          <div className="text-xl font-black uppercase text-center py-10">
-            INTERACTIVE DEMO
-          </div>
-          <div className="flex justify-center">
-            <CoulombVisualizer />
-          </div>
-        </div>
         <div className="mb-12">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             GeoGebra Simulation
@@ -38,7 +22,6 @@ const CoulombsLawPage = () => {
             <iframe
               title="Coulomb's Law Simulation"
               src="https://www.geogebra.org/material/iframe/id/154678/width/873/height/500/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-              // src="https://www.geogebra.org/classic/NQwe7K89?embed"
               width="873px"
               height="500px"
               allowFullScreen
@@ -47,31 +30,14 @@ const CoulombsLawPage = () => {
           </div>
         </div>
 
-        {/* <div className="mb-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            PhET Simulation
-          </h2>
-          <div className="aspect-video shadow-md rounded-lg border border-gray-300">
-            <iframe
-              title="PhET Coulomb Simulation"
-              src="https://phet.colorado.edu/sims/html/charges-and-fields/latest/charges-and-fields_en.html"
-              width="873px"
-              height="500px"
-              allowFullScreen
-              loading="lazy"
-            />
+          <div className="pb-20">
+          <div className="text-xl font-black uppercase text-center py-10">
+            INTERACTIVE DEMO
           </div>
-        </div> */}
-
-        <div className="mb-12">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-           Custom P5.js Simulation
-        </h2>
-        <div className="shadow-md rounded-lg border border-gray-300 overflow-hidden">
-        <ReactP5Wrapper sketch={CoulombP5Sketch} />
+          <div className="flex justify-center">
+            <CoulombVisualizer />
+          </div>
         </div>
-        </div>
-
 
         <div>
           <span>Coulombs Law:</span>
@@ -910,13 +876,27 @@ const CoulombsLawPage = () => {
         </svg>
       </div>
 
-         <Button onClick={() => navigate('/quiz/electrostatics/coulombs-law')}>
-  Take Test
-</Button>
+      <div className="bg-white rounded-xl shadow p-6 text-center mb-6 max-w-3xl mx-auto mt-9">
+  <h2 className="text-2xl font-semibold mb-2 text-gray-800">Test Your Understanding of Electric Fields!</h2>
+  <p className="text-gray-700 mb-4">
+    Explore how point charges influence electric fields and apply the core principles of Coulomb’s Law with our interactive quiz. Whether you're brushing up for exams or testing your conceptual clarity, this quick assessment will help solidify your grasp of:
+  </p>
+  <ul className="list-disc list-inside text-left text-gray-700 mb-4">
+    <li>Electric field intensity due to multiple point charges</li>
+    <li>Vector summation and field direction</li>
+    <li>Conceptual and numerical applications</li>
+  </ul>
+  <p className="text-gray-700 font-medium mb-6">💡 <span className="italic">Challenge yourself and see how well you understand the fundamentals!</span></p>
 
-
-
-
+  <div className="flex justify-center">
+    <Button
+      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
+      onClick={() => navigate('/quiz/electrostatics/coulombs-law')}
+    >
+      Take Test
+    </Button>
+  </div>
+</div>
     </div>
   );
 };
