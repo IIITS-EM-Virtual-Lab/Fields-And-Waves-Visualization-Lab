@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { BlockMath } from "react-katex";
+import AmpereLawVisualizer from "@/components/AmpereLawVisualizer";
 
 const AmpereLawPage = () => {
   return (
@@ -7,6 +8,14 @@ const AmpereLawPage = () => {
       {/* Title Section */}
       <div className="text-2xl font-extrabold uppercase text-center py-6 text-gray-900">
         Ampere's Circuit Law
+      </div>
+      <div className="pb-20">
+        <div className="text-xl font-black uppercase text-center py-10">
+          INTERACTIVE DEMO
+        </div>
+        <div className="flex justify-center">
+          <AmpereLawVisualizer />
+        </div>
       </div>
       {/* Description */}
       <div className="text-lg leading-relaxed mb-6">

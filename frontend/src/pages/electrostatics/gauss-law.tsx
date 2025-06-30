@@ -11,13 +11,13 @@ const GaussLawPage = () => {
       </div>
 
 	  	<div className="pb-20">
-			<div className="text-xl font-black uppercase text-center py-10">
-				INTERACTIVE DEMO
-			</div>
-			<div className="flex justify-center">
-				<GaussLawVisualizer />
-			</div>
+        <div className="text-xl font-black uppercase text-center py-10">
+          INTERACTIVE DEMO
         </div>
+        <div className="flex justify-center">
+          <GaussLawVisualizer />
+        </div>
+      </div>
 
       {/* Content Section */}
       <div>
