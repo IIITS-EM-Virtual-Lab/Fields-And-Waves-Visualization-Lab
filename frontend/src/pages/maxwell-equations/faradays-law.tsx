@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { BlockMath } from "react-katex";
+import FaradayVisualizer from "@/components/FaradayLawVisualizer";
 
 const FaradayLawPage = () => {
   return (
@@ -7,6 +8,15 @@ const FaradayLawPage = () => {
       {/* Title Section */}
       <div className="text-3xl font-bold uppercase text-center py-6 text-gray-900">
         Faraday's Law
+      </div>
+
+      <div className="pb-20">
+        <div className="text-xl font-black uppercase text-center py-10">
+          INTERACTIVE DEMO
+        </div>
+        <div className="flex justify-center">
+          <FaradayVisualizer />
+        </div>
       </div>
 
       {/* Introduction Section */}
