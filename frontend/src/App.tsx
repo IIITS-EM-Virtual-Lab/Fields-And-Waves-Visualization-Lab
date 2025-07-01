@@ -89,6 +89,9 @@ const AppRoutes = () => {
 
           <Route path="/content/:id" element={<Content />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/quizzes/module/:moduleName/common" element={<ChapterQuiz />} />
+
+
         </Routes>
       </div>
 

@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import VectorTripleProduct from "@/components/VectorTripleProduct";
+import { useNavigate } from "react-router-dom";
 
 const TripleProductPage = () => {
+  const navigate = useNavigate();
   return (
     <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
       <div className="pb-10">
@@ -71,9 +73,14 @@ const TripleProductPage = () => {
       <div>But</div>
       <div className="py-8 flex justify-center font-bold">(A.B)C = C(A.B)</div>
 
-      <div className="flex justify-end mb-48">
-        <Button className="px-6">Next</Button>
-      </div>
+      <div className="flex justify-center">
+    <Button
+      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
+      onClick={() => navigate('/quiz/vector-algebra/triple-product')}
+    >
+      Take Test
+    </Button>
+  </div>
     </div>
   );
 };

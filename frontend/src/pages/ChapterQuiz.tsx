@@ -18,11 +18,16 @@ interface Question {
 
 const redirectMap: Record<string, string> = {
   'electrostatics/coulombs-law': '/electrostatics-intro',
-  'electrostatics/electric-dipole': '/dipole-intro',
-  'electrostatics/electric-field': '/electric-field-intro',
-  // Add more mappings as needed
-};
+  'electrostatics/electric-flux': '/electric-field-and-flux-density',
+  'electrostatics/gradient': '/field-operations',
+  'electrostatics/electric-potential': '/electric-potential',
+  'electrostatics/electric-dipole': '/electric-dipole',
 
+  'vector-algebra/scalars': '/scalars-and-vectors',
+  'vector-algebra/addition': '/vector-addition',
+  'vector-algebra/multiplication': '/vector-multiplication',
+  'vector-algebra/triple-product': '/triple-product',
+};
 
 interface Quiz {
   _id: string;
@@ -46,7 +51,11 @@ const ChapterQuiz = () => {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/quizzes/module/${moduleName}/chapter/${chapterName}`);
+        const url =
+          !chapterName || chapterName === "common"
+            ? `http://localhost:5000/api/quizzes/module/${moduleName}/common`
+            : `http://localhost:5000/api/quizzes/module/${moduleName}/chapter/${chapterName}`;
+        const res = await axios.get(url);
         setQuiz(res.data.data);
       } catch (err) {
         console.error('Error fetching quiz:', err);
@@ -89,46 +98,52 @@ const ChapterQuiz = () => {
   };
 
   const handleNext = () => {
-  if (!quiz) return;
-  const nextIndex = currentIndex + 1;
+    if (!quiz) return;
+    const nextIndex = currentIndex + 1;
 
-  if (nextIndex >= quiz.questions.length) {
-    const key = `${moduleName}/${chapterName}`;
-    const redirectPath = redirectMap[key] || '/'; // fallback to home
-    navigate(redirectPath);
-    return;
-  }
+    if (nextIndex >= quiz.questions.length) {
+      const key = `${moduleName}/${chapterName}`;
+      const redirectPath =
+        chapterName === 'common'
+          ? `/explore/${moduleName}`
+          : redirectMap[key] || '/';
+      navigate(redirectPath);
+      return;
+    }
 
-  setCurrentIndex(nextIndex);
-  setSelectedOption(null);
-  setLockedOptions([]);
-  setCorrectOption(null);
-  setSkipped(false);
-};
+    setCurrentIndex(nextIndex);
+    setSelectedOption(null);
+    setLockedOptions([]);
+    setCorrectOption(null);
+    setSkipped(false);
+  };
 
-
-const renderExplanation = (opt: string) => {
-  if (correctOption === opt) {
-    return (
-      <div className="explanation correct">
-        <strong>Correct:</strong> {currentQuestion?.explanation}
-        {currentQuestion?.solutionImageUrl && (
-          <div className="solution-image">
-            <img src={currentQuestion.solutionImageUrl} alt="Solution" />
-          </div>
-        )}
-      </div>
-    );
-  } else if (lockedOptions.includes(opt)) {
-    return (
-      <div className="explanation incorrect">
-        <strong>Incorrect.</strong> Try again.
-      </div>
-    );
-  }
-  return null;
-};
-
+  const renderExplanation = (opt: string) => {
+    if (correctOption === opt) {
+      return (
+        <div className="explanation correct">
+          <strong>Correct!</strong>
+          {currentQuestion?.explanation && (
+            <div>
+              <strong>Explanation:</strong> {currentQuestion.explanation}
+            </div>
+          )}
+          {currentQuestion?.solutionImageUrl && (
+            <div className="solution-image">
+              <img src={currentQuestion.solutionImageUrl} alt="Solution" />
+            </div>
+          )}
+        </div>
+      );
+    } else if (lockedOptions.includes(opt)) {
+      return (
+        <div className="explanation incorrect">
+          <strong>Incorrect.</strong> Try again.
+        </div>
+      );
+    }
+    return null;
+  };
 
   if (loading || !quiz) return <div>Loading...</div>;
 
@@ -136,7 +151,11 @@ const renderExplanation = (opt: string) => {
     return (
       <div className="quiz-intro-page">
         <div className="quiz-intro">
-          <h2>Course Challenge</h2>
+          <h2>
+            {chapterName === "common"
+              ? `Course Challenge: ${moduleName.replace(/-/g, ' ').toUpperCase()}`
+              : "Course Challenge"}
+          </h2>
           <p className="intro-subtitle">Ready for a challenge?</p>
           <p>Test your knowledge and earn points for what you already know!</p>
           <p><strong>{quiz.questions.length} questions • 30–45 minutes</strong></p>

@@ -14,7 +14,7 @@ const {
 } = require('../controllers/Quiz');
 
 // ✅ Route definitions
-router.get('/module/:moduleName', getModuleQuizzes);
+router.get('/module/:moduleName/common', getModuleQuizzes);
 router.get('/module/:moduleName/chapter/:chapterName', getChapterQuiz);
 
 router.post('/', auth, admin, createQuiz);

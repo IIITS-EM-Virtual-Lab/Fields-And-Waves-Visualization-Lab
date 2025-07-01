@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import VectorMultiplier from "@/components/VectorMultiplier";
+import { useNavigate } from "react-router-dom";
 
 const VectorMultiplicationPage = () => {
+  const navigate = useNavigate();
   return (
     <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
       <div className="text-xl font-black uppercase text-center py-10">
@@ -462,9 +464,14 @@ const VectorMultiplicationPage = () => {
         </div> */}
       </div>
 
-      <div className="flex justify-end m-48">
-        <Button className="px-6">Next</Button>
-      </div>
+      <div className="flex justify-center">
+    <Button
+      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
+      onClick={() => navigate('/quiz/vector-algebra/multiplication')}
+    >
+      Take Test
+    </Button>
+  </div>
     </div>
   );
 };

@@ -146,7 +146,9 @@ const ProfilePage = () => {
       setLoading(true);
       setError('');
       const response = await axios.get(
-        `http://localhost:5000/api/quizzes/module/${selectedModule}/chapter/${selectedChapter}`,
+  selectedChapter === '__module__'
+    ? `http://localhost:5000/api/quizzes/module/${selectedModule}/common`
+    : `http://localhost:5000/api/quizzes/module/${selectedModule}/chapter/${selectedChapter}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -162,7 +164,7 @@ const ProfilePage = () => {
             'http://localhost:5000/api/quizzes',
             {
               module: selectedModule,
-              chapter: selectedChapter,
+              chapter: selectedChapter === '__module__' ? '' : selectedChapter,
               questions: []
             },
             {
@@ -315,19 +317,28 @@ const ProfilePage = () => {
             disabled={!selectedModule}
           >
             <option value="">Select Chapter</option>
+            <option value="__module__">Common Quiz for Entire Module</option>
             {selectedModule && moduleChapters[selectedModule]?.map(chapter => (
               <option key={chapter} value={chapter}>
                 {chapter.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
               </option>
             ))}
           </select>
+
         </div>
 
                {/* Quiz Content */}
         {selectedModule && selectedChapter && (
           <div className="quiz-content">
             <div className="quiz-header">
-              <h3>Questions for {selectedChapter.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</h3>
+              <h3>
+  Questions for{" "}
+  {selectedChapter === "__module__"
+    ? `${selectedModule.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} (Entire Module)`
+    : selectedChapter.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  }
+</h3>
+
               <button 
                 className="add-question-btn"
                 onClick={() => {
@@ -431,25 +442,29 @@ const ProfilePage = () => {
                 const questionImageInput = e.currentTarget.querySelector('input[name="questionImage"]') as HTMLInputElement;
                 const solutionImageInput = e.currentTarget.querySelector('input[name="solutionImage"]') as HTMLInputElement;
                 
-                const questionData = {
-                  type: newQuestionType,
-                  question: formData.get('question') as string,
-                  options: newQuestionType === 'MCQ'
-                    ? (formData.get('options') as string).split('\n').filter(Boolean)
-                    : [],
-                  correctAnswer: newQuestionType === 'MCQ'
-                    ? formData.get('correctAnswer') as string
-                    : (formData.get('correctAnswer') as string).split('\n').filter(Boolean),
-                  explanation: formData.get('explanation') as string,
-                  difficulty: formData.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD',
-                  points: Number(formData.get('points'))
-                };
+               const explanationValue = (formData.get('explanation') as string)?.trim();
+
+const questionData = {
+  type: newQuestionType,
+  question: formData.get('question') as string,
+  options: newQuestionType === 'MCQ'
+    ? (formData.get('options') as string).split('\n').filter(Boolean)
+    : [],
+  correctAnswer: newQuestionType === 'MCQ'
+    ? formData.get('correctAnswer') as string
+    : (formData.get('correctAnswer') as string).split('\n').filter(Boolean),
+  explanation: explanationValue || '', // If empty, set as ''
+  difficulty: formData.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD',
+  points: Number(formData.get('points'))
+};
+
 
                 const apiFormData = new FormData();
                 Object.entries(questionData).forEach(([key, value]) => {
                   if ((key === 'options' || key === 'correctAnswer') && value !== undefined) {
                     apiFormData.append(key, JSON.stringify(value));
                   } else if (value !== undefined) {
+                    if (key === 'explanation' && !value) return; 
                     apiFormData.append(key, value as string);
                   }
                 });
@@ -502,7 +517,6 @@ const ProfilePage = () => {
                   name="explanation"
                   placeholder="Enter explanation for the correct answer"
                   defaultValue={editingQuestion?.explanation}
-                  required
                 />
 
                 <select

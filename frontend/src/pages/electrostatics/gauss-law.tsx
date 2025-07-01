@@ -68,9 +68,6 @@ const GaussLawPage = () => {
       </div>
 
       {/* Footer Section */}
-      <div className="flex justify-end mb-48">
-        <Button className="px-6">Next</Button>
-      </div>
     </div>
   );
 };

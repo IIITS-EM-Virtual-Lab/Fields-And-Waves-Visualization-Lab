@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import "katex/dist/katex.min.css";
 import { BlockMath } from "react-katex";
+import { useNavigate } from "react-router-dom";
 import ElectricDipoleVisualizer from "@/components/ElectricDipoleVisualizer";
 
 const ElectricDipolePage = () => {
+    const navigate = useNavigate();
     return (
         <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
             <div className="text-xl font-black uppercase text-center py-10">
@@ -75,9 +77,14 @@ const ElectricDipolePage = () => {
                     height="500px"
                 ></iframe>
             </div>
-            <div className="flex justify-end mb-48">
-                <Button className="px-6">Next</Button>
-            </div>
+             <div className="flex justify-center">
+    <Button
+      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
+      onClick={() => navigate('/quiz/electrostatics/electric-dipole')}
+    >
+      Take Test
+    </Button>
+  </div>
         </div>
     );
 };

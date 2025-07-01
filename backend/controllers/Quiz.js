@@ -5,22 +5,23 @@ const uploader = cloudinary.uploader;
 
 // Get all quizzes for a module
 exports.getModuleQuizzes = async (req, res) => {
-  try {
+   try {
     const { moduleName } = req.params;
-    const quizzes = await Quiz.find({ module: moduleName })
-      .select('module chapter questions.length');
-    
-    res.status(200).json({
-      success: true,
-      data: quizzes
-    });
+    const quiz = await Quiz.findOne({ module: moduleName, chapter: "" });
+
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: "Module quiz not found" });
+    }
+
+    res.status(200).json({ success: true, data: quiz });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error fetching module quizzes',
-      error: error.message
-    });
-  }
+      message: "Error fetching module-level quiz",
+      error: error.message,
+    });
+  }
+
 };
 
 // Get quiz for a specific chapter

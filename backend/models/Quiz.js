@@ -22,7 +22,6 @@ const questionSchema = new mongoose.Schema({
   },
   explanation: {
     type: String,
-    required: true
   },
   difficulty: {
     type: String,
@@ -51,7 +50,8 @@ const quizSchema = new mongoose.Schema({
   },
   chapter: {
     type: String,
-    required: true
+    required: false,
+    default:''
   },
   questions: [questionSchema],
   createdAt: {
