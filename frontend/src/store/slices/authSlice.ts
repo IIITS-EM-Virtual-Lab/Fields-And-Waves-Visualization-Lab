@@ -5,6 +5,7 @@ import { RootState } from "../store";
 export interface Client {
   name: string;
   email: string;
+  _id: string;
   profilePicture?: string;
   isAdmin?: boolean;
   // Add other fields if you store more info like id, role, etc.

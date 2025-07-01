@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const quizResultController = require("../controllers/QuizResult");
 const { auth, admin } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
 const {
@@ -45,5 +46,8 @@ router.put(
 );
 
 router.delete('/:quizId/questions/:questionId', auth, admin, deleteQuestion);
+
+router.post("/quizresult", quizResultController.submitQuiz);
+router.get("/userstats/:userId", quizResultController.getUserStats);
 
 module.exports = router;

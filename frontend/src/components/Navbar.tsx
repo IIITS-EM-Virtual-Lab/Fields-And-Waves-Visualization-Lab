@@ -169,7 +169,7 @@ const Navbar = () => {
             user && (
               <>
                 <button
-                  onClick={() => navigate("/profilepage")}
+                  onClick={() => navigate("/userdashboard")}
                   className="px-4 py-1 bg-gray-100 rounded-full text-[#1a1a1a] font-medium"
                 >
                   {user.name}

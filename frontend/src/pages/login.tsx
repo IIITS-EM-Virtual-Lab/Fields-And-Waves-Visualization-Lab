@@ -22,6 +22,8 @@ const Login = () => {
     const email = urlParams.get('email');
     const isAdmin = urlParams.get('isAdmin');
     const error = urlParams.get('error');
+    const userId = urlParams.get('userId')!;
+
 
     if (error) {
       alert('Google Sign-in Failed');
@@ -34,10 +36,17 @@ const Login = () => {
         client: { 
           name, 
           email, 
-          isAdmin: isAdmin === 'true' 
+          isAdmin: isAdmin === 'true',
+          _id: userId, 
         }
       }));
-      navigate('/home');
+      if (isAdmin === "true") {
+        navigate("/profilepage");
+      } else {
+        navigate("/userdashboard");
+      }
+
+
     }
   }, []);
 
@@ -60,7 +69,7 @@ const Login = () => {
 
       dispatch(setCredentials({
         token,
-        client: { name: user.name, email: user.email, isAdmin: user.isAdmin }
+        client: { _id: user._id,name: user.name, email: user.email, isAdmin: user.isAdmin }
       }));
 
       navigate('/home');

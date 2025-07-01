@@ -37,6 +37,7 @@ import Login from "./pages/login";
 import Signup from "./pages/signup";
 import ProfilePage from "./pages/ProfilePage";
 import ChapterQuiz from './pages/ChapterQuiz';
+import UserDashboard from "./pages/UserDashboard";
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -90,7 +91,7 @@ const AppRoutes = () => {
           <Route path="/content/:id" element={<Content />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/quizzes/module/:moduleName/common" element={<ChapterQuiz />} />
-
+          <Route path="/userdashboard" element={<UserDashboard />} />
 
         </Routes>
       </div>

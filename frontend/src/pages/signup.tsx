@@ -4,7 +4,7 @@ import axios from 'axios';
 import './login-signup.css';
 import { FaGoogle } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
-import { setCredentials } from '../store/slices/authSlice'; // Adjust this import path if needed
+import { setCredentials } from '../store/slices/authSlice'; 
 
 const Signup = () => {
   const navigate = useNavigate();
