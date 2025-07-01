@@ -64,9 +64,7 @@ const VectorCalculusIntro = () => {
         dV = dx dy dz
       </div>
 
-      <div className="flex justify-end mb-48">
-        <Button className="px-6">Next</Button>
-      </div>
+
     </div>
   );
 };

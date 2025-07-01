@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { BlockMath } from "react-katex";
 import GaussLawVisualizer from "@/components/GaussLawVisualizer";
 
+
 const GaussLawPage = () => {
   return (
     <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">

@@ -1,4 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '../store/slices/authSlice';
 
 const sidebarData = [
   {
@@ -60,6 +62,7 @@ const sidebarData = [
 ];
 
 const Sidebar = () => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const location = useLocation();
   const activeSection = sidebarData.find(section =>
     section.subtopics.some(sub => sub.path === location.pathname)
@@ -105,7 +108,7 @@ const Sidebar = () => {
       </ul>
 
       {/* Show Course Challenge only for Vector Calculus and Maxwell Equations */}
-      {['vector-calculus', 'maxwell-equations'].includes(
+{['vector-calculus', 'maxwell-equations'].includes(
   sectionToRender.topic.toLowerCase().replace(/\s+/g, '-')
 ) && (
   <div className="border p-4 rounded-md shadow-sm bg-white text-sm">
@@ -116,15 +119,19 @@ const Sidebar = () => {
     <p className="text-gray-700 mb-1">
       Test your knowledge of the skills in this course.
     </p>
-   <Link
-  to={`/quizzes/module/${sectionToRender.topic.toLowerCase().replace(/\s+/g, '-')}/common`}
-  className="text-blue-600 font-medium hover:underline"
->
-  Start Course challenge
-</Link>
-
+    {isAuthenticated ? (
+      <Link
+        to={`/quizzes/module/${sectionToRender.topic.toLowerCase().replace(/\s+/g, '-')}/common`}
+        className="text-blue-600 font-medium hover:underline"
+      >
+        Start Course challenge
+      </Link>
+    ) : (
+      <p className="text-[#a00032] text-s">Login to unlock this challenge</p>
+    )}
   </div>
 )}
+
 
     </div>
   );

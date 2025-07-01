@@ -50,9 +50,7 @@ const SphericalCoordinatesPage = () => {
       </div>
 
 
-      <div className="flex justify-end m-48">
-        <Button className="px-6">Next</Button>
-      </div>
+
     </div>
   );
 };

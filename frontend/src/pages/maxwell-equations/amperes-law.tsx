@@ -288,11 +288,7 @@ H = \frac{I}{2\pi r} \hat{\phi}
           }}
         ></iframe>
       </div>
-      <div className="flex justify-end mt-10">
-        <Button className="px-6 py-3  text-white font-semibold rounded ">
-          Next
-        </Button>
-      </div>
+    
     </div>
   );
 };

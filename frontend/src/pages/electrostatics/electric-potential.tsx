@@ -3,8 +3,11 @@ import { BlockMath } from "react-katex";
 import { useNavigate } from "react-router-dom";
 import ElectricPotentialVisualizer from "@/components/ElectricPotentialVisualizer";
 import ElectricPotentialGraph from "@/components/ElectricPotentialGraph";
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '../../store/slices/authSlice';
 
 const ElectricPotentialPage = () => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const navigate = useNavigate();
   return (
     <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
@@ -80,14 +83,17 @@ V(r) = \frac{Q}{4\pi\varepsilon\begin{vmatrix}r-{r}'\end{vmatrix}}
         ></iframe>
       </div>
 
-       <div className="flex justify-center">
-    <Button
-      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
-      onClick={() => navigate('/quiz/electrostatics/electric-potential')}
-    >
+ {isAuthenticated ? (
+  <div className="flex justify-center mt-4 pr-20">
+    <Button onClick={() => navigate('/quiz/electrostatics/electric-potential')}>
       Take Test
     </Button>
   </div>
+) : (
+  <div className="text-center text-medium text-[#a00032] mt-4">
+    Please log in to take the test.
+  </div>
+)}
     </div>
   );
 };

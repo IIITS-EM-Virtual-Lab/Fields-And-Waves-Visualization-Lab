@@ -138,12 +138,6 @@ const GaussLawContdPage = () => {
         ></iframe>
       </div>
 
-      {/* Footer Section */}
-      <div className="flex justify-end mt-10">
-        <Button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700">
-          Next
-        </Button>
-      </div>
     </div>
   );
 };

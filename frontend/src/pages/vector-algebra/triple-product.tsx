@@ -1,8 +1,12 @@
 import { Button } from "@/components/ui/button";
 import VectorTripleProduct from "@/components/VectorTripleProduct";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '../../store/slices/authSlice';
+
 
 const TripleProductPage = () => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const navigate = useNavigate();
   return (
     <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
@@ -73,14 +77,17 @@ const TripleProductPage = () => {
       <div>But</div>
       <div className="py-8 flex justify-center font-bold">(A.B)C = C(A.B)</div>
 
-      <div className="flex justify-center">
-    <Button
-      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
-      onClick={() => navigate('/quiz/vector-algebra/triple-product')}
-    >
+ {isAuthenticated ? (
+  <div className="flex justify-center mt-4 pr-20">
+    <Button onClick={() => navigate('/quiz/vector-algebra/triple-product')}>
       Take Test
     </Button>
   </div>
+) : (
+  <div className="text-center text-medium text-[#a00032] mt-4">
+    Please log in to take the test.
+  </div>
+)}
     </div>
   );
 };

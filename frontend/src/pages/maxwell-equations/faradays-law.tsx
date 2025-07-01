@@ -113,12 +113,6 @@ const FaradayLawPage = () => {
         ></iframe>
       </div>
 
-      {/* Next Button */}
-      <div className="flex justify-end mt-10">
-        <Button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded">
-          Next
-        </Button>
-      </div>
     </div>
   );
 };

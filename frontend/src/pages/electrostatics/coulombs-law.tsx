@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import CoulombVisualizer from "@/components/CoulombVisualizer";
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '../../store/slices/authSlice';
 
 
 const CoulombsLawPage = () => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const navigate = useNavigate();
   return (
       <div className="min-h-screen bg-white py-12 px-6">
@@ -888,14 +891,18 @@ const CoulombsLawPage = () => {
   </ul>
   <p className="text-gray-700 font-medium mb-6">💡 <span className="italic">Challenge yourself and see how well you understand the fundamentals!</span></p>
 
-  <div className="flex justify-center">
-    <Button
-      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
-      onClick={() => navigate('/quiz/electrostatics/coulombs-law')}
-    >
+ {isAuthenticated ? (
+  <div className="flex justify-center mt-4 pr-20">
+    <Button onClick={() => navigate('/quiz/electrostatics/coulombs-law')}>
       Take Test
     </Button>
   </div>
+) : (
+  <div className="text-center text-medium text-[#a00032] mt-4">
+    Please log in to take the test.
+  </div>
+)}
+
 </div>
     </div>
   );

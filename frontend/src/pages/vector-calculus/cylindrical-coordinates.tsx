@@ -54,10 +54,6 @@ const CylindricalCoordinatesPage = () => {
         alt=""
         className="w-[200px] mx-auto p-8"
       />
-
-      <div className="flex justify-end mb-48">
-        <Button className="px-6">Next</Button>
-      </div>
     </div>
   );
 };
