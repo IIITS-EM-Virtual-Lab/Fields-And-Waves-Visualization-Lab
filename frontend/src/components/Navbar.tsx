@@ -144,12 +144,23 @@ const Navbar = () => {
         </div>
 
         {/* Center Logo */}
-        <div className="flex items-center gap-2 ml-[-80px] cursor-pointer" onClick={() => navigate("/")}>
-          <img src="/logo.png" alt="Logo" className="h-6 w-6" />
-          <h1 className="text-[#a00032] font-lato font-bold text-[20px]">
-            Fields and Waves Visualization Lab
-          </h1>
-        </div>
+            <div
+              className="flex items-center gap-2 ml-[-80px] cursor-pointer"
+              onClick={() => {
+                if (!isAuthenticated) {
+                  navigate("/");
+                } else if (user?.isAdmin === true) {
+                  navigate("/profilepage");
+                } else {
+                  navigate("/userdashboard");
+                }
+              }}
+            >
+              <img src="/logo.png" alt="Logo" className="h-6 w-6" />
+              <h1 className="text-[#a00032] font-lato font-bold text-[20px]">
+                Fields and Waves Visualization Lab
+              </h1>
+            </div>
 
         {/* Right Section */}
         <div className="flex items-center gap-4 text-[16px] font-semibold">
@@ -169,7 +180,13 @@ const Navbar = () => {
             user && (
               <>
                 <button
-                  onClick={() => navigate("/userdashboard")}
+                  onClick={() => {
+                    if (user?.isAdmin === true) {
+                      navigate("/profilepage");
+                    } else {
+                      navigate("/userdashboard");
+                    }
+                  }}
                   className="px-4 py-1 bg-gray-100 rounded-full text-[#1a1a1a] font-medium"
                 >
                   {user.name}
