@@ -12,7 +12,7 @@ const auth = async (req, res, next) => {
 
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-
+      console.log(decoded);
       const user = await User.findById(decoded.id).select('-password');
       
       // Add user from payload

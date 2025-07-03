@@ -172,6 +172,7 @@ exports.handleGoogleCallback = async (req, res) => {
     frontendUrl.searchParams.set('name', user.name);
     frontendUrl.searchParams.set('email', user.email);
     frontendUrl.searchParams.set('isAdmin', user.isAdmin);
+    frontendUrl.searchParams.set('userId', user._id.toString()); // ✅ ADD THIS LINE
     res.redirect(frontendUrl.toString());
 
   } catch (err) {

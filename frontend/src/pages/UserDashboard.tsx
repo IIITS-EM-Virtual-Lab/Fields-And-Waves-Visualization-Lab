@@ -2,18 +2,24 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../store/slices/authSlice";
+import { selectCurrentUser, selectCurrentToken } from "../store/slices/authSlice";
 import axios from "axios";
 
 const UserDashboard = () => {
   const user = useSelector(selectCurrentUser);
+  const token = useSelector(selectCurrentToken);
   const [stats, setStats] = useState({ totalPoints: 0, totalQuizzes: 0, accuracy: 0 });
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/userstats/${user?._id}`);
-        setStats(res.data);
+        const res = await axios.get(`http://localhost:5000/api/quizresult/stats/${user?._id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`, // Add authorization header
+        'Content-Type': 'application/json'
+      }
+    });
+        setStats(res.data.data.overall);
       } catch (err) {
         console.error("Error fetching stats", err);
       }

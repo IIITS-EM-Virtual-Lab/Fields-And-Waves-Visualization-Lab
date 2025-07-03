@@ -72,6 +72,11 @@ const Login = () => {
         client: { _id: user._id,name: user.name, email: user.email, isAdmin: user.isAdmin }
       }));
 
+      // 🔐 Save token and user to localStorage so ChapterQuiz can access them
+localStorage.setItem('token', token);
+localStorage.setItem('user', JSON.stringify(user));
+
+
       navigate('/home');
     } catch (error: any) {
       console.error("Login Error:", error);

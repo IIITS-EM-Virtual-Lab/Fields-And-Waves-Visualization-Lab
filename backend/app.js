@@ -1,23 +1,30 @@
+// app.js
+
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const cors = require('cors');
+
 const authController = require('./controllers/Auth');
 const { auth } = require('./middleware/auth');
 const userRoutes = require('./routes/userRoutes');
 const quizRoutes = require('./routes/quiz');
-const cors = require('cors');
+const quizResultRoutes = require('./routes/quizResultRoutes');
 
 dotenv.config();
+
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
+// Database Connection
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.error('Mongo Error:', err));
+  .then(() => console.log('✅ MongoDB Connected'))
+  .catch(err => console.error('❌ Mongo Error:', err));
 
-// Routes
+// Auth Routes
 app.post('/api/auth/initiate-signup', authController.initiateSignup);
 app.post('/api/auth/verify-and-signup', authController.verifyAndSignup);
 app.post('/api/auth/login', authController.login);
@@ -25,11 +32,12 @@ app.get('/api/auth/me', auth, authController.getCurrentUser);
 app.get('/api/auth/google', authController.getGoogleAuthURL);
 app.get('/api/auth/google/callback', authController.handleGoogleCallback);
 
-// Use routesAdd commentMore actions
+// App Routes
 app.use('/api/users', userRoutes);
 app.use('/api/quizzes', quizRoutes);
+app.use('/api/quizresult', quizResultRoutes);
 
-// Error handling middleware
+// Error Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -39,7 +47,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
