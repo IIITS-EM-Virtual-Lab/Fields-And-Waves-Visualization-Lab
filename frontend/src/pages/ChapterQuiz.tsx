@@ -164,7 +164,8 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
       quizId: quiz._id,
       score: finalScore,
       correctAnswers: finalCorrectCount,
-      totalQuestions: quiz.questions.length
+      totalQuestions: quiz.questions.length,
+      userAnswers: userAnswers // Add user answers to submission
     });
     
     const response = await axios.post('http://localhost:5000/api/quizresult', {
@@ -172,10 +173,11 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
       quizId: quiz._id,
       score: finalScore,
       correctAnswers: finalCorrectCount,
-      totalQuestions: quiz.questions.length
+      totalQuestions: quiz.questions.length,
+      userAnswers: userAnswers // Send user answers to backend
     }, {
       headers: {
-        'Authorization': `Bearer ${token}`, // Add authorization header
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });
@@ -184,10 +186,6 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
     console.log('✅ Quiz result submitted successfully:', response.data);
   } catch (err) {
     console.error('❌ Error submitting quiz result:', err);
-    // if (err.response) {
-    //   console.error('Response data:', err.response.data);
-    //   console.error('Response status:', err.response.status);
-    // }
   }
 };
 

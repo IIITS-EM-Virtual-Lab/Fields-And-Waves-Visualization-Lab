@@ -2,6 +2,26 @@
 
 const mongoose = require('mongoose');
 
+const userAnswerSchema = new mongoose.Schema({
+  questionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
+  selectedAnswer: {
+    type: String,
+    required: true
+  },
+  isCorrect: {
+    type: Boolean,
+    required: true
+  },
+  points: {
+    type: Number,
+    required: true,
+    min: 0
+  }
+}, { _id: false });
+
 const quizResultSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -42,6 +62,7 @@ const quizResultSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  userAnswers: [userAnswerSchema], // Add this field
   completedAt: {
     type: Date,
     default: Date.now
