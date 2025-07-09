@@ -1,10 +1,23 @@
 import React from 'react';
 import Latex from 'react-latex-next';
 import './displacement_current.css';
+import DisplacementCurrentVisualizer from '@/components/DisplacementCurrentVisualizer';
 
 const DisplacementCurrent: React.FC = () => {
     return (
         <div className="displacement-current">
+            <div className="text-3xl font-bold uppercase text-center py-6 text-gray-900">
+                Faraday's Law
+            </div>
+
+            <div className="pb-20">
+                <div className="text-xl font-black uppercase text-center py-10">
+                    INTERACTIVE DEMO
+                </div>
+                <div className="flex justify-center">
+                    <DisplacementCurrentVisualizer />
+                </div>
+            </div>
             <p>
                 The concept of displacement current was introduced by James Clerk Maxwell to modify Ampère's Law and make it consistent with the continuity equation. 
                 Displacement current is not an actual current of moving charges, but a term added to Ampère's Law to account for the changing electric field in situations where there is no physical current.
