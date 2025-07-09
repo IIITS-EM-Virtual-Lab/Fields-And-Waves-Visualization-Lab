@@ -1,6 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
-import Footer from "@/components/Footer";
 
 const ContentLayout = () => {
   const location = useLocation();
@@ -24,9 +23,6 @@ const ContentLayout = () => {
           </main>
         </div>
       </div>
-
-      {/* Footer: at bottom of natural page flow */}
-      <Footer />
     </div>
   );
 };

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import { useSelector } from "react-redux";
 import { selectCurrentUser, selectCurrentToken } from "../store/slices/authSlice";
 import axios from "axios";
@@ -517,8 +516,6 @@ const UserDashboard = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
       
       {renderReviewModal()}
     </div>

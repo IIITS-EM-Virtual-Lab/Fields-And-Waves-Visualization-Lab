@@ -51,15 +51,15 @@ const exploreModules = [
       { name: "EMF", path: "/transformer-motional-emf" },
     ],
   },
-  {
-    title: "Wave Propagation",
-    items: [
-      { name: "Types of Waves", path: "/types-of-waves" },
-      { name: "Wave Power Energy", path: "/wave-power-energy" },
-      { name: "Plane Wave Analysis", path: "/plane-wave-analysis" },
-      { name: "Wave Reflection", path: "/wave-reflection" },
-    ],
-  },
+  // {
+  //   title: "Wave Propagation",
+  //   items: [
+  //     { name: "Types of Waves", path: "/types-of-waves" },
+  //     { name: "Wave Power Energy", path: "/wave-power-energy" },
+  //     { name: "Plane Wave Analysis", path: "/plane-wave-analysis" },
+  //     { name: "Wave Reflection", path: "/wave-reflection" },
+  //   ],
+  // },
 ];
 
 const Navbar = () => {
@@ -107,7 +107,7 @@ const Navbar = () => {
             </button>
 
             {showExplore && (
-              <div className="absolute top-[48px] left-0 w-[1000px] bg-white border border-gray-200 shadow-xl p-6 flex gap-12 text-sm z-50">
+              <div className="absolute top-[48px] left-0 w-[810px] bg-white border border-gray-200 shadow-xl p-6 flex gap-12 text-sm z-50">
                 {exploreModules.map((mod, i) => (
                   <div key={i}>
                     <h4 className="text-[#1a1a1a] font-semibold mb-2 text-[16px] leading-[1.2]">{mod.title}</h4>
