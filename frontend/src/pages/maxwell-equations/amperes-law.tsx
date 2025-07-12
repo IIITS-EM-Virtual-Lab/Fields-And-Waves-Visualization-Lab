@@ -4,7 +4,7 @@ import AmpereLawVisualizer from "@/components/AmpereLawVisualizer";
 
 const AmpereLawPage = () => {
   return (
-    <div className="px-8 md:px-24 lg:px-48 py-10 bg-gray-50 text-gray-800">
+    <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
       {/* Title Section */}
       <div className="text-2xl font-extrabold uppercase text-center py-6 text-gray-900">
         Ampere's Circuit Law

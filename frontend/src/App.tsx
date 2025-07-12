@@ -29,6 +29,7 @@ import TypeOfWaves from "./pages/wave-propagation/waves_in_general";
 import WaveAnalysis from './pages/wave-propagation/wave_analysis';
 import PowVector from './pages/wave-propagation/pow_vector';
 import WaveReflection from './pages/wave-propagation/wave_reflection';
+import Footer from "./components/Footer";
 
 import ContentLayout from "@/pages/ContentLayout";
 import Navbar from "@/components/Navbar";
@@ -43,17 +44,17 @@ const AppRoutes = () => {
   const location = useLocation();
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       <Navbar />
-      <div className="pt-20">
+      <div className="flex-grow pt-20">
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/" element={<Home />} />
           <Route path="/profilepage" element={<ProfilePage />} />
           <Route path="/quiz/:moduleName/:chapterName" element={<ChapterQuiz />} />
-          
+
           <Route element={<ContentLayout />}>
             <Route path="/home" element={<Home />} />
             <Route path="/vector-addition" element={<VectorAdditionPage />} />
@@ -85,21 +86,20 @@ const AppRoutes = () => {
             <Route path="/types-of-waves" element={<TypeOfWaves />} />
             <Route path="/plane-wave-analysis" element={<WaveAnalysis />} />
             <Route path="/wave-power-energy" element={<PowVector />} />
-            <Route path="/wave-reflection" element={<WaveReflection />} />
+            <Route path="/wave-reflection" element={<WaveReflection />} /> 
           </Route>
 
           <Route path="/content/:id" element={<Content />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/quizzes/module/:moduleName/common" element={<ChapterQuiz />} />
           <Route path="/userdashboard" element={<UserDashboard />} />
-
-        </Routes>
+         </Routes>
       </div>
-
-      {/* {location.pathname !== "/auth" && <Footer />} */}
-    </>
+      <Footer /> {/* Add this here to ensure every page has a footer */}
+    </div>
   );
 };
+
 
 const App = () => {
   return (

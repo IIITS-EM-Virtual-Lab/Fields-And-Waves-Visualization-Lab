@@ -48,16 +48,16 @@ const modules = [
       { name: "EMF", path: "/transformer-motional-emf" },
     ],
   },
-  {
-    title: "Wave Propagation",
-    icon: "/assets/wave.gif",
-    topics: [
-      { name: "Types of Waves", path: "/types-of-waves" },
-      { name: "Wave Power Energy", path: "/wave-power-energy" },
-      { name: "Plane Wave Analysis", path: "/plane-wave-analysis" },
-      { name: "Wave Reflection", path: "/wave-reflection" },
-    ],
-  },
+  // {
+  //   title: "Wave Propagation",
+  //   icon: "/assets/wave.gif",
+  //   topics: [
+  //     { name: "Types of Waves", path: "/types-of-waves" },
+  //     { name: "Wave Power Energy", path: "/wave-power-energy" },
+  //     { name: "Plane Wave Analysis", path: "/plane-wave-analysis" },
+  //     { name: "Wave Reflection", path: "/wave-reflection" },
+  //   ],
+  // },
 ];
 
 const aboutData = [
@@ -93,8 +93,9 @@ const Home = () => {
     });
   };
 
-  return (
-  <main className="flex-grow px-12">
+ return (
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-grow px-12">
 
     {/* Hero Section */}
     <div className="flex items-center h-[70vh]">
@@ -213,8 +214,8 @@ const Home = () => {
         />
       </div>
     </div>
-
-  </main>
+      </main>
+    </div>
 
         
 
