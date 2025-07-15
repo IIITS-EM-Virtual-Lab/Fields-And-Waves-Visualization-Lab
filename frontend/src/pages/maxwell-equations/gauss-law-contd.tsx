@@ -1,13 +1,22 @@
-import { Button } from "@/components/ui/button";
+import GaussApplicationVisualizer from "@/components/GaussApplicationVisualizer";
 import { BlockMath } from "react-katex";
 
 const GaussLawContdPage = () => {
   return (
     <div className="px-6 md:px-16 lg:px-32 py-10 bg-gray-50 text-gray-800">
-      {/* Title Section */}
-      <div className="text-2xl font-extrabold uppercase text-center py-6 text-gray-900">
-        Applications of Gauss Law
-      </div>
+		{/* Title Section */}
+		<div className="text-2xl font-extrabold uppercase text-center py-6 text-gray-900">
+			Applications of Gauss Law
+		</div>
+
+      	<div className="pb-20">
+            <div className="text-xl font-black uppercase text-center py-10">
+                INTERACTIVE DEMO
+            </div>
+            <div className="flex justify-center">
+                <GaussApplicationVisualizer />
+            </div>
+        </div>
 
       {/* Content Section */}
       <div className="space-y-10 text-lg leading-relaxed">

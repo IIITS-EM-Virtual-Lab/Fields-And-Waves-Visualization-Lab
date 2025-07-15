@@ -7,42 +7,74 @@ import VectorArrow from './VectorArrow';
 
 const epsilon0 = 8.854e-12;
 
-function GaussLawVisualizer() {
+function GaussApplicationVisualizer() {
   const [chargeValue, setChargeValue] = useState(1e-9); // 1nC
   const [chargePosition, setChargePosition] = useState([0, 0, 0]);
   const [surfaceRadius, setSurfaceRadius] = useState(2);
 
   const charge = useMemo(() => new THREE.Vector3(...chargePosition), [chargePosition]);
+  const surfaceCenter = new THREE.Vector3(0, 0, 0);
 
-  // Flux = Q / ε₀
-  const flux = useMemo(() => chargeValue / epsilon0, [chargeValue]);
+  const isEnclosed = charge.distanceTo(surfaceCenter) <= surfaceRadius;
+  const totalFlux = useMemo(() => (isEnclosed ? chargeValue / epsilon0 : 0), [isEnclosed, chargeValue]);
 
-  // Generate outward field lines from point charge
+  const numericalFlux = useMemo(() => {
+    const n = 20; // grid resolution
+    let fluxSum = 0;
+
+    for (let theta = 0; theta < Math.PI; theta += Math.PI / n) {
+      for (let phi = 0; phi < 2 * Math.PI; phi += Math.PI / n) {
+        const x = surfaceRadius * Math.sin(theta) * Math.cos(phi);
+        const y = surfaceRadius * Math.sin(theta) * Math.sin(phi);
+        const z = surfaceRadius * Math.cos(theta);
+
+        const dS = new THREE.Vector3(x, y, z).normalize().multiplyScalar(surfaceRadius ** 2 * Math.sin(theta) * Math.PI ** 2 / (n ** 2));
+
+        const rVec = new THREE.Vector3(x, y, z).sub(charge);
+        const rMag = rVec.length();
+        if (rMag === 0) continue;
+
+        const D = rVec.clone().normalize().multiplyScalar(chargeValue / (4 * Math.PI * epsilon0 * rMag ** 2));
+        fluxSum += D.dot(dS);
+      }
+    }
+    return fluxSum;
+  }, [charge, surfaceRadius, chargeValue]);
+
+  const area = useMemo(() => 4 * Math.PI * surfaceRadius ** 2, [surfaceRadius]);
+  const dS = {
+    xy: new THREE.Vector3(0, 0, 1),
+    yz: new THREE.Vector3(1, 0, 0),
+    zx: new THREE.Vector3(0, 1, 0),
+  };
+
+  const displacement = useMemo(() => {
+    const r = charge.clone().sub(surfaceCenter);
+    const rMag = r.length();
+    return r.divideScalar(rMag ** 3).multiplyScalar(chargeValue / (4 * Math.PI * epsilon0));
+  }, [charge, chargeValue]);
+
+  const psi = useMemo(() => {
+    return {
+      xy: displacement.dot(dS.xy) * area,
+      yz: displacement.dot(dS.yz) * area,
+      zx: displacement.dot(dS.zx) * area,
+    };
+  }, [displacement, dS, area]);
+
   const fieldVectors = useMemo(() => {
-    const vectors: { from: [number, number, number]; to: [number, number, number] }[] = [];
-  
+    const vectors = [];
     const directions = [
-      [1, 1, 1],
-      [-1, 1, 1],
-      [1, -1, 1],
-      [1, 1, -1],
-      [1, -1, -1],
-      [-1, 1, -1],
-      [-1, -1, 1],
-      [-1, -1, -1],
+      [1, 1, 1], [-1, 1, 1], [1, -1, 1], [1, 1, -1],
+      [1, -1, -1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]
     ];
-  
+
     for (const [dx, dy, dz] of directions) {
       const dir = new THREE.Vector3(dx, dy, dz).normalize();
-      const from = chargeValue > 0
-        ? charge.toArray()
-        : dir.clone().multiplyScalar(surfaceRadius).add(charge).toArray();
-      const to = chargeValue > 0
-        ? dir.clone().multiplyScalar(surfaceRadius).add(charge).toArray()
-        : charge.toArray();
+      const from = chargeValue > 0 ? charge.toArray() : dir.clone().multiplyScalar(surfaceRadius).add(charge).toArray();
+      const to = chargeValue > 0 ? dir.clone().multiplyScalar(surfaceRadius).add(charge).toArray() : charge.toArray();
       vectors.push({ from, to });
     }
-  
     return vectors;
   }, [charge, surfaceRadius, chargeValue]);
 
@@ -68,8 +100,14 @@ function GaussLawVisualizer() {
         </div>
       </div>
 
-      <div className="mt-4 text-lg bg-white border p-2 rounded shadow select-none">
-        <span className="font-bold">Electric Flux: </span>Φ = {flux.toExponential(3)} N.m²/C
+      <div className="mt-4 bg-white border p-4 rounded shadow select-none text-lg">
+        <div><b>Total Flux:</b> Φ = {totalFlux.toExponential(3)} N·m²/C</div>
+        <div><b>Numerical ∮D·dS:</b> ≈ {numericalFlux.toExponential(3)} N·m²/C</div>
+        <div className="mt-2 text-sm">
+          <div>ψ (XY plane) = {psi.xy.toExponential(3)} N·m²/C</div>
+          <div>ψ (YZ plane) = {psi.yz.toExponential(3)} N·m²/C</div>
+          <div>ψ (ZX plane) = {psi.zx.toExponential(3)} N·m²/C</div>
+        </div>
       </div>
 
       <div className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-6" style={{ height: 500, width: 800, zIndex: 0 }}>
@@ -80,19 +118,16 @@ function GaussLawVisualizer() {
 
           <Axes length={20} width={3} fontPosition={4.5} interval={1} xcolor="black" ycolor="black" zcolor="black" />
 
-          {/* Charge */}
           <mesh position={charge.toArray()}>
             <sphereGeometry args={[0.2, 32, 32]} />
             <meshStandardMaterial color={chargeValue > 0 ? 'red' : 'blue'} />
           </mesh>
 
-          {/* Flux surface */}
-          <mesh position={charge.toArray()}>
-            <sphereGeometry args={[surfaceRadius, 32, 32]} />
-            <meshStandardMaterial color={chargeValue > 0 ? 'red' : 'blue'} opacity={0.5} transparent />
+          <mesh position={[0, 0, 0]}>
+            <sphereGeometry args={[surfaceRadius, 64, 64]} />
+            <meshStandardMaterial color={chargeValue > 0 ? 'red' : 'blue'} opacity={0.3} transparent />
           </mesh>
 
-          {/* Field lines */}
           {fieldVectors.map((vec, i) => (
             <VectorArrow
               key={i}
@@ -101,17 +136,10 @@ function GaussLawVisualizer() {
               color={chargeValue > 0 ? 'red' : 'blue'}
             />
           ))}
-
-          {/* Flux label */}
-          <Html position={[charge.x, charge.y + surfaceRadius + 0.5, charge.z]} center distanceFactor={8}>
-            <div style={{ fontSize: '20px', background: 'white', padding: '6px 10px', borderRadius: '10px', whiteSpace: 'nowrap', userSelect: 'none' }}>
-              Φ = {flux.toExponential(3)} N.m²/C
-            </div>
-          </Html>
         </Canvas>
       </div>
     </div>
   );
 }
 
-export default GaussLawVisualizer;
+export default GaussApplicationVisualizer;
