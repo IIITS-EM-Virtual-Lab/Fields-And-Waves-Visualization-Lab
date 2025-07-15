@@ -1,46 +1,45 @@
 const Contact = () => {
   return (
-    <main className=" px-12">
-      <div
-        className="absolute top-0 left-0 h-[80vh] w-screen -z-10"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(187,223,255,1) 0%, rgba(187,223,255,1) 59%, rgba(255,255,255,1) 100%)",
-        }}
-      ></div>
-      <div className="flex items-center h-[40vh]">
-        <div className="w-1/2  text-4xl font-extrabold p-8">Contact Us</div>
-        <div className="w-1/2">
-          <img src="/assets/hero.png" />
-        </div>
+    <main className="pb-20">
+      {/* Banner Section */}
+      <div className="bg-[#5d86a0] py-28 text-center">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-white">Meet Our Team</h1>
       </div>
-      <div className="ml-10">
-        <div className="text-3xl font-extrabold uppercase mt-20 mb-4">
-          Instructor
+
+      {/* Instructor Section */}
+      <section className="max-w-6xl mx-auto px-6 mt-16">
+        <h2 className="text-xl font-extrabold text-[#004c99] uppercase mb-4">Instructor</h2>
+        <div className="bg-gray-50 rounded-xl shadow-md p-6 border border-gray-100 max-w-3xl">
+          <p className="font-bold">Dr. K. Divyabramham, Ph.D.</p>
+          <p>Assistant Professor</p>
+          <p>Department of Electronics and Communication Engineering</p>
+          <p>Indian Institute of Information Technology, Sri City</p>
+          <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
         </div>
-        <div>Dr. K. Divyabramham Ph. D.</div>
-        <div>Assistant Professor,</div>
-        <div>Dept. of Electronics and Communication Engineering,</div>
-        <div>Indian Institute of Information Technology, Sri City,</div>
-        <div>Chittoor, Andhra Pradesh 517646, INDIA.</div>
-        <div className="text-3xl font-extrabold uppercase mt-20 mb-4">
-          Contributors
+      </section>
+
+      {/* Contributors Section */}
+      <section className="max-w-6xl mx-auto px-6 mt-16">
+        <h2 className="text-xl font-extrabold text-[#004c99] uppercase mb-4">Contributors</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Contributor 1 */}
+          <div className="bg-gray-50 rounded-2xl shadow-md p-6 text-gray-800">
+            <p className="font-bold">Subrahmanyam Bitra</p>
+            <p>B.Tech</p>
+            <p>Dept. of Electronics and Communication Engineering</p>
+            <p>IIIT Sri City</p>
+            <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
+          </div>
+          {/* Contributor 2 */}
+          <div className="bg-gray-50 rounded-2xl shadow-md p-6 text-gray-800">
+            <p className="font-bold">Nitish Nasari</p>
+            <p>B.Tech</p>
+            <p>Dept. of Electronics and Communication Engineering</p>
+            <p>IIIT Sri City</p>
+            <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
+          </div>
         </div>
-        <div>
-          <div>Subrahmanyam Bitra</div>
-          <div>B.Tech</div>
-          <div>Dept. of Electronics and Communication Engineering,</div>
-          <div>Indian Institute of Information Technology, Sri City,</div>
-          <div>Chittoor, Andhra Pradesh 517646, INDIA.</div>
-        </div>
-        <div className="mt-10 mb-40">
-          <div>Nitish Nasari</div>
-          <div>B.Tech</div>
-          <div>Dept. of Electronics and Communication Engineering,</div>
-          <div>Indian Institute of Information Technology, Sri City,</div>
-          <div>Chittoor, Andhra Pradesh 517646, INDIA.</div>
-        </div>
-      </div>
+      </section>
     </main>
   );
 };
