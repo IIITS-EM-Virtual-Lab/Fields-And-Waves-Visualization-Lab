@@ -52,11 +52,35 @@ const sendOTPEmail = async (email, otp) => {
   await transporter.sendMail(mailOptions);
 };
 
+const sendResetPasswordEmail = async (email, resetLink) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD
+    }
+  });
+
+  const mailOptions = {
+    from: `"VE Lab" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: 'Reset your VE Lab password',
+    html: `
+      <p>You requested a password reset. Click the link below to set a new password:</p>
+      <a href="${resetLink}">${resetLink}</a>
+      <p>This link is valid for 24 hours. If you didn’t request this, you can ignore this email.</p>
+    `
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
 // 6. Export everything
 module.exports = {
   generateOTP,
   sendOTPEmail,
   storeOTP,
   verifyOTP,
-  removeOTP
+  removeOTP,
+  sendResetPasswordEmail
 };

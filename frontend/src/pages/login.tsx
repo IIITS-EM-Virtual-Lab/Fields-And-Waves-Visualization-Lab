@@ -128,7 +128,6 @@ const Login = () => {
   };
 
   const handleForgotPassword = () => {
-    // Navigate to forgot password page or show modal
     navigate('/forgot-password');
   };
 
@@ -141,95 +140,114 @@ const Login = () => {
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        <div className="auth-header">
-          <h2 className="auth-title">Welcome Back</h2>
-          <p className="auth-subtitle">Sign in to your account</p>
+        {/* Left side with illustration */}
+        <div className="auth-left">
+          <div className="auth-illustration">
+            <img 
+              src="/college project-rafiki.png" 
+              alt="College Learning Illustration" 
+            />
+          </div>
         </div>
 
-        <form onSubmit={(e) => e.preventDefault()}>
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              Email Address <span className="required">*</span>
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              ref={emailRef}
-              className={`auth-input ${errors.email ? 'error' : ''}`}
-              onChange={() => setErrors({ ...errors, email: '' })}
-            />
-            {errors.email && <span className="error-message">{errors.email}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
-              Password <span className="required">*</span>
-            </label>
-            <div className="password-input-wrapper">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                ref={passwordRef}
-                className={`auth-input ${errors.password ? 'error' : ''}`}
-                onChange={() => setErrors({ ...errors, password: '' })}
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            {errors.password && <span className="error-message">{errors.password}</span>}
-          </div>
-
-          <div className="auth-actions">
-            <button
-              className={`auth-btn primary ${(!isFormValid() || isLoading) ? 'disabled' : ''}`}
-              onClick={handleLogin}
-              disabled={!isFormValid() || resetButton || isLoading}
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </button>
-
-            <div className="divider">
-              <span>or</span>
+        {/* Right side with form */}
+        <div className="auth-right">
+          <div className="auth-form-container">
+            <div className="auth-header">
+              <h2 className="auth-title">Welcome Back</h2>
+              <p className="auth-subtitle">Sign in to your account</p>
             </div>
 
-            <button
-              className="auth-btn google"
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-            >
-              <FaGoogle className="google-icon" />
-              Continue with Google
-            </button>
-          </div>
+            {/* Login form */}
+            <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">
+                  Email Address <span className="required">*</span>
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  ref={emailRef}
+                  className={`auth-input ${errors.email ? 'error' : ''}`}
+                  onChange={() => setErrors({ ...errors, email: '' })}
+                />
+                {errors.email && <span className="error-message">{errors.email}</span>}
+              </div>
 
-          <div className="auth-links">
-            <button
-              type="button"
-              className="link-btn"
-              onClick={handleForgotPassword}
-            >
-              Forgot Password?
-            </button>
-            <span className="auth-link-text">
-              Need an account?{' '}
-              <button
-                type="button"
-                className="link-btn primary"
-                onClick={() => navigate('/signup')}
-              >
-                Create Account
-              </button>
-            </span>
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">
+                  Password <span className="required">*</span>
+                </label>
+                <div className="password-input-wrapper">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    ref={passwordRef}
+                    className={`auth-input ${errors.password ? 'error' : ''}`}
+                    onChange={() => setErrors({ ...errors, password: '' })}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {errors.password && <span className="error-message">{errors.password}</span>}
+              </div>
+
+              <div className="auth-actions">
+                <button
+                  className={`auth-btn primary ${(!isFormValid() || isLoading) ? 'disabled' : ''}`}
+                  onClick={handleLogin}
+                  disabled={!isFormValid() || resetButton || isLoading}
+                >
+                  {isLoading ? 'Signing in...' : 'Sign In'}
+                </button>
+              </div>
+
+              <div className="divider">
+                <span>or</span>
+              </div>
+
+              {/* OAuth buttons */}
+              <div className="oauth-buttons">
+                <button
+                  className="oauth-btn google"
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={isLoading}
+                >
+                  <FaGoogle className="google-icon" />
+                  Continue with Google
+                </button>
+              </div>
+
+              <div className="auth-links">
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={handleForgotPassword}
+                >
+                  Forgot Password?
+                </button>
+                <span className="auth-link-text">
+                  Need an account?{' '}
+                  <button
+                    type="button"
+                    className="link-btn primary"
+                    onClick={() => navigate('/signup')}
+                  >
+                    Create Account
+                  </button>
+                </span>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

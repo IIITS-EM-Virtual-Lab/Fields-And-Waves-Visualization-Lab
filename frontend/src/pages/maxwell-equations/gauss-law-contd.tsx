@@ -3,7 +3,7 @@ import { BlockMath } from "react-katex";
 
 const GaussLawContdPage = () => {
   return (
-    <div className="px-6 md:px-16 lg:px-32 py-10 bg-gray-50 text-gray-800">
+    <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
 		{/* Title Section */}
 		<div className="text-2xl font-extrabold uppercase text-center py-6 text-gray-900">
 			Applications of Gauss Law

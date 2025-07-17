@@ -157,170 +157,202 @@ const Signup = () => {
     <div className="auth-wrapper">
       {!showOTP ? (
         <div className="auth-card">
-          <div className="auth-header">
-            <h2 className="auth-title">Create Account</h2>
-            <p className="auth-subtitle">Join us to get started</p>
+          {/* Left side with illustration */}
+          <div className="auth-left">
+            <div className="auth-illustration">
+              <img 
+                src="/college project-rafiki.png" 
+                alt="College Learning Illustration" 
+              />
+            </div>
           </div>
 
-          <form onSubmit={(e) => e.preventDefault()}>
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">
-                Full Name <span className="required">*</span>
-              </label>
-              <input
-                id="name"
-                type="text"
-                placeholder="Enter your full name"
-                ref={nameRef}
-                className={`auth-input ${errors.name ? 'error' : ''}`}
-                onChange={() => setErrors({ ...errors, name: '' })}
-              />
-              {errors.name && <span className="error-message">{errors.name}</span>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">
-                Email Address <span className="required">*</span>
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                ref={emailRef}
-                className={`auth-input ${errors.email ? 'error' : ''}`}
-                onChange={() => setErrors({ ...errors, email: '' })}
-              />
-              {errors.email && <span className="error-message">{errors.email}</span>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="password" className="form-label">
-                Password <span className="required">*</span>
-              </label>
-              <div className="password-input-wrapper">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Create a password"
-                  ref={passwordRef}
-                  className={`auth-input ${errors.password ? 'error' : ''}`}
-                  onChange={() => setErrors({ ...errors, password: '' })}
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-              {errors.password && <span className="error-message">{errors.password}</span>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="confirmPassword" className="form-label">
-                Confirm Password <span className="required">*</span>
-              </label>
-              <div className="password-input-wrapper">
-                <input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm your password"
-                  ref={confirmRef}
-                  className={`auth-input ${errors.confirmPassword ? 'error' : ''}`}
-                  onChange={() => setErrors({ ...errors, confirmPassword: '' })}
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-              {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-            </div>
-
-            <div className="auth-actions">
-              <button
-                className={`auth-btn primary ${(!isFormValid() || isLoading) ? 'disabled' : ''}`}
-                onClick={handleSignup}
-                disabled={!isFormValid() || isLoading}
-              >
-                {isLoading ? 'Creating Account...' : 'Create Account'}
-              </button>
-
-              <div className="divider">
-                <span>or</span>
+          {/* Right side with form */}
+          <div className="auth-right">
+            <div className="auth-form-container">
+              <div className="auth-header">
+                <h2 className="auth-title">Create Account</h2>
+                <p className="auth-subtitle">Join us to get started</p>
               </div>
 
-              <button
-                className="auth-btn google"
-                type="button"
-                onClick={handleGoogleSignup}
-                disabled={isLoading}
-              >
-                <FaGoogle className="google-icon" />
-                Continue with Google
-              </button>
-            </div>
+              <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
+                <div className="form-group">
+                  <label htmlFor="name" className="form-label">
+                    Full Name <span className="required">*</span>
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    ref={nameRef}
+                    className={`auth-input ${errors.name ? 'error' : ''}`}
+                    onChange={() => setErrors({ ...errors, name: '' })}
+                  />
+                  {errors.name && <span className="error-message">{errors.name}</span>}
+                </div>
 
-            <div className="auth-links">
-              <span className="auth-link-text">
-                Already have an account?{' '}
-                <button
-                  type="button"
-                  className="link-btn primary"
-                  onClick={() => navigate('/login')}
-                >
-                  Sign In
-                </button>
-              </span>
+                <div className="form-group">
+                  <label htmlFor="email" className="form-label">
+                    Email Address <span className="required">*</span>
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    ref={emailRef}
+                    className={`auth-input ${errors.email ? 'error' : ''}`}
+                    onChange={() => setErrors({ ...errors, email: '' })}
+                  />
+                  {errors.email && <span className="error-message">{errors.email}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="password" className="form-label">
+                    Password <span className="required">*</span>
+                  </label>
+                  <div className="password-input-wrapper">
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Create a password"
+                      ref={passwordRef}
+                      className={`auth-input ${errors.password ? 'error' : ''}`}
+                      onChange={() => setErrors({ ...errors, password: '' })}
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                  {errors.password && <span className="error-message">{errors.password}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="confirmPassword" className="form-label">
+                    Confirm Password <span className="required">*</span>
+                  </label>
+                  <div className="password-input-wrapper">
+                    <input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="Confirm your password"
+                      ref={confirmRef}
+                      className={`auth-input ${errors.confirmPassword ? 'error' : ''}`}
+                      onChange={() => setErrors({ ...errors, confirmPassword: '' })}
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                </div>
+
+                <div className="auth-actions">
+                  <button
+                    className={`auth-btn primary ${(!isFormValid() || isLoading) ? 'disabled' : ''}`}
+                    onClick={handleSignup}
+                    disabled={!isFormValid() || isLoading}
+                  >
+                    {isLoading ? 'Creating Account...' : 'Create Account'}
+                  </button>
+                </div>
+
+                <div className="divider">
+                  <span>or</span>
+                </div>
+
+                <div className="oauth-buttons">
+                  <button
+                    className="oauth-btn google"
+                    type="button"
+                    onClick={handleGoogleSignup}
+                    disabled={isLoading}
+                  >
+                    <FaGoogle className="google-icon" />
+                    Continue with Google
+                  </button>
+                </div>
+
+                <div className="auth-links">
+                  <span className="auth-link-text">
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      className="link-btn primary"
+                      onClick={() => navigate('/login')}
+                    >
+                      Sign In
+                    </button>
+                  </span>
+                </div>
+              </form>
             </div>
-          </form>
+          </div>
         </div>
       ) : (
         <div className="auth-card">
-          <div className="auth-header">
-            <h2 className="auth-title">Verify Email</h2>
-            <p className="auth-subtitle">Enter the 6-digit code sent to {signupData.email}</p>
+          {/* Left side with illustration */}
+          <div className="auth-left">
+            <div className="auth-illustration">
+              <img 
+                src="/college project-rafiki.png" 
+                alt="College Learning Illustration" 
+              />
+            </div>
           </div>
 
-          <form onSubmit={(e) => e.preventDefault()}>
-            <div className="otp-container">
-              <div className="otp-inputs">
-                {otp.map((val, i) => (
-                  <input
-                    key={i}
-                    className="otp-input"
-                    type="text"
-                    maxLength={1}
-                    value={val}
-                    onChange={(e) => handleOTPChange(i, e.target.value)}
-                    onKeyDown={(e) => handleOTPKeyDown(i, e)}
-                    ref={(el) => (otpRefs.current[i] = el)}
-                  />
-                ))}
+          {/* Right side with OTP form */}
+          <div className="auth-right">
+            <div className="auth-form-container">
+              <div className="auth-header">
+                <h2 className="auth-title">Verify Email</h2>
+                <p className="auth-subtitle">Enter the 6-digit code sent to {signupData.email}</p>
               </div>
-            </div>
 
-            <div className="otp-buttons">
-              <button
-                className="auth-btn secondary"
-                onClick={() => setShowOTP(false)}
-                disabled={isLoading}
-              >
-                Back
-              </button>
-              <button
-                className={`auth-btn primary ${(!isOTPComplete() || isLoading) ? 'disabled' : ''}`}
-                onClick={handleVerify}
-                disabled={!isOTPComplete() || isLoading}
-              >
-                {isLoading ? 'Verifying...' : 'Verify'}
-              </button>
+              <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
+                <div className="otp-container">
+                  <div className="otp-inputs">
+                    {otp.map((val, i) => (
+                      <input
+                        key={i}
+                        className="otp-input"
+                        type="text"
+                        maxLength={1}
+                        value={val}
+                        onChange={(e) => handleOTPChange(i, e.target.value)}
+                        onKeyDown={(e) => handleOTPKeyDown(i, e)}
+                        ref={(el) => (otpRefs.current[i] = el)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="otp-buttons">
+                  <button
+                    className="auth-btn secondary"
+                    onClick={() => setShowOTP(false)}
+                    disabled={isLoading}
+                  >
+                    Back
+                  </button>
+                  <button
+                    className={`auth-btn primary ${(!isOTPComplete() || isLoading) ? 'disabled' : ''}`}
+                    onClick={handleVerify}
+                    disabled={!isOTPComplete() || isLoading}
+                  >
+                    {isLoading ? 'Verifying...' : 'Verify'}
+                  </button>
+                </div>
+              </form>
             </div>
-          </form>
+          </div>
         </div>
       )}
     </div>

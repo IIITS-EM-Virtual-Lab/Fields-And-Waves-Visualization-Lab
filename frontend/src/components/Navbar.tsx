@@ -21,11 +21,11 @@ const exploreModules = [
   {
     title: "Vector Calculus",
     items: [
-      { name: "Intro", path: "/vector-calculus-intro" },
       { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates" },
       { name: "Spherical Coordinates", path: "/spherical-coordinates" },
-      { name: "Del Operator", path: "/del-operator" },
-      { name: "Cartesian, Cylindrical and Spherical", path: "/cartesian-cylindrical-spherical"}
+      { name: "Cartesian, Cylindrical and Spherical", path: "/cartesian-cylindrical-spherical"},
+      { name: "Intro", path: "/vector-calculus-intro" },
+      { name: "Del Operator", path: "/del-operator" }
     ],
   },
   {
@@ -33,16 +33,16 @@ const exploreModules = [
     items: [
       { name: "Intro", path: "/electrostatics-intro" },
       { name: "Electric Field & Flux", path: "/electric-field-and-flux-density" },
-      { name: "Field Operations", path: "/field-operations" },
+      // { name: "Field Operations", path: "/field-operations" },
       { name: "Electric Potential", path: "/electric-potential" },
-      { name: "Gauss Law", path: "/gauss-law" },
+      // { name: "Gauss Law", path: "/gauss-law" },
       { name: "Electric Dipole", path: "/electric-dipole" },
     ],
   },
   {
     title: "Maxwell Equations",
     items: [
-      { name: "Gauss Law Contd", path: "/gauss-law-contd" },
+      { name: "Gauss Law", path: "/gauss-law-contd" },
       { name: "Gauss Law Magnetism", path: "/gauss-law-magnetism" },
       { name: "Faraday Law", path: "/faraday-law" },
       { name: "Ampere Law", path: "/ampere-law" },
@@ -182,7 +182,15 @@ const Navbar = () => {
               <div className="absolute top-[48px] left-0 w-[810px] bg-white border border-gray-200 shadow-xl p-6 flex gap-12 text-sm z-50">
                 {exploreModules.map((mod, i) => (
                   <div key={i}>
-                    <h4 className="text-[#1a1a1a] font-semibold mb-2 text-[16px] leading-[1.2]">{mod.title}</h4>
+                    <h4
+                      className="text-[#1a1a1a] font-semibold mb-2 text-[16px] leading-[1.2] cursor-pointer hover:underline"
+                      onClick={() => {
+                        navigate(`/module/${mod.title.toLowerCase().replace(/\s+/g, "-")}`);
+                        setShowExplore(false);
+                      }}
+                    >
+                      {mod.title}
+                    </h4>
                     <ul className="space-y-1">
                       {mod.items.map((sub, j) => (
                         <li
@@ -260,8 +268,8 @@ const Navbar = () => {
                 }
               }}
             >
-              <img src="/logo.png" alt="Logo" className="h-6 w-6" />
-              <h1 className="text-[#a00032] font-lato font-bold text-[20px]">
+              <img src="/fwvlab.png" alt="Logo" className="h-9 w-9" />
+              <h1 className="text-[#a00032] font-lato font-bold text-[18px]">
                 Fields and Waves Visualization Lab
               </h1>
             </div>

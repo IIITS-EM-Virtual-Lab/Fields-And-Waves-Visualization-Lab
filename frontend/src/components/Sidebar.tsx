@@ -17,11 +17,12 @@ const sidebarData = [
     topic: "Vector Calculus",
     icon: "/assets/vector-calculus.png",
     subtopics: [
-      { name: "Intro", path: "/vector-calculus-intro" },
+      
       { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates" },
       { name: "Spherical Coordinates", path: "/spherical-coordinates" },
-      { name: "Del Operator", path: "/del-operator" },
       { name: "Cartesian, Cylindrical and Spherical", path: "/cartesian-cylindrical-spherical" },
+      { name: "Intro", path: "/vector-calculus-intro" },
+      { name: "Del Operator", path: "/del-operator" }
     ],
   },
   {
@@ -30,9 +31,9 @@ const sidebarData = [
     subtopics: [
       { name: "Intro", path: "/electrostatics-intro" },
       { name: "Electric Field & Flux", path: "/electric-field-and-flux-density" },
-      { name: "Field Operations", path: "/field-operations" },
+      // { name: "Field Operations", path: "/field-operations" },
       { name: "Electric Potential", path: "/electric-potential" },
-      { name: "Gauss Law", path: "/gauss-law" },
+      // { name: "Gauss Law", path: "/gauss-law" },
       { name: "Electric Dipole", path: "/electric-dipole" },
     ],
   },
@@ -40,7 +41,7 @@ const sidebarData = [
     topic: "Maxwell Equations",
     icon: "/assets/maxwell.png",
     subtopics: [
-      { name: "Gauss Law Contd", path: "/gauss-law-contd" },
+      { name: "Gauss Law", path: "/gauss-law-contd" },
       { name: "Gauss Law Magnetism", path: "/gauss-law-magnetism" },
       { name: "Faraday Law", path: "/faraday-law" },
       { name: "Ampere Law", path: "/ampere-law" },
