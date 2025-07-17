@@ -62,7 +62,7 @@ function AmpereLawVisualizer() {
                 </div>
             </div>
             <div className="mt-4 relative overflow-hidden rounded-lg border-2 border-blue-600" style={{ height: 500, width: 800, zIndex: 0 }}>
-                <Canvas camera={{ position: [5, 5, 5], fov: 50 }}>
+                <Canvas camera={{ position: [5, 6, 5], fov: 50 }}>
                     <ambientLight intensity={0.6} />
                     <pointLight position={[10, 10, 10]} />
                     <OrbitControls />

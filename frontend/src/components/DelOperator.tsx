@@ -71,7 +71,7 @@ function DelOperator() {
         </div>
 
         <div className="relative border-2 border-blue-600 rounded-lg overflow-hidden" style={{ height: 500, width: 800, zIndex: 0 }}>
-            <Canvas>
+            <Canvas camera={{position: [1, 2, 5]}}>
                 <ambientLight intensity={0.5} />
                 <pointLight position={[10, 10, 10]} />
                 <OrbitControls />

@@ -16,7 +16,7 @@ function VectorVisualizer() {
         className="relative overflow-hidden rounded-lg border-2 border-blue-600" 
         style={{ height: 500, width: 800, zIndex: 0 }}
       >
-          <Canvas style={{ height: '100%', width: '100%' }}>
+          <Canvas style={{ height: '100%', width: '100%' }} camera={{ position: [3, 1, 5] }}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
           <OrbitControls />

@@ -85,7 +85,7 @@ function CoulombVisualizer() {
 
     return (
         <div className="relative overflow-hidden w-full h-screen relative bg-white border-2 border-blue-600 z-0">
-            <Canvas onCreated={({ camera }) => ((window as any).camera = camera)}>
+            <Canvas onCreated={({ camera }) => ((window as any).camera = camera)} camera={{position: [7, 7, 7]}}>
                 <ambientLight intensity={0.5} />
                 <pointLight position={[10, 10, 10]} />
                 <Controls enabled={!isDragging} />
@@ -103,7 +103,7 @@ function CoulombVisualizer() {
                     />
                 ))}
 
-                <FieldVisualizer charges={charges} visible={showField} arrowColor="blue" />
+                <FieldVisualizer charges={charges} visible={showField} arrowColor="gray" />
             </Canvas>
 
             <div className="absolute top-4 left-4 bg-white p-2 rounded shadow-md">

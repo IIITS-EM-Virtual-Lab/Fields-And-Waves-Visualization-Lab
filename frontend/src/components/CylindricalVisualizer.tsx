@@ -42,7 +42,7 @@ function CylindricalVisualizer() {
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div className="relative overflow-hidden rounded-lg border-2 border-blue-600" style={{ height: 500, width: 800, zIndex: 0 }}>
-        <Canvas style={{ height: '100%', width: '100%' }}>
+        <Canvas style={{ height: '100%', width: '100%' }} camera={{position: [6, 2, 0]}}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
           <OrbitControls />
