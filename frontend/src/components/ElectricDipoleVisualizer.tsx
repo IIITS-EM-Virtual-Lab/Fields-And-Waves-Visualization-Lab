@@ -192,7 +192,7 @@ function ElectricDipoleVisualizer() {
             </div>
 
             <div className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-6" style={{ height: 500, width: 800, zIndex: 0 }}>
-                <Canvas style={{ height: '100%', width: '100%' }}>
+                <Canvas style={{ height: '100%', width: '100%' }} camera={{position: [2, 4, 5]}}>
                     <ambientLight intensity={0.5} />
                     <pointLight position={[10, 10, 10]} />
                     <OrbitControls />

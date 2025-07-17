@@ -14,7 +14,7 @@ function TimeUpdater({ setTime }: { setTime: React.Dispatch<React.SetStateAction
 
 function FaradayVisualizer() {
     const [bMagnitude, setBMagnitude] = useState(1);
-    const [theta, setTheta] = useState(90);
+    const [theta, setTheta] = useState(0);
     const [animateField, setAnimateField] = useState(false);
     const [animateRing, setAnimateRing] = useState(false);
     const [time, setTime] = useState(0);
@@ -149,7 +149,7 @@ function FaradayVisualizer() {
             </div>
 
             <div className="mt-4 relative overflow-hidden rounded-lg border-2 border-blue-600" style={{ height: 500, width: 800, zIndex: 0 }}>
-                <Canvas>
+                <Canvas camera={{position: [5, 2, 5]}}>
                     <ambientLight intensity={0.5} />
                     <pointLight position={[10, 10, 10]} />
                     <OrbitControls />
@@ -161,7 +161,7 @@ function FaradayVisualizer() {
 
                     {(animateField || animateRing) && <TimeUpdater setTime={setTime} />}
 
-                    <mesh quaternion={ringQuaternion}>
+                    <mesh quaternion={ringQuaternion} rotation={[0, 0, Math.PI/2]}>
                         <torusGeometry args={[radius, 0.02, 16, 100]} />
                         <meshStandardMaterial color="orange" />
                     </mesh>
