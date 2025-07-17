@@ -168,19 +168,23 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
       userAnswers: userAnswers // Add user answers to submission
     });
     
-    const response = await axios.post('http://localhost:5000/api/quizresult', {
-      userId: currentUser._id,
-      quizId: quiz._id,
-      score: finalScore,
-      correctAnswers: finalCorrectCount,
-      totalQuestions: quiz.questions.length,
-      userAnswers: userAnswers // Send user answers to backend
-    }, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await axios.post('http://localhost:5000/api/quizresult/save', {
+  userId: currentUser._id,
+  quizId: quiz._id,
+  score: finalScore,
+  correctAnswers: finalCorrectCount,
+  totalQuestions: quiz.questions.length,
+  accuracy: Math.round((finalCorrectCount / quiz.questions.length) * 100),
+  module: quiz.module,
+  chapter: quiz.chapter,
+  userAnswers: userAnswers
+}, {
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+});
+
 
     setSubmitted(true);
     console.log('✅ Quiz result submitted successfully:', response.data);
@@ -195,6 +199,7 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
 
     if (nextIndex >= quiz.questions.length) {
       // Quiz completed - submit results
+      console.log("submit");
       await submitQuizResult(score, correctCount);
       setShowResults(true);
       return;
