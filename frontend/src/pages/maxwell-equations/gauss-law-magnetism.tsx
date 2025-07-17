@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import GaussLawMagnetismVisualizer from "@/components/GaussLawMagnetismVisualizer";
 import { BlockMath } from "react-katex";
 
 const GaussLawMagnestismPage = () => {
@@ -7,6 +7,15 @@ const GaussLawMagnestismPage = () => {
       {/* Title Section */}
       <div className="text-3xl font-extrabold uppercase text-center py-6 text-gray-900">
         Gauss's Law for Magnetism
+      </div>
+
+      <div className="pb-20">
+        <div className="text-xl font-black uppercase text-center py-10">
+          INTERACTIVE DEMO
+        </div>
+        <div className="flex justify-center">
+          <GaussLawMagnetismVisualizer />
+        </div>
       </div>
 
       {/* Content Section */}
