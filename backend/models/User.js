@@ -34,7 +34,9 @@ const userSchema = new mongoose.Schema({
   isAdmin: {
     type: Boolean,
     default: false
-  }
+  },
+  resetToken: String,
+  resetTokenExpiry: Date,
 });
 
 // Hash password before saving

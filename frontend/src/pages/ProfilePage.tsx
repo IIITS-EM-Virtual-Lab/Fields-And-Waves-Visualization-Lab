@@ -104,7 +104,7 @@ const ProfilePage = () => {
       { id: 'quizzes', label: 'Quizzes', icon: <FaQuestionCircle /> }
     ] : []),
     { id: 'settings', label: 'Settings', icon: <FaCog /> },
-    { id: 'logout', label: 'Logout', icon: <FaSignOutAlt /> },
+    { id: 'sign out', label: 'Sign Out', icon: <FaSignOutAlt /> },
   ];
 
   useEffect(() => {
@@ -665,12 +665,14 @@ const questionData = {
             <p>Settings content will be added here.</p>
           </div>
         );
-      case 'logout':
+      case 'sign out':
         return (
           <div className="logout-content">
-            <h2>Logout</h2>
-            <p>Are you sure you want to logout?</p>
-            <button className="logout-button">Logout</button>
+            <h2>Sign Out</h2>
+            <p>Are you sure you want to sign out?</p>
+            <button className="logout-button">
+              Sign Out
+            </button>
           </div>
         );
       default:

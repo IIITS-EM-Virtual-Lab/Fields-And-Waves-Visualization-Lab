@@ -10,6 +10,7 @@ const { auth } = require('./middleware/auth');
 const userRoutes = require('./routes/userRoutes');
 const quizRoutes = require('./routes/quiz');
 const quizResultRoutes = require('./routes/quizResultRoutes');
+const passwordResetRoutes = require('./routes/passwordResetRoutes');
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/api/password-reset', passwordResetRoutes);
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI)

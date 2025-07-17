@@ -33,7 +33,7 @@ function FaradayVisualizer() {
         return new THREE.Vector3(0, Math.sin(angleRad), Math.cos(angleRad));
     }, [angleRad]);
 
-    const flux = useMemo(() => B.clone().multiplyScalar(area).dot(areaVector), [B, area, areaVector]);
+    const flux = useMemo(() => B.clone().multiplyScalar(Math.cos(theta)).multiplyScalar(area).dot(areaVector), [B, area, areaVector, theta]);
 
     const emf = useMemo(() => {
         if (animateField) return -Math.cos(time);

@@ -30,15 +30,19 @@ import WaveAnalysis from './pages/wave-propagation/wave_analysis';
 import PowVector from './pages/wave-propagation/pow_vector';
 import WaveReflection from './pages/wave-propagation/wave_reflection';
 import Footer from "./components/Footer";
+import Settings from "./pages/settings";
 
 import ContentLayout from "@/pages/ContentLayout";
 import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/lib/scrollToTop";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
+import ForgotPassword from "./pages/forgotpassword";
 import ProfilePage from "./pages/ProfilePage";
 import ChapterQuiz from './pages/ChapterQuiz';
 import UserDashboard from "./pages/UserDashboard";
+import ModulePage from "./pages/ModulePage";
+import ResetPassword from "./pages/reset-password";
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -51,6 +55,9 @@ const AppRoutes = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/" element={<Home />} />
           <Route path="/profilepage" element={<ProfilePage />} />
           <Route path="/quiz/:moduleName/:chapterName" element={<ChapterQuiz />} />
@@ -87,15 +94,16 @@ const AppRoutes = () => {
             <Route path="/plane-wave-analysis" element={<WaveAnalysis />} />
             <Route path="/wave-power-energy" element={<PowVector />} />
             <Route path="/wave-reflection" element={<WaveReflection />} /> 
-          </Route>
 
+            <Route path="/module/:moduleSlug" element={<ModulePage />} />
+          </Route>
           <Route path="/content/:id" element={<Content />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/quizzes/module/:moduleName/common" element={<ChapterQuiz />} />
           <Route path="/userdashboard" element={<UserDashboard />} />
          </Routes>
       </div>
-      <Footer /> {/* Add this here to ensure every page has a footer */}
+      <Footer /> 
     </div>
   );
 };
