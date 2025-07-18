@@ -54,14 +54,6 @@ const ElectricFluxPage = () => {
           <div>For a volume charge distributions, eqs are</div>
         </div>
       </div>
-      <div className="flex justify-center py-10">
-        <iframe
-          scrolling="no"
-          src="https://www.geogebra.org/material/iframe/id/2270909/width/1180/height/627/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-          width="1180px"
-          height="627px"
-        ></iframe>
-      </div>
       {/* 
       <div>
         1. The Differential elements in spherical coordinates can be found as:

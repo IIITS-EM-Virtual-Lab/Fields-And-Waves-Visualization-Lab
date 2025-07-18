@@ -12,11 +12,6 @@ const SphericalCoordinatesPage = () => {
           INTERACTIVE DEMO
         </div>
         <div className="flex justify-center">
-          {/* <iframe
-            src="https://www.geogebra.org/classic/bats5scf?embed"
-            width="1000"
-            height="1000"
-          ></iframe> */}
           <SphericalVisualizer />
         </div>
       </div>

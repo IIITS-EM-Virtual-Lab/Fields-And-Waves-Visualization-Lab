@@ -20,10 +20,15 @@ const VectorAdditionPage = () => {
         <div className="text-xl font-black uppercase text-center py-6">
           INTERACTIVE DEMO
         </div>
-        <div className="flex justify-center overflow-x-auto">
-          <div className="min-w-[320px] max-w-[90vw] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px]">
-            <VectorAddition />
-          </div>
+        <div className="flex justify-center">
+          {/* <iframe
+            scrolling="no"
+            src="https://www.geogebra.org/material/iframe/id/1815911/width/984/height/593/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
+            width="984px"
+            height="593px"
+            // style="border: 0px"
+          ></iframe> */}
+          <VectorAddition />
         </div>
       </div>
 
@@ -347,10 +352,15 @@ const VectorAdditionPage = () => {
         <div className="text-xl font-black uppercase text-center py-6">
           INTERACTIVE DEMO
         </div>
-        <div className="flex justify-center overflow-x-auto">
-          <div className="min-w-[320px] max-w-[90vw] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px]">
-            <VectorSubtraction />
-          </div>
+        <div className="flex justify-center">
+          {/* <iframe
+            scrolling="no"
+            src="https://www.geogebra.org/material/iframe/id/1815911/width/984/height/593/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
+            width="984px"
+            height="593px"
+            // style="border: 0px"
+          ></iframe> */}
+          <VectorSubtraction />
         </div>
       </div>
       

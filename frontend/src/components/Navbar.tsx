@@ -12,7 +12,7 @@ const exploreModules = [
   {
     title: "Vector Algebra",
     items: [
-      { name: "Scalars", path: "/scalars-and-vectors" },
+      { name: "Scalars and Vectors", path: "/scalars-and-vectors" },
       { name: "Addition", path: "/vector-addition" },
       { name: "Multiplication", path: "/vector-multiplication" },
       { name: "Triple Product", path: "/triple-product" },
@@ -24,7 +24,7 @@ const exploreModules = [
       { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates" },
       { name: "Spherical Coordinates", path: "/spherical-coordinates" },
       { name: "Cartesian, Cylindrical and Spherical", path: "/cartesian-cylindrical-spherical"},
-      { name: "Intro", path: "/vector-calculus-intro" },
+      { name: "Differential Length, Area and Volume", path: "/vector-calculus-intro" },
       { name: "Del Operator", path: "/del-operator" }
     ],
   },

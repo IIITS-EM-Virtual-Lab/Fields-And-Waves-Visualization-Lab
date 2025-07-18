@@ -5,7 +5,7 @@ import { selectIsAuthenticated } from "../store/slices/authSlice"; // make sure 
 
 const modules: Record<string, { name: string; path: string; topics: string[] }[]> = {
  "vector-algebra": [
-    { name: "Scalars", path: "/scalars-and-vectors", topics: ["Definition", "Examples"] },
+    { name: "Scalars and Vectors", path: "/scalars-and-vectors", topics: ["Definition", "Examples"] },
     { name: "Addition", path: "/vector-addition", topics: ["Vector Sum", "Graphical Representation"] },
     { name: "Multiplication", path: "/vector-multiplication", topics: ["Dot Product", "Cross Product"] },
     { name: "Triple Product", path: "/triple-product", topics: ["Scalar Triple", "Vector Triple"] },
@@ -14,15 +14,13 @@ const modules: Record<string, { name: string; path: string; topics: string[] }[]
     { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates", topics: ["ρ, φ, z system"] },
     { name: "Spherical Coordinates", path: "/spherical-coordinates", topics: ["r, θ, φ system"] },
     { name: "Cartesian, Cylindrical and Spherical", path: "/cartesian-cylindrical-spherical", topics: ["Coordinate Comparison"] },
-    { name: "Intro", path: "/vector-calculus-intro", topics: ["Gradient", "Divergence", "Curl"] },
-    { name: "Del Operator", path: "/del-operator", topics: ["∇ symbol usage"] },
   ],
   "electrostatics": [
     { name: "Intro", path: "/electrostatics-intro", topics: ["Charge Basics"] },
     { name: "Electric Field & Flux", path: "/electric-field-and-flux-density", topics: ["Gauss Law Idea"] },
-    // { name: "Field Operations", path: "/field-operations", topics: ["Gradient, Divergence"] },
+    { name: "Field Operations", path: "/field-operations", topics: ["Gradient, Divergence"] },
     { name: "Electric Potential", path: "/electric-potential", topics: ["Potential Energy"] },
-    // { name: "Gauss Law", path: "/gauss-law", topics: ["Integral & Differential Forms"] },
+    { name: "Gauss Law", path: "/gauss-law", topics: ["Integral & Differential Forms"] },
     { name: "Electric Dipole", path: "/electric-dipole", topics: ["Dipole Moment"] },
   ],
   "maxwell-equations": [

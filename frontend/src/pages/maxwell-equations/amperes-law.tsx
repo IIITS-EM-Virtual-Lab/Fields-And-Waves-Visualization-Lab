@@ -262,31 +262,6 @@ H = \frac{I}{2\pi r} \hat{\phi}
             <BlockMath math="H = 0" />
           </div>
         </div>
-      </div>{" "}
-      {/* Navigation Button */}
-      <div className="p-10 flex justify-center items-center">
-        <iframe
-          src="https://www.geogebra.org/material/iframe/id/NC7aXeRS//width/873/height/500/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-          width="800"
-          height="600"
-          allowFullScreen
-          style={{
-            border: "1px solid #e4e4e4",
-            borderRadius: "4px",
-          }}
-        ></iframe>{" "}
-      </div>
-      <div className="p-10 flex justify-center items-center">
-        <iframe
-          src="https://www.geogebra.org/material/iframe/id/wEAxCzBe//width/800/height/600/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-          width="800"
-          height="600"
-          allowFullScreen
-          style={{
-            border: "1px solid #e4e4e4",
-            borderRadius: "4px",
-          }}
-        ></iframe>
       </div>
     
     </div>

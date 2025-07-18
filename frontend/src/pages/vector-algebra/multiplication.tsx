@@ -17,10 +17,13 @@ const VectorMultiplicationPage = () => {
         <div className="text-xl font-black uppercase text-center py-6">
           INTERACTIVE DEMO
         </div>
-        <div className="flex justify-center overflow-x-auto">
-          <div className="min-w-[320px] max-w-[90vw] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px]">
-            <VectorMultiplier />
-          </div>
+        <div className="flex justify-center">
+          {/* <iframe
+            src="https://www.geogebra.org/classic/hv7u7qcb?embed"
+            width="1800"
+            height="800"
+          ></iframe> */}
+          <VectorMultiplier />
         </div>
       </div>
       
