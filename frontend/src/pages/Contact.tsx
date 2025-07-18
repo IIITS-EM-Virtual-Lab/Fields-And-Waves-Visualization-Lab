@@ -38,6 +38,38 @@ const Contact = () => {
             <p>IIIT Sri City</p>
             <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
           </div>
+          {/* Contributor 3 */}
+          <div className="bg-gray-50 rounded-2xl shadow-md p-6 text-gray-800">
+            <p className="font-bold">Kothamasu Mohith Ram Sai Karthik Phalgun</p>
+            <p>B.Tech</p>
+            <p>Dept. of Computer Science and Engineering</p>
+            <p>IIIT Sri City</p>
+            <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
+          </div>
+          {/* Contributor 4 */}
+          <div className="bg-gray-50 rounded-2xl shadow-md p-6 text-gray-800">
+            <p className="font-bold">Sriman Reddy Bommireddy</p>
+            <p>B.Tech</p>
+            <p>Dept. of Computer Science and Engineering</p>
+            <p>IIIT Sri City</p>
+            <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
+          </div>
+          {/* Contributor 5 */}
+          <div className="bg-gray-50 rounded-2xl shadow-md p-6 text-gray-800">
+            <p className="font-bold">Eraveni Sai Likhith</p>
+            <p>B.Tech</p>
+            <p>Dept. of Electronics and Communication Engineering</p>
+            <p>IIIT Sri City</p>
+            <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
+          </div>
+          {/* Contributor 6 */}
+          <div className="bg-gray-50 rounded-2xl shadow-md p-6 text-gray-800">
+            <p className="font-bold">Abdul Khadar</p>
+            <p>B.Tech</p>
+            <p>Dept. of Electronics and Communication Engineering</p>
+            <p>IIIT Sri City</p>
+            <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
+          </div>
         </div>
       </section>
     </main>

@@ -4,42 +4,42 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../../store/slices/authSlice';
 
-
 const VectorMultiplicationPage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const navigate = useNavigate();
   return (
-    <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
-      <div className="text-xl font-black uppercase text-center py-10">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col border-t border-slate-300">
+      <div className="text-xl sm:text-2xl lg:text-3xl font-black uppercase text-center py-8">
         Vector Multiplication
       </div>
+      
       <div className="pb-10">
-        <div className="text-xl font-black uppercase text-center py-10">
+        <div className="text-xl font-black uppercase text-center py-6">
           INTERACTIVE DEMO
         </div>
-        <div className="flex justify-center">
-          {/* <iframe
-            src="https://www.geogebra.org/classic/hv7u7qcb?embed"
-            width="1800"
-            height="800"
-          ></iframe> */}
-          <VectorMultiplier />
+        <div className="flex justify-center overflow-x-auto">
+          <div className="min-w-[320px] max-w-[90vw] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px]">
+            <VectorMultiplier />
+          </div>
         </div>
       </div>
-      <div>
+      
+      <div className="pb-4">
         When two vectors A and B are multiplied, the result is either a scalar
         or a vector depending how they are multiplied. Thus there are two types
         of multiplication.
       </div>
-      <ol>
+      
+      <ol className="list-decimal list-inside pl-4 sm:pl-10 pb-8">
         <li>Scalar (or dot) product: A.B</li>
         <li>Vector (or cross) product: A×B</li>
       </ol>
 
-      <div className="text-xl font-black uppercase text-center py-10">
+      <div className="text-xl sm:text-2xl font-black uppercase text-center py-8">
         DOT PRODUCT
       </div>
-      <div>
+      
+      <div className="space-y-4">
         <div>
           The dot product is one way of multiplying two or more vectors. The
           resultant of the dot product of vectors is a scalar quantity. Thus,
@@ -47,21 +47,23 @@ const VectorMultiplicationPage = () => {
           is the sum of the products of the corresponding entries of two
           sequences of numbers.
         </div>
-        <br />
+        
         <div>
           The dot product of two vectors A and B, written as A.B, is defined
           geometrically as the product of the magnitudes of A and B and cosine
           of the smaller angle between them, when they are drawn tail to tail.
         </div>
-        <div className="flex justify-center p-8">
+        
+        <div className="flex justify-center p-4 sm:p-8">
           <svg
             width="400"
             height="40"
             viewBox="0 0 535 54"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            className="max-w-full h-auto"
           >
-            <path
+                     <path
               d="M9.17252 35.8414C9.17252 36.6897 9.9855 37.1846 11.6115 37.326C12.2477 37.326 12.5658 37.5204 12.5658 37.9092C12.5658 37.9445 12.5305 38.1743 12.4598 38.5984C12.3537 39.0933 12.2477 39.4114 12.1417 39.5528C12.0356 39.6942 11.8059 39.7649 11.4524 39.7649C11.3817 39.7649 11.1696 39.7649 10.8161 39.7649C10.4627 39.7649 9.86178 39.7472 9.01346 39.7119C8.16513 39.6765 7.03403 39.6589 5.62016 39.6589C3.11053 39.6589 1.50224 39.6942 0.795305 39.7649H0.371142C0.123714 39.5175 0 39.3231 0 39.1817C0.0706938 38.2273 0.300449 37.6087 0.689264 37.326H1.43155C3.90583 37.2199 5.70852 36.3362 6.83962 34.6749C7.05171 34.4629 10.2506 29.0725 16.4363 18.5037C22.622 7.93502 25.7679 2.57997 25.8739 2.43858C26.1214 2.01442 26.5455 1.80233 27.1464 1.80233H27.5706H28.4719C28.684 2.12046 28.79 2.29719 28.79 2.33254L30.2746 19.4581C31.2643 30.8751 31.7945 36.6367 31.8652 36.7427C32.042 37.1315 33.1907 37.326 35.3115 37.326C36.1952 37.326 36.6371 37.5027 36.6371 37.8562C36.6371 37.9269 36.584 38.1743 36.478 38.5984C36.372 39.1286 36.2836 39.4468 36.2129 39.5528C36.1422 39.6589 35.8948 39.7295 35.4706 39.7649C35.3646 39.7649 35.1171 39.7649 34.7283 39.7649C34.3395 39.7649 33.6502 39.7472 32.6605 39.7119C31.6708 39.6765 30.3807 39.6589 28.79 39.6589C25.4674 39.6589 23.2936 39.6942 22.2685 39.7649H21.6323C21.4202 39.5528 21.3142 39.3938 21.3142 39.2877C21.3142 39.1817 21.3495 38.8635 21.4202 38.3333C21.5616 37.8738 21.6676 37.5911 21.7383 37.485L21.9504 37.326H23.0108C24.9196 37.2199 26.0507 36.9195 26.4041 36.4246L25.7679 28.4716H13.149L11.3464 31.5467C9.89713 33.9857 9.17252 35.4172 9.17252 35.8414ZM25.5028 25.9796C25.5028 25.5908 25.2907 22.8337 24.8665 17.7084C24.4424 12.5831 24.1949 10.0028 24.1243 9.96747L22.6927 12.2473C22.1272 13.2017 21.0137 15.0928 19.3524 17.9205L14.5806 25.9796L20.0417 26.0326C23.6824 26.0326 25.5028 26.015 25.5028 25.9796Z"
               fill="black"
             />
@@ -135,11 +137,11 @@ const VectorMultiplicationPage = () => {
             />
           </svg>
         </div>
-        <div>where θ is the smaller angle between A and B </div>
-        <br />
-        <br />
+        
+        <div>where θ is the smaller angle between A and B</div>
       </div>
-      <div className="flex gap-4">
+      
+      <div className="flex flex-wrap gap-2 sm:gap-4 items-center py-6">
         <span>If </span>
         <svg
           width="150"
@@ -147,8 +149,9 @@ const VectorMultiplicationPage = () => {
           viewBox="0 0 353 51"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
+          className="max-w-full h-auto"
         >
-          <path
+                    <path
             d="M12.4945 36.605C11.9089 36.5074 9.76136 36.4586 6.05205 36.4586C2.60303 36.4586 0.732102 36.5074 0.439261 36.605H0V33.579H2.53795C4.22992 33.579 5.07591 33.5464 5.07591 33.4813C13.0152 13.3729 17.1312 3.20485 17.424 2.97709C17.6193 2.68425 18.2212 2.53783 19.2299 2.53783C20.1735 2.53783 20.7754 2.68425 21.0357 2.97709C21.1659 3.0747 22.2559 5.66146 24.3058 10.7374C26.3557 15.8133 28.3893 20.8892 30.4066 25.9651L33.3839 33.4813C33.3839 33.5464 34.2298 33.579 35.9218 33.579H38.4598V36.605H37.9229C37.2396 36.5074 34.6528 36.4586 30.1626 36.4586C25.3145 36.4586 22.4999 36.5074 21.719 36.605H21.0845V33.579H23.2809C24.7125 33.579 25.4284 33.5627 25.4284 33.5302L23.2809 28.0638H10.8351L9.76136 30.7482C9.04553 32.5377 8.67134 33.4488 8.63881 33.4813C8.63881 33.5464 9.35464 33.579 10.7863 33.579H12.9826V36.605H12.4945ZM17.0824 25.0378L22.0607 24.989L19.5227 18.7905C17.8958 14.6907 17.0498 12.6408 16.9848 12.6408C13.6984 20.8404 12.0553 24.9727 12.0553 25.0378H17.0824Z"
             fill="black"
           />
@@ -204,7 +207,8 @@ const VectorMultiplicationPage = () => {
           viewBox="0 0 325 52"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-        >
+          className="max-w-full h-auto"
+               >
           <path
             d="M30.7754 11.825C30.7754 12.9419 30.5344 13.9601 30.0524 14.8799C29.5703 15.7996 28.9828 16.5222 28.2899 17.0478C27.597 17.5733 26.904 18.0168 26.2111 18.3781C25.5182 18.7394 24.9307 18.9858 24.4486 19.1172L23.7256 19.265L24.5842 19.4128C25.1566 19.5114 25.8948 19.7413 26.7986 20.1026C27.7024 20.4639 28.5761 20.9566 29.4197 21.5807C30.0825 22.2377 30.6097 22.8289 31.0014 23.3545C31.8148 24.7013 32.2216 26.1301 32.2216 27.6411V27.9367C32.2216 28.6922 32.0559 29.6448 31.7245 30.7945C30.429 34.3091 27.5066 36.3293 22.9573 36.8548C22.8368 36.8877 18.9353 36.9205 11.2527 36.9534H0V33.8986H4.88069V6.20811H0V3.1533H10.1681H16.7209C19.5227 3.1533 21.5262 3.23542 22.7313 3.39965C23.9365 3.56389 25.1717 3.99091 26.4371 4.68071C29.3293 6.25739 30.7754 8.63883 30.7754 11.825ZM23.6804 11.6772C23.6804 10.3633 23.4544 9.29578 23.0025 8.47459C22.5506 7.6534 22.0987 7.11142 21.6467 6.84864C21.1948 6.58586 20.7128 6.4052 20.2006 6.30666C19.9897 6.24096 18.4683 6.20811 15.6363 6.20811H11.4787V18.1318H15.1844C17.685 18.0989 19.0708 18.0496 19.342 17.9839C22.2342 17.327 23.6804 15.2248 23.6804 11.6772ZM24.9005 27.4933C24.9005 23.7158 23.6201 21.4658 21.0593 20.7431C21.0291 20.7103 20.999 20.6939 20.9689 20.6939L16.2238 20.6446H11.4787V33.8986H15.9074H16.3141H18.3026C19.8692 33.8986 21.1346 33.685 22.0987 33.258C23.0628 32.831 23.8461 31.9113 24.4486 30.4988C24.7499 29.7105 24.9005 28.7086 24.9005 27.4933Z"
             fill="black"
@@ -256,15 +260,17 @@ const VectorMultiplicationPage = () => {
         </svg>
         <span> then, </span>
       </div>
-      <div className="flex justify-center items-center p-8">
+      
+      <div className="flex justify-center items-center p-4 sm:p-8">
         <svg
           width="400"
           height="50"
           viewBox="0 0 648 50"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
+          className="max-w-full h-auto"
         >
-          <path
+                   <path
             d="M12.6615 35.4128C12.068 35.3139 9.89183 35.2645 6.13294 35.2645C2.63782 35.2645 0.741887 35.3139 0.445132 35.4128H0V32.3464H2.57188C4.28646 32.3464 5.14375 32.3134 5.14375 32.2475C13.1891 11.8703 17.3602 1.56629 17.6569 1.33548C17.8548 1.03872 18.4648 0.890347 19.4869 0.890347C20.4431 0.890347 21.0531 1.03872 21.3169 1.33548C21.4488 1.4344 22.5534 4.05573 24.6307 9.19949C26.7079 14.3432 28.7687 19.487 30.8131 24.6307L33.8301 32.2475C33.8301 32.3134 34.6874 32.3464 36.4019 32.3464H38.9738V35.4128H38.4298C37.7373 35.3139 35.116 35.2645 30.5658 35.2645C25.6528 35.2645 22.8007 35.3139 22.0093 35.4128H21.3664V32.3464H23.592C25.0428 32.3464 25.7682 32.3299 25.7682 32.2969L23.592 26.7575H10.9799L9.89183 29.4777C9.16643 31.2912 8.78724 32.2145 8.75427 32.2475C8.75427 32.3134 9.47967 32.3464 10.9305 32.3464H13.1561V35.4128H12.6615ZM17.3107 23.691L22.3555 23.6416L19.7837 17.3602C18.135 13.2057 17.2777 11.1284 17.2118 11.1284C13.8815 19.4375 12.2164 23.6251 12.2164 23.691H17.3107Z"
             fill="black"
           />
@@ -338,10 +344,16 @@ const VectorMultiplicationPage = () => {
           />
         </svg>
       </div>
-      <div className="flex justify-center">
-        <img src="assets/vector-algebra/mul-4.png" alt="dot-product" />
+      
+      <div className="flex justify-center pb-6">
+        <img 
+          src="assets/vector-algebra/mul-4.png" 
+          alt="dot-product" 
+          className="max-w-full h-auto"
+        />
       </div>
-      <div>
+      
+      <div className="space-y-2 pb-8">
         <div>
           Two Vectors A and B are said to be orthogonal (or perpendicular ) with
           each other if A.B = 0
@@ -351,31 +363,36 @@ const VectorMultiplicationPage = () => {
       </div>
 
       <div>
-        <div className="text-xl font-black uppercase text-center py-10">
+        <div className="text-xl sm:text-2xl font-black uppercase text-center py-8">
           CROSS PRODUCT
         </div>
-        <div>
-          The Cross product of two vectors A and B, written as A×B, is a vector
-          quantity whose magnitude is the area of the parallelogram formed by A
-          and B and is in the direction of advance of a right handed screw as A
-          is turned into B.
-        </div>
-        <div>
-          Cross product is a binary operation on two vectors in
-          three-dimensional space. It results in a vector that is perpendicular
-          to both vectors. The Vector product of two vectors, a and b, is
-          denoted by A × B. Its resultant vector is perpendicular to A and B.
+        
+        <div className="space-y-4">
+          <div>
+            The Cross product of two vectors A and B, written as A×B, is a vector
+            quantity whose magnitude is the area of the parallelogram formed by A
+            and B and is in the direction of advance of a right handed screw as A
+            is turned into B.
+          </div>
+          
+          <div>
+            Cross product is a binary operation on two vectors in
+            three-dimensional space. It results in a vector that is perpendicular
+            to both vectors. The Vector product of two vectors, a and b, is
+            denoted by A × B. Its resultant vector is perpendicular to A and B.
+          </div>
         </div>
 
-        <div className="py-14 flex justify-center gap-10">
+        <div className="py-8 sm:py-14 flex flex-col md:flex-row justify-center items-center gap-4 md:gap-10">
           <svg
             width="315"
             height="35"
             viewBox="0 0 615 55"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            className="max-w-full h-auto"
           >
-            <path
+          <path
               d="M14.0965 41.2982C13.4357 41.1881 11.0129 41.1331 6.82797 41.1331C2.93676 41.1331 0.825965 41.1881 0.495579 41.2982H0V37.8843H2.86334C4.77224 37.8843 5.72669 37.8476 5.72669 37.7741C14.6838 15.0876 19.3276 3.61591 19.658 3.35894C19.8782 3.02855 20.5573 2.86336 21.6953 2.86336C22.7599 2.86336 23.439 3.02855 23.7327 3.35894C23.8796 3.46907 25.1093 6.38748 27.422 12.1142C29.7347 17.8409 32.0291 23.5675 34.3051 29.2942L37.664 37.7741C37.664 37.8476 38.6184 37.8843 40.5273 37.8843H43.3907V41.2982H42.785C42.0141 41.1881 39.0957 41.1331 34.0297 41.1331C28.56 41.1331 25.3846 41.1881 24.5036 41.2982H23.7878V37.8843H26.2657C27.8809 37.8843 28.6885 37.8659 28.6885 37.8292L26.2657 31.662H12.2243L11.0129 34.6905C10.2053 36.7096 9.78309 37.7374 9.74638 37.7741C9.74638 37.8476 10.554 37.8843 12.1692 37.8843H14.6471V41.2982H14.0965ZM19.2725 28.248L24.8891 28.1929L22.0257 21.1998C20.1902 16.5744 19.2358 14.2617 19.1624 14.2617C15.4547 23.5125 13.6009 28.1746 13.6009 28.248H19.2725Z"
               fill="black"
             />
@@ -440,44 +457,43 @@ const VectorMultiplicationPage = () => {
               fill="black"
             />
           </svg>
-          <div>
+          <div className="text-center md:text-left">
             where aₙ is a unit vector normal to the plane containing A and B.
           </div>
         </div>
-        <div>
+        
+        <div className="pb-4">
           The vector multiplication of A × B in the above equation is called
           cross product owing to the cross sign; it is also called vector
           product because the result is a vector. If A=(A1, A2, A3) and B=(B1,
           B2, B3), then
         </div>
-        <div className="flex-col">
+        
+        <div className="flex flex-col items-center space-y-4">
           <img
             src="assets/vector-algebra/mul-6.png"
             alt="cross-product"
-            className="h-[200px] w-[400px] mx-auto p-4"
+            className="max-w-full h-auto w-auto max-h-[200px] p-4"
           />
           <img
             src="assets/vector-algebra/mul-7.png"
             alt="cross-product"
-            className="mx-auto p-4"
+            className="max-w-full h-auto p-4"
           />
         </div>
-
-        {/* <div className="font-bold">
-          The Cross product has the following basic properties
-        </div> */}
       </div>
-       {isAuthenticated ? (
-  <div className="flex justify-center mt-4 pr-20">
-    <Button onClick={() => navigate('/quiz/vector-algebra/multiplication')}>
-      Take Test
-    </Button>
-  </div>
-) : (
-  <div className="text-center text-medium text-[#a00032] mt-4">
-    Please log in to take the test.
-  </div>
-)}
+      
+      {isAuthenticated ? (
+        <div className="flex justify-center mt-6">
+          <Button onClick={() => navigate('/quiz/vector-algebra/multiplication')}>
+            Take Test
+          </Button>
+        </div>
+      ) : (
+        <div className="text-center text-sm sm:text-base text-[#a00032] mt-6">
+          Please log in to take the test.
+        </div>
+      )}
     </div>
   );
 };

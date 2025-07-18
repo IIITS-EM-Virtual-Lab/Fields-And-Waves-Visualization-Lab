@@ -6,7 +6,7 @@ import {
   selectCurrentUser,
   logout,
 } from "@/store/slices/authSlice";
-import { ChevronDown, Search, User, Settings, LogOut } from "lucide-react";
+import { ChevronDown, Search, User, Settings, LogOut, Menu, X } from "lucide-react";
 
 const exploreModules = [
   {
@@ -69,12 +69,16 @@ const Navbar = () => {
   const user = useSelector(selectCurrentUser);
   const [showExplore, setShowExplore] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Array<{name: string, path: string, module: string}>>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
   const dropdownRef = useRef(null);
   const userDropdownRef = useRef(null);
   const searchRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   // Debug logging
   console.log('Navbar - isAuthenticated:', isAuthenticated);
@@ -107,6 +111,12 @@ const Navbar = () => {
         !(searchRef.current as HTMLElement).contains(event.target as Node)
       ) {
         setShowSearchResults(false);
+      }
+      if (
+        mobileMenuRef.current &&
+        !(mobileMenuRef.current as HTMLElement).contains(event.target as Node)
+      ) {
+        setShowMobileMenu(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -142,12 +152,15 @@ const Navbar = () => {
     navigate(path);
     setShowSearchResults(false);
     setSearchQuery("");
+    setShowMobileSearch(false);
+    setShowMobileMenu(false);
   };
 
   const handleLogout = () => {
     dispatch(logout());
     navigate("/login");
     setShowUserDropdown(false);
+    setShowMobileMenu(false);
   };
 
   const handleUserDashboard = () => {
@@ -157,18 +170,32 @@ const Navbar = () => {
       navigate("/userdashboard");
     }
     setShowUserDropdown(false);
+    setShowMobileMenu(false);
   };
 
   const handleSettings = () => {
     navigate("/settings");
     setShowUserDropdown(false);
+    setShowMobileMenu(false);
+  };
+
+  const toggleModuleExpansion = (moduleTitle: string) => {
+    setExpandedModules(prev => ({
+      ...prev,
+      [moduleTitle]: !prev[moduleTitle]
+    }));
+  };
+
+  const handleMobileNavigation = (path: string) => {
+    navigate(path);
+    setShowMobileMenu(false);
   };
 
   return (
     <header className="bg-white fixed top-0 left-0 w-full z-50 border-b border-gray-200 font-sans">
       <div className="max-w-[1200px] mx-auto h-[72px] flex items-center justify-between px-5 text-[18px] text-[#1a1a1a]">
-        {/* Left Section */}
-        <div className="flex items-center gap-6 relative">
+        {/* Desktop Layout */}
+        <div className="hidden md:flex items-center gap-6 relative">
           {/* Explore Dropdown */}
           <div ref={dropdownRef}>
             <button
@@ -204,16 +231,15 @@ const Navbar = () => {
                           {sub.name}
                         </li>
                       ))}
-                      </ul>
-
+                    </ul>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Search */}
-          <div ref={searchRef} className="hidden md:flex items-center border border-[#0f172a] rounded px-3 py-1.5 relative">
+          {/* Desktop Search */}
+          <div ref={searchRef} className="flex items-center border border-[#0f172a] rounded px-3 py-1.5 relative">
             <Search size={18} className="text-[#2563eb] mr-2" />
             <input
               type="text"
@@ -255,27 +281,67 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Center Logo */}
-            <div
-              className="flex items-center gap-2 ml-[-80px] cursor-pointer"
-              onClick={() => {
-                if (!isAuthenticated) {
-                  navigate("/");
-                } else if (user?.isAdmin === true) {
-                  navigate("/profilepage");
-                } else {
-                  navigate("/userdashboard");
-                }
-              }}
-            >
-              <img src="/fwvlab.png" alt="Logo" className="h-9 w-9" />
-              <h1 className="text-[#a00032] font-lato font-bold text-[18px]">
-                Fields and Waves Visualization Lab
-              </h1>
-            </div>
+        {/* Mobile Layout - Left Side */}
+        <div className="flex md:hidden items-center gap-3">
+          {/* Logo and Name */}
+          <div
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => {
+              if (!isAuthenticated) {
+                navigate("/");
+              } else if (user?.isAdmin === true) {
+                navigate("/profilepage");
+              } else {
+                navigate("/userdashboard");
+              }
+            }}
+          >
+            <img src="/fwvlab.png" alt="Logo" className="h-8 w-8" />
+            <h1 className="text-[#a00032] font-lato font-bold text-[14px] leading-tight">
+              Fields and Waves<br/>Visualization Lab
+            </h1>
+          </div>
+        </div>
 
-        {/* Right Section */}
-        <div className="flex items-center gap-4 text-[16px] font-semibold">
+        {/* Desktop Center Logo */}
+        <div className="hidden md:flex items-center gap-2 ml-[-80px] cursor-pointer"
+          onClick={() => {
+            if (!isAuthenticated) {
+              navigate("/");
+            } else if (user?.isAdmin === true) {
+              navigate("/profilepage");
+            } else {
+              navigate("/userdashboard");
+            }
+          }}
+        >
+          <img src="/fwvlab.png" alt="Logo" className="h-10 w-11" />
+          <h1 className="text-[#a00032] font-lato font-bold text-[18px]">
+            Fields and Waves Visualization Lab
+          </h1>
+        </div>
+
+        {/* Mobile Layout - Right Side */}
+        <div className="flex md:hidden items-center gap-3">
+          {/* Search Icon */}
+          <button
+            onClick={() => setShowMobileSearch(true)}
+            className="text-[#2563eb] p-1"
+          >
+            <Search size={20} />
+          </button>
+
+          {/* Mobile Menu Icon */}
+          <button
+            onClick={() => setShowMobileMenu(true)}
+            className="text-[#2563eb] p-1"
+          >
+            <Menu size={20} />
+          </button>
+        </div>
+
+        {/* Desktop Right Section */}
+        <div className="hidden md:flex items-center gap-4 text-[16px] font-semibold">
           {!isAuthenticated ? (
             <>
               <button onClick={() => navigate("/login")} className="text-[#2563eb] hover:underline">
@@ -303,7 +369,6 @@ const Navbar = () => {
                     <ChevronDown size={14} />
                   </div>
                 </button>
-
 
                 {showUserDropdown && (
                   <div className="absolute top-[45px] right-0 w-48 bg-white border border-gray-200 shadow-xl rounded-lg py-1 z-50"> 
@@ -339,6 +404,163 @@ const Navbar = () => {
           )}
         </div>
       </div>
+
+      {/* Mobile Search Modal */}
+      {showMobileSearch && (
+        <div className="fixed inset-0 bg-white z-50 md:hidden">
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowMobileSearch(false)}
+                className="text-[#2563eb] p-1"
+              >
+                <X size={20} />
+              </button>
+              <div className="flex-1 flex items-center border border-[#0f172a] rounded px-3 py-2">
+                <Search size={18} className="text-[#2563eb] mr-2" />
+                <input
+                  type="text"
+                  placeholder="Search for courses, skills, and more"
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  onKeyDown={handleSearchSubmit}
+                  className="outline-none text-[16px] text-[#2563eb] bg-transparent flex-1 font-medium"
+                  autoFocus
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Mobile Search Results */}
+          <div className="flex-1 overflow-y-auto">
+            {searchResults.length > 0 ? (
+              searchResults.map((result, index) => (
+                <div
+                  key={index}
+                  className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                  onClick={() => handleSearchResultClick(result.path)}
+                >
+                  <div className="text-[#2563eb] text-[14px] font-medium">
+                    {result.name}
+                  </div>
+                  <div className="text-[#666] text-[12px] mt-1">
+                    {result.module}
+                  </div>
+                </div>
+              ))
+            ) : searchQuery.trim() !== "" ? (
+              <div className="px-4 py-3 text-[#666] text-[14px]">
+                No results found for "{searchQuery}"
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Menu Modal */}
+      {showMobileMenu && (
+        <div className="fixed inset-0 bg-white z-50 md:hidden">
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img src="/fwvlab.png" alt="Logo" className="h-8 w-8" />
+                <h1 className="text-[#a00032] font-lato font-bold text-[14px] leading-tight">
+                  Fields and Waves<br/>Visualization Lab
+                </h1>
+              </div>
+              <button
+                onClick={() => setShowMobileMenu(false)}
+                className="text-[#2563eb] p-1"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-4">
+            {/* Authentication Section */}
+            {!isAuthenticated ? (
+              <div className="mb-6 pb-4 border-b border-gray-200">
+                <button
+                  onClick={() => handleMobileNavigation("/login")}
+                  className="w-full text-left py-3 text-[#2563eb] font-medium text-[16px] hover:underline"
+                >
+                  Log in
+                </button>
+                <button
+                  onClick={() => handleMobileNavigation("/signup")}
+                  className="w-full text-left py-3 text-[#2563eb] font-medium text-[16px] hover:underline"
+                >
+                  Sign up
+                </button>
+              </div>
+            ) : (
+              user && (
+                <div className="mb-6 pb-4 border-b border-gray-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      {user.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span className="text-[#2563eb] font-semibold text-[16px]">{user.name}</span>
+                  </div>
+                  <button
+                    onClick={handleUserDashboard}
+                    className="w-full text-left py-2 text-gray-700 font-medium hover:text-[#2563eb]"
+                  >
+                    Dashboard
+                  </button>
+                  <button
+                    onClick={handleSettings}
+                    className="w-full text-left py-2 text-gray-700 font-medium hover:text-[#2563eb]"
+                  >
+                    Settings
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left py-2 text-red-600 font-medium hover:text-red-700"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )
+            )}
+
+            {/* Modules Section */}
+            <div className="space-y-2">
+              {exploreModules.map((module, index) => (
+                <div key={index} className="border-b border-gray-100 last:border-b-0">
+                  <button
+                    onClick={() => toggleModuleExpansion(module.title)}
+                    className="w-full flex items-center justify-between py-3 text-left text-[#1a1a1a] font-semibold text-[16px] hover:text-[#2563eb]"
+                  >
+                    <span>{module.title}</span>
+                    <ChevronDown 
+                      size={16} 
+                      className={`transform transition-transform ${
+                        expandedModules[module.title] ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                  
+                  {expandedModules[module.title] && (
+                    <div className="pb-3 pl-4">
+                      {module.items.map((item, itemIndex) => (
+                        <button
+                          key={itemIndex}
+                          onClick={() => handleMobileNavigation(item.path)}
+                          className="w-full text-left py-2 text-[#2563eb] text-[14px] hover:underline"
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
