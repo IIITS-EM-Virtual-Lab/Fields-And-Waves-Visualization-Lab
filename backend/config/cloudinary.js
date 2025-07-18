@@ -12,7 +12,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'EMLabUploads', // Folder in your Cloudinary account
+    folder: 'FWVlabUploads', // Folder in your Cloudinary account
     allowed_formats: ['jpg', 'png', 'jpeg'],
     transformation: [{ width: 1000, height: 1000, crop: 'limit' }] // Optional: limit image size
   },
