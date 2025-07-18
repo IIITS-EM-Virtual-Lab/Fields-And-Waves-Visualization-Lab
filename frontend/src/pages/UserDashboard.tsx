@@ -81,7 +81,7 @@ const UserDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/quizresult/stats/${user?._id}`, {
+        const res = await axios.get(`https://fields-and-waves-visualization-lab.onrender.com/api/quizresult/stats/${user?._id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -95,7 +95,7 @@ const UserDashboard = () => {
 
     const fetchTopicStats = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/quizresult/stats-by-topic/${user?._id}`, {
+        const res = await axios.get(`https://fields-and-waves-visualization-lab.onrender.com/api/quizresult/stats-by-topic/${user?._id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -110,7 +110,7 @@ const UserDashboard = () => {
 
     const fetchHistory = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/quizresult/user/${user?._id}`, {
+        const res = await axios.get(`https://fields-and-waves-visualization-lab.onrender.com/api/quizresult/user/${user?._id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

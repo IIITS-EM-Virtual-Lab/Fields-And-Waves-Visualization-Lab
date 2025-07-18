@@ -72,8 +72,8 @@ const ChapterQuiz = () => {
       try {
         const url =
           !chapterName || chapterName === "common"
-            ? `http://localhost:5000/api/quizzes/module/${moduleName}/common`
-            : `http://localhost:5000/api/quizzes/module/${moduleName}/chapter/${chapterName}`;
+            ? `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/module/${moduleName}/common`
+            : `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/module/${moduleName}/chapter/${chapterName}`;
         const res = await axios.get(url);
         setQuiz({
           _id: res.data.data._id,
@@ -168,7 +168,7 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
       userAnswers: userAnswers // Add user answers to submission
     });
     
-    const response = await axios.post('http://localhost:5000/api/quizresult/save', {
+    const response = await axios.post('https://fields-and-waves-visualization-lab.onrender.com/api/quizresult/save', {
   userId: currentUser._id,
   quizId: quiz._id,
   score: finalScore,

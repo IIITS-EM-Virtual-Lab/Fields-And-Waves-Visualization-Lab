@@ -127,7 +127,7 @@ const ProfilePage = () => {
       console.log('Token type:', typeof token);
       console.log('Token length:', token ? token.length : 0);
       
-      const response = await axios.get('http://localhost:5000/api/users', {
+      const response = await axios.get('https://fields-and-waves-visualization-lab.onrender.com/api/users', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -147,8 +147,8 @@ const ProfilePage = () => {
       setError('');
       const response = await axios.get(
   selectedChapter === '__module__'
-    ? `http://localhost:5000/api/quizzes/module/${selectedModule}/common`
-    : `http://localhost:5000/api/quizzes/module/${selectedModule}/chapter/${selectedChapter}`,
+    ? `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/module/${selectedModule}/common`
+    : `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/module/${selectedModule}/chapter/${selectedChapter}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -161,7 +161,7 @@ const ProfilePage = () => {
         // Quiz doesn't exist, create it
         try {
           const createResponse = await axios.post(
-            'http://localhost:5000/api/quizzes',
+            'https://fields-and-waves-visualization-lab.onrender.com/api/quizzes',
             {
               module: selectedModule,
               chapter: selectedChapter === '__module__' ? '' : selectedChapter,
@@ -192,7 +192,7 @@ const ProfilePage = () => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/users/${userId}`, {
+      await axios.delete(`https://fields-and-waves-visualization-lab.onrender.com/api/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -206,7 +206,7 @@ const ProfilePage = () => {
 
   const handleToggleAdmin = async (userId: string, currentAdminStatus: boolean) => {
     try {
-      await axios.patch(`http://localhost:5000/api/users/${userId}/toggle-admin`, 
+      await axios.patch(`https://fields-and-waves-visualization-lab.onrender.com/api/users/${userId}/toggle-admin`, 
         { isAdmin: !currentAdminStatus },
         {
           headers: {
@@ -228,7 +228,7 @@ const ProfilePage = () => {
 
     try {
       await axios.delete(
-        `http://localhost:5000/api/quizzes/${currentQuiz._id}/questions/${questionId}`,
+        `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/${currentQuiz._id}/questions/${questionId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -262,7 +262,7 @@ const ProfilePage = () => {
 
     try {
       await axios.post(
-        `http://localhost:5000/api/quizzes/${currentQuiz._id}/questions`,
+        `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/${currentQuiz._id}/questions`,
         questionData,
         {
           headers: {

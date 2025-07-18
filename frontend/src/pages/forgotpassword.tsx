@@ -17,7 +17,7 @@ const ForgotPassword: React.FC = () => {
     if (!isValidEmail) return;
 
     try {
-      await axios.post("http://localhost:5000/api/password-reset/request", {
+      await axios.post("https://fields-and-waves-visualization-lab.onrender.com/api/password-reset/request", {
         email,
       });
       setEmailSent(true);

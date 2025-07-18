@@ -76,7 +76,7 @@ const Signup = () => {
     const password = passwordRef.current?.value || '';
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/initiate-signup', { name, email, password });
+      const response = await axios.post('https://fields-and-waves-visualization-lab.onrender.com/api/auth/initiate-signup', { name, email, password });
       if (response.data.success) {
         setSignupData({ name, email, password });
         setShowOTP(true);
@@ -112,7 +112,7 @@ const Signup = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/verify-and-signup', {
+      const response = await axios.post('https://fields-and-waves-visualization-lab.onrender.com/api/auth/verify-and-signup', {
         ...signupData,
         otp: otpString
       });
@@ -131,7 +131,7 @@ const Signup = () => {
 
   const handleGoogleSignup = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/auth/google');
+      const response = await axios.get('https://fields-and-waves-visualization-lab.onrender.com/api/auth/google');
       if (response.data.url) {
         window.location.href = response.data.url;
       }

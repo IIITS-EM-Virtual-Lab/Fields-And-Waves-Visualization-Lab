@@ -78,7 +78,7 @@ const Login = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post('https://fields-and-waves-visualization-lab.onrender.com/api/auth/login', {
         email: emailRef.current?.value,
         password: passwordRef.current?.value
       }, {
@@ -115,7 +115,7 @@ const Login = () => {
   // ✅ Redirect to Google OAuth URL
   const handleGoogleLogin = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/auth/google');
+      const response = await axios.get('https://fields-and-waves-visualization-lab.onrender.com/api/auth/google');
       if (response.data.url) {
         window.location.href = response.data.url;
       } else {

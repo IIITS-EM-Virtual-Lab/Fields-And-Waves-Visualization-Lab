@@ -37,7 +37,7 @@ const Settings = () => {
       if (name) payload.name = name;
       if (password) payload.password = password;
 
-      const res = await axios.put(`http://localhost:5000/api/users/${user._id}`, payload, {
+      const res = await axios.put(`https://fields-and-waves-visualization-lab.onrender.com/api/users/${user._id}`, payload, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -63,7 +63,7 @@ const Settings = () => {
     if (!window.confirm("Are you sure you want to delete your account? This action is irreversible.")) return;
 
     try {
-      const res = await axios.delete(`http://localhost:5000/api/users/${user._id}`, {
+      const res = await axios.delete(`https://fields-and-waves-visualization-lab.onrender.com/api/users/${user._id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }

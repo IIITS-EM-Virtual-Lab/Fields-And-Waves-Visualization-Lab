@@ -31,7 +31,7 @@ const ResetPassword: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/password-reset/reset", {
+      const res = await axios.post("https://fields-and-waves-visualization-lab.onrender.com/api/password-reset/reset", {
         token,
         newPassword: password,
       });
