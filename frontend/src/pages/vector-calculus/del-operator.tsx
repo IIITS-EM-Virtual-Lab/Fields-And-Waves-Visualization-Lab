@@ -10,11 +10,6 @@ const DelOperatorPage = () => {
       <div className="flex justify-center items-center pb-10">
         {" "}
         <DelOperator />
-        {/* <iframe
-          src="https://www.geogebra.org/classic/dj822cm2?embed"
-          width="1000"
-          height="700"
-        ></iframe> */}
       </div>
       <div className="flex items-center">
         1. The del operator, written as{" "}

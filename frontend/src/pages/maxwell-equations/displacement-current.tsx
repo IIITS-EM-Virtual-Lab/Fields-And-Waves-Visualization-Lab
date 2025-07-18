@@ -46,15 +46,6 @@ const DisplacementCurrent: React.FC = () => {
                 The inclusion of the displacement current term allows Maxwell's equations to predict the existence of electromagnetic waves, which propagate through space at the speed of light. 
                 This was a significant theoretical development that unified the theories of electricity and magnetism into a single framework.
             </p>
-            <iframe 
-                src="https://www.geogebra.org/classic/kapn6jws?embed" 
-                width="800" 
-                height="600" 
-                allowFullScreen 
-                style={{ border: '1px solid #e4e4e4', borderRadius: '4px' }} 
-                frameBorder="0"
-                className="iframe-container"
-            ></iframe>
         </div>
     );
 };

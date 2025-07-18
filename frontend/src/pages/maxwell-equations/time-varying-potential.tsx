@@ -34,15 +34,6 @@ const TimeVaryingPotential: React.FC = () => {
         Sadiku emphasizes that these potentials have physical significance, describing the dynamic coupling between the fields,
         essential for understanding electromagnetic radiation and wave phenomena.
       </p>
-
-      <iframe
-        src="https://www.geogebra.org/classic/hyhtnguc?embed"
-        width="800"
-        height="600"
-        allowFullScreen
-        style={{ border: '1px solid #e4e4e4', borderRadius: '4px' }}
-        frameBorder="0"
-      ></iframe>
     </div>
   );
 };

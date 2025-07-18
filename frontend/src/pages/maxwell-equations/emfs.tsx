@@ -1,25 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import Latex from 'react-latex-next';
 import './emf.css';
 
 const EMFS: React.FC = () => {
-    const transformerIframeRef = useRef<HTMLIFrameElement>(null);
-    const motionalIframeRef = useRef<HTMLIFrameElement>(null);
-
-    const handleFullscreen = (iframeRef: React.RefObject<HTMLIFrameElement>) => {
-        if (iframeRef.current) {
-            const element = iframeRef.current;
-            if (element.requestFullscreen) {
-                element.requestFullscreen();
-            } else if ((element as any).webkitRequestFullscreen) {
-                (element as any).webkitRequestFullscreen();
-            } else if ((element as any).mozRequestFullScreen) {
-                (element as any).mozRequestFullScreen();
-            } else if ((element as any).msRequestFullscreen) {
-                (element as any).msRequestFullscreen();
-            }
-        }
-    };
 
     return (
         <div className="container">
@@ -51,25 +34,6 @@ const EMFS: React.FC = () => {
                         </p>
                         <p className="figure-caption">Figure 1: Visualization of Transformer EMF</p>
                     </div>
-                    <div className="animation">
-                        <div className="iframe-wrapper">
-                            <iframe
-                                src="https://www.geogebra.org/classic/kbx9tae4?embed"
-                                width="800"
-                                height="600"
-                                allowFullScreen
-                                style={{ border: '1px solid #e4e4e4', borderRadius: '4px' }}
-                                frameBorder="0"
-                                title="Transformer EMF"
-                            ></iframe>
-                            <button
-                                className="fullscreen-button"
-                                onClick={() => handleFullscreen(transformerIframeRef)}
-                            >
-                                <img src="fullscreen-icon.png" alt="Full Screen" />
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Motional EMF Section */}
@@ -97,25 +61,6 @@ const EMFS: React.FC = () => {
                             </ul>
                         </p>
                         <p className="figure-caption">Figure 2: Visualization of Motional EMF</p>
-                    </div>
-                    <div className="animation">
-                        <div className="iframe-wrapper">
-                            <iframe
-                                src="https://www.geogebra.org/classic/kxsvddnj?embed"
-                                width="800"
-                                height="600"
-                                allowFullScreen
-                                style={{ border: '1px solid #e4e4e4', borderRadius: '4px' }}
-                                frameBorder="0"
-                                title="Motional EMF"
-                            ></iframe>
-                            <button
-                                className="fullscreen-button"
-                                onClick={() => handleFullscreen(motionalIframeRef)}
-                            >
-                                <img src="fullscreen-icon.png" alt="Full Screen" />
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>

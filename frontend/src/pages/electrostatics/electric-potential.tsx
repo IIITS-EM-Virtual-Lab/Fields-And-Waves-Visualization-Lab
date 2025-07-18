@@ -70,18 +70,6 @@ V(r) = \frac{Q}{4\pi\varepsilon\begin{vmatrix}r-{r}'\end{vmatrix}}
 "
         />
       </div>
-      <div className="p-10 flex justify-center items-center">
-        <iframe
-          src="https://www.geogebra.org/material/iframe/id/gpTWDmv3//width/800/height/600/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-          width="800"
-          height="600"
-          allowFullScreen
-          style={{
-            border: "1px solid #e4e4e4",
-            borderRadius: "4px",
-          }}
-        ></iframe>
-      </div>
 
  {isAuthenticated ? (
   <div className="flex justify-center mt-4 pr-20">

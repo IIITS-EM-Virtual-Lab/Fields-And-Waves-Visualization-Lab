@@ -74,13 +74,6 @@ const ElectricDipolePage = () => {
                 Electric flux lines, also known as electric field lines, visually
                 represent the direction and strength of an electric field in space.
             </div>
-            <div className="p-10 flex justify-center items-center">
-                <iframe
-                    src="https://www.geogebra.org/material/iframe/id/m4sQ9jeT//width/873/height/500/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-                    width="873px"
-                    height="500px"
-                ></iframe>
-            </div>
               {isAuthenticated ? (
                 <div className="flex justify-center mt-4 pr-20">
                     <Button onClick={() => navigate('/quiz/electrostatics/electric-dipole')}>

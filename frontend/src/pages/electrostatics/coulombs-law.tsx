@@ -17,21 +17,6 @@ const CoulombsLawPage = () => {
         <p className="text-md text-gray-800 text-justify mb-8 leading-relaxed">
           Coulomb's Law describes the electrostatic interaction between electrically charged particles. It states that the magnitude of the electrostatic force between two point charges is directly proportional to the product of their charges and inversely proportional to the square of the distance between them.
         </p>
-        <div className="mb-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            GeoGebra Simulation
-          </h2>
-          <div className="aspect-video shadow-md rounded-lg overflow-hidden border border-gray-300">
-            <iframe
-              title="Coulomb's Law Simulation"
-              src="https://www.geogebra.org/material/iframe/id/154678/width/873/height/500/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-              width="873px"
-              height="500px"
-              allowFullScreen
-              loading="lazy"
-            />
-          </div>
-        </div>
 
           <div className="pb-20">
           <div className="text-xl font-black uppercase text-center py-10">

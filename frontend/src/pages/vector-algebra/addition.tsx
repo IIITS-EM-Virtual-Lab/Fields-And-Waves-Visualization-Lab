@@ -20,13 +20,6 @@ const VectorAdditionPage = () => {
           INTERACTIVE DEMO
         </div>
         <div className="flex justify-center">
-          {/* <iframe
-            scrolling="no"
-            src="https://www.geogebra.org/material/iframe/id/1815911/width/984/height/593/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-            width="984px"
-            height="593px"
-            // style="border: 0px"
-          ></iframe> */}
           <VectorAddition />
         </div>
       </div>
@@ -380,13 +373,6 @@ const VectorAdditionPage = () => {
           INTERACTIVE DEMO
         </div>
         <div className="flex justify-center">
-          {/* <iframe
-            scrolling="no"
-            src="https://www.geogebra.org/material/iframe/id/1815911/width/984/height/593/border/888888/rc/false/ai/false/sdz/false/smb/false/stb/false/stbh/true/ld/false/sri/true/at/auto"
-            width="984px"
-            height="593px"
-            // style="border: 0px"
-          ></iframe> */}
           <VectorSubtraction />
         </div>
       </div>
