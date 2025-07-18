@@ -167,7 +167,7 @@ exports.handleGoogleCallback = async (req, res) => {
     const token = generateToken(user._id);
 
     // Redirect to frontend with token and user data
-    const frontendUrl = new URL('http://localhost:5173/login');
+    const frontendUrl = new URL('https://www.fwvlab.com/login');
     frontendUrl.searchParams.set('token', token);
     frontendUrl.searchParams.set('name', user.name);
     frontendUrl.searchParams.set('email', user.email);

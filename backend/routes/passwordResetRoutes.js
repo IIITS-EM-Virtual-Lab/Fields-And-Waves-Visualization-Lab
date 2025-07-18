@@ -19,7 +19,7 @@ router.post('/request', async (req, res) => {
   user.resetTokenExpiry = expiry;
   await user.save();
 
-  const link = `http://localhost:5173/reset-password?token=${token}`;
+  const link = `https://www.fwvlab.com/reset-password?token=${token}`;
   await sendResetPasswordEmail(email, link);
 
   res.json({ message: 'Reset link sent' });
