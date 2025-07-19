@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import logo from "/logo.png"; // or use your confirmation icon
+import logo from "/fwvlab.png";
 import axios from "axios";
 
 const ForgotPassword: React.FC = () => {
@@ -31,7 +31,7 @@ const ForgotPassword: React.FC = () => {
       {emailSent ? (
         <div className="bg-[#f2f3f5] border border-gray-300 px-8 py-6 rounded-md shadow text-center w-[450px]">
           <img
-            src="/logo.png" // change if using a different success icon
+            src="/fwvlab.png"
             alt="Success"
             className="w-16 h-16 mx-auto mb-4"
           />
