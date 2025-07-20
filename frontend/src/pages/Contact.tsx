@@ -11,7 +11,7 @@ const Contact = () => {
         <h2 className="text-xl font-extrabold text-[#004c99] uppercase mb-4">Instructor</h2>
         <div className="bg-gray-50 rounded-xl shadow-md p-6 border border-gray-100 max-w-3xl">
           <p className="font-bold">Dr. K. Divyabramham, Ph.D.</p>
-          <p>Assistant Professor</p>
+          <p>Associate Professor</p>
           <p>Department of Electronics and Communication Engineering</p>
           <p>Indian Institute of Information Technology, Sri City</p>
           <p>Chittoor, Andhra Pradesh 517646, INDIA</p>

@@ -99,7 +99,7 @@ const Home = () => {
         <div className="flex flex-col lg:flex-row items-center min-h-[60vh] lg:h-[70vh] px-4 sm:px-6 lg:px-12 py-8 lg:py-0">
           <div className="w-full lg:w-1/2 flex flex-col items-center order-2 lg:order-1 mt-6 lg:mt-[42px]">
             <img
-              src="https://nilus.in/Demo/SatyaSandBox/templates/yootheme/cache/d9/jcbose4dec21Main-d9643159.jpeg"
+              src="/JC Bose.jpeg"
               alt="Sir J.C. Bose"
               className="mb-3 rounded-md shadow-md w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-[75%] xl:max-w-[350px] 2xl:max-w-[450px] h-auto mx-auto"
             />
