@@ -6,7 +6,7 @@ const modules = [
     title: "Vector Algebra",
     icon: "/assets/vector-algebra.png",
     topics: [
-      { name: "Scalars", path: "/scalars-and-vectors" },
+      { name: "Scalars and Vectors", path: "/scalars-and-vectors" },
       { name: "Addition", path: "/vector-addition" },
       { name: "Multiplication", path: "/vector-multiplication" },
       { name: "Triple Product", path: "/triple-product" },
@@ -31,7 +31,7 @@ const modules = [
       { name: "Cylindrical Coordinates", path: "/cylindrical-coordinates" },
       { name: "Spherical Coordinates", path: "/spherical-coordinates" },
       { name: "Cartesian, Cylindrical and Spherical", path: "/cartesian-cylindrical-spherical"},
-      { name: "Intro", path: "/vector-calculus-intro" },
+      { name: "Differential Length, Area and Volume", path: "/vector-calculus-intro" },
       { name: "Del Operator", path: "/del-operator" }
     ],
   },
@@ -82,6 +82,7 @@ const aboutData = [
 ];
 
 const Home = () => {
+  const navigate = useNavigate();
   const [openStates, setOpenStates] = useState<boolean[]>(Array(modules.length).fill(true));
 
   const toggleDropdown = (index: number) => {
@@ -201,11 +202,14 @@ const Home = () => {
               Gain a strong conceptual foundation in vector algebra, field theory,
               Maxwell's equations, and wave propagation through simulations and expert-driven lessons.
             </p>
-            <div className="pt-2 sm:pt-3 lg:pt-4">
-              <button className="bg-blue-600 text-white px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-sm sm:text-base lg:text-[1rem] rounded hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                Dive into the Lab
-              </button>
-            </div>
+             <div className="pt-2 sm:pt-3 lg:pt-4">
+                <button
+                  onClick={() => navigate("/signup")}
+                  className="bg-blue-600 text-white px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-sm sm:text-base lg:text-[1rem] rounded hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                >
+                  Dive into the Lab
+                </button>
+              </div>
           </div>
            <div className="w-full lg:w-1/2 flex justify-center">
             <img

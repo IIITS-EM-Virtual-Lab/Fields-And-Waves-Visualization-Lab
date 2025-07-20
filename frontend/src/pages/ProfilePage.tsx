@@ -658,23 +658,6 @@ const questionData = {
         );
       case 'quizzes':
         return renderQuizManagement();
-      case 'settings':
-        return (
-          <div className="settings-content">
-            <h2>Settings</h2>
-            <p>Settings content will be added here.</p>
-          </div>
-        );
-      case 'sign out':
-        return (
-          <div className="logout-content">
-            <h2>Sign Out</h2>
-            <p>Are you sure you want to sign out?</p>
-            <button className="logout-button">
-              Sign Out
-            </button>
-          </div>
-        );
       default:
         return null;
     }
