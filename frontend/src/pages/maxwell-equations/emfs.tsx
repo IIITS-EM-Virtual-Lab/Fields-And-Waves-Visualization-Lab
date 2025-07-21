@@ -6,7 +6,7 @@ const EMFS: React.FC = () => {
 
     return (
         <div className="container">
-            <div className="header">
+            <div  className="text-2xl font-extrabold uppercase text-center py-6 text-gray-900">
                 <h1>Electromotive Forces (EMFs)</h1>
             </div>
             <div className="content">
