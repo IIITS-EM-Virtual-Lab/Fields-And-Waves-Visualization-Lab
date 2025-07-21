@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import Home from "@/pages/Home";
-import Contact from "@/pages/Contact";
+import Team from "@/pages/team";
 import Content from "@/pages/Content";
 import Scalars from "./pages/vector-algebra/scalars";
 import VectorAdditionPage from "./pages/vector-algebra/addition";
@@ -98,7 +98,7 @@ const AppRoutes = () => {
             <Route path="/module/:moduleSlug" element={<ModulePage />} />
           </Route>
           <Route path="/content/:id" element={<Content />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/team" element={<Team />} />
           <Route path="/quizzes/module/:moduleName/common" element={<ChapterQuiz />} />
           <Route path="/userdashboard" element={<UserDashboard />} />
          </Routes>

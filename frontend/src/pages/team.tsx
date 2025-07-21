@@ -1,4 +1,4 @@
-const Contact = () => {
+const Team = () => {
   return (
     <main className="pb-20">
       {/* Banner Section */}
@@ -76,4 +76,4 @@ const Contact = () => {
   );
 };
 
-export default Contact;
+export default Team;

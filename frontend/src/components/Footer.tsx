@@ -13,10 +13,10 @@ const Footer = () => {
             <span className="text-md font-semibold">Fields and Waves Visualization Lab</span>
           </div>
           <nav className="flex space-x-6 sm:space-x-8">
-            <Link to="/about" className="hover:underline hover:text-[#0A204F]/80 transition-colors">
+            <Link to="/feedback" className="hover:underline hover:text-[#0A204F]/80 transition-colors">
               Feedback Form
             </Link>
-            <Link to="/contact" className="hover:underline hover:text-[#0A204F]/80 transition-colors">
+            <Link to="/team" className="hover:underline hover:text-[#0A204F]/80 transition-colors">
               Our team
             </Link>
           </nav>
