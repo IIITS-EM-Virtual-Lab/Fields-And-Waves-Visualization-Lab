@@ -31,6 +31,7 @@ import PowVector from './pages/wave-propagation/pow_vector';
 import WaveReflection from './pages/wave-propagation/wave_reflection';
 import Footer from "./components/Footer";
 import Settings from "./pages/settings";
+import Feedback from "./pages/feedback";
 
 import ContentLayout from "@/pages/ContentLayout";
 import Navbar from "@/components/Navbar";
@@ -61,6 +62,7 @@ const AppRoutes = () => {
           <Route path="/" element={<Home />} />
           <Route path="/profilepage" element={<ProfilePage />} />
           <Route path="/quiz/:moduleName/:chapterName" element={<ChapterQuiz />} />
+          <Route path="/feedback" element ={<Feedback/>} />
 
           <Route element={<ContentLayout />}>
             <Route path="/home" element={<Home />} />
