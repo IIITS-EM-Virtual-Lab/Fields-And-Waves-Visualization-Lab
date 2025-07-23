@@ -32,12 +32,24 @@ interface Quiz {
   questions: Question[];
 }
 
+interface FeedbackEntry {
+  _id: string;
+  name: string;
+  designation: string;
+  institute: string;
+  query: string;
+  suggestion?: string;
+  platformDiscovery?: string;
+  createdAt: string;
+}
+
 const ProfilePage = () => {
   const { client, token } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState('profile');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [feedbackList, setFeedbackList] = useState<FeedbackEntry[]>([]);
 
   // Quiz management states
   const [selectedModule, setSelectedModule] = useState('');
@@ -117,6 +129,22 @@ const ProfilePage = () => {
       fetchChapterQuiz();
     }
   }, [activeTab, selectedModule, selectedChapter]);
+
+  useEffect(() => {
+  if (activeTab === 'Feedback') {
+    fetchFeedback();
+  }
+}, [activeTab]);
+
+const fetchFeedback = async () => {
+  try {
+    const response = await axios.get("https://fields-and-waves-visualization-lab.onrender.com/api/feedback");
+    setFeedbackList(response.data);
+  } catch (err) {
+    console.error("Error fetching feedback:", err);
+  }
+};
+
 
   const fetchUsers = async () => {
     try {
@@ -331,12 +359,12 @@ const ProfilePage = () => {
           <div className="quiz-content">
             <div className="quiz-header">
               <h3>
-  Questions for{" "}
-  {selectedChapter === "__module__"
-    ? `${selectedModule.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} (Entire Module)`
-    : selectedChapter.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-  }
-</h3>
+                Questions for{" "}
+                {selectedChapter === "__module__"
+                  ? `${selectedModule.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} (Entire Module)`
+                  : selectedChapter.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                }
+              </h3>
 
               <button 
                 className="add-question-btn"
@@ -443,19 +471,19 @@ const ProfilePage = () => {
                 
                const explanationValue = (formData.get('explanation') as string)?.trim();
 
-const questionData = {
-  type: newQuestionType,
-  question: formData.get('question') as string,
-  options: newQuestionType === 'MCQ'
-    ? (formData.get('options') as string).split('\n').filter(Boolean)
-    : [],
-  correctAnswer: newQuestionType === 'MCQ'
-    ? formData.get('correctAnswer') as string
-    : (formData.get('correctAnswer') as string).split('\n').filter(Boolean),
-  explanation: explanationValue || '', // If empty, set as ''
-  difficulty: formData.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD',
-  points: Number(formData.get('points'))
-};
+              const questionData = {
+                type: newQuestionType,
+                question: formData.get('question') as string,
+                options: newQuestionType === 'MCQ'
+                  ? (formData.get('options') as string).split('\n').filter(Boolean)
+                  : [],
+                correctAnswer: newQuestionType === 'MCQ'
+                  ? formData.get('correctAnswer') as string
+                  : (formData.get('correctAnswer') as string).split('\n').filter(Boolean),
+                explanation: explanationValue || '', // If empty, set as ''
+                difficulty: formData.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD',
+                points: Number(formData.get('points'))
+              };
 
 
                 const apiFormData = new FormData();
@@ -570,6 +598,31 @@ const questionData = {
     );
   };
 
+  const renderFeedback = () => {
+  return (
+    <div className="feedback-content">
+      <h2>Received Feedback</h2>
+      {feedbackList.length === 0 ? (
+        <p>No feedback submitted yet.</p>
+      ) : (
+        <div className="feedback-list">
+          {feedbackList.map((entry) => (
+            <div key={entry._id} className="feedback-card">
+              <h3>{entry.name} ({entry.designation})</h3>
+              <p><strong>Institute:</strong> {entry.institute}</p>
+              <p><strong>Query:</strong> {entry.query}</p>
+              {entry.suggestion && <p><strong>Suggestion:</strong> {entry.suggestion}</p>}
+              {entry.platformDiscovery && <p><strong>Found us via:</strong> {entry.platformDiscovery}</p>}
+              <p className="timestamp">Submitted on {new Date(entry.createdAt).toLocaleString()}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
 
   const renderContent = () => {
     switch (activeTab) {
@@ -657,6 +710,8 @@ const questionData = {
         );
       case 'quizzes':
         return renderQuizManagement();
+      case 'Feedback':
+        return renderFeedback();
       default:
         return null;
     }

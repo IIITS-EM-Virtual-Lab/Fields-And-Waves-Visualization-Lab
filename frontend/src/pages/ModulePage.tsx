@@ -72,12 +72,12 @@ const ModulePage = () => {
                     className="text-l font-semibold text-gray-700 cursor-pointer hover:underline"
                     onClick={() => navigate(chapter.path)}
                   >
-                    Unit {index + 1}: {chapter.name}
+                    Topic {index + 1}: {chapter.name}
                   </h2>
                 </div>
               </div>
               <div className="flex items-center text-sm text-gray-700">
-                <span className="mr-2">Unit mastery: 0%</span>
+                <span className="mr-2">Topic mastery: 0%</span>
                 <div className="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center">
                   <span className="text-xs text-gray-600">i</span>
                 </div>

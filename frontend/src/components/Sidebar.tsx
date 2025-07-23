@@ -99,7 +99,7 @@ const sectionToRender = matchedSection || sidebarData[0];
         />
         <div>
           <p className="text-lg font-bold">{sectionToRender.topic}</p>
-          <p className="text-sm text-gray-500">{sectionToRender.subtopics.length} Units</p>
+          <p className="text-sm text-gray-500">{sectionToRender.subtopics.length} Topics</p>
         </div>
       </Link>
 
@@ -117,7 +117,7 @@ const sectionToRender = matchedSection || sidebarData[0];
                 }`}
               >
                 <span className="block text-sm uppercase text-gray-500 mb-1">
-                  Unit {index + 1}
+                  Topic {index + 1}
                 </span>
                 {sub.name}
               </Link>
