@@ -11,6 +11,8 @@ const userRoutes = require('./routes/userRoutes');
 const quizRoutes = require('./routes/quiz');
 const quizResultRoutes = require('./routes/quizResultRoutes');
 const passwordResetRoutes = require('./routes/passwordResetRoutes');
+const feedbackRoutes = require("./routes/feedbackRoutes");
+
 
 dotenv.config();
 
@@ -20,6 +22,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/api/password-reset', passwordResetRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI)

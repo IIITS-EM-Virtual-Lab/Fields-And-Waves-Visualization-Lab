@@ -3,7 +3,7 @@ import { BlockMath } from "react-katex";
 
 const GaussLawMagnestismPage = () => {
   return (
-    <div className="px-6 md:px-16 lg:px-32 py-10 bg-gray-50 text-gray-800">
+    <div className="px-6 md:px-16 lg:px-32 py-10 text-gray-800">
       {/* Title Section */}
       <div className="text-3xl font-extrabold uppercase text-center py-6 text-gray-900">
         Gauss's Law for Magnetism

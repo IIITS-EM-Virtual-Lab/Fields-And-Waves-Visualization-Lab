@@ -103,8 +103,7 @@ const ProfilePage = () => {
       { id: 'users', label: 'Users', icon: <FaUsers /> },
       { id: 'quizzes', label: 'Quizzes', icon: <FaQuestionCircle /> }
     ] : []),
-    { id: 'settings', label: 'Settings', icon: <FaCog /> },
-    { id: 'sign out', label: 'Sign Out', icon: <FaSignOutAlt /> },
+    { id: 'Feedback', label: 'Feedback', icon: <FaCog /> },
   ];
 
   useEffect(() => {
