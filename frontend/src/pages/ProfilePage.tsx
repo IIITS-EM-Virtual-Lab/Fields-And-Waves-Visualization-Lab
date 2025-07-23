@@ -115,7 +115,7 @@ const ProfilePage = () => {
       { id: 'users', label: 'Users', icon: <FaUsers /> },
       { id: 'quizzes', label: 'Quizzes', icon: <FaQuestionCircle /> }
     ] : []),
-    { id: 'Feedback', label: 'Feedback', icon: <FaCog /> },
+    { id: 'feedback', label: 'Feedback', icon: <FaCog /> },
   ];
 
   useEffect(() => {
@@ -131,7 +131,7 @@ const ProfilePage = () => {
   }, [activeTab, selectedModule, selectedChapter]);
 
   useEffect(() => {
-  if (activeTab === 'Feedback') {
+  if (activeTab === 'feedback') {
     fetchFeedback();
   }
 }, [activeTab]);
@@ -710,8 +710,9 @@ const fetchFeedback = async () => {
         );
       case 'quizzes':
         return renderQuizManagement();
-      case 'Feedback':
+      case 'feedback':  // fix here
         return renderFeedback();
+
       default:
         return null;
     }
