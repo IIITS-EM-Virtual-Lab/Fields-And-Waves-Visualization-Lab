@@ -222,8 +222,8 @@ const Home = () => {
 
                 
 
-       <div className="text-center mt-12 border-t pt-10">
-  <h2 className="text-2xl font-serif font-semibold text-gray-700 mb-10">Key supporters</h2>
+       <div className="text-center mt-12 pt-10">
+  <h2 className="text-3xl font-serif font-semibold text-gray-700 mb-10">Key supporters</h2>
   <div className="flex justify-center items-center gap-12 mb-10">
     <img
       src="/Sponser1.JPG"
