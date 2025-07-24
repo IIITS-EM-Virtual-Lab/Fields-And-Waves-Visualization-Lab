@@ -222,18 +222,18 @@ const Home = () => {
 
                 
 
-       <div className="text-center mt-8 pt-10">
-  <h2 className="text-3xl font-serif font-semibold text-gray-700 mb-10">Key supporters</h2>
-  <div className="flex justify-center items-center gap-12 mb-32">
+       <div className="text-center mt-4 pt-10">
+  <h2 className="text-4xl font-serif font-semibold text-gray-700 mb-10">Key supporters</h2>
+  <div className="flex justify-center items-center gap-12 mb-28">
     <img
       src="/Sponser1.JPG"
       alt="Gyan Circle Ventures"
-      className="h-28 w-auto object-contain"
+      className="h-32 w-auto object-contain"
     />
     <img
       src="/Sponser2.png"
       alt="Meity Startup Hub"
-      className="h-28 w-auto object-contain"
+      className="h-32 w-auto object-contain"
     />
   </div>
 </div>
