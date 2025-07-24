@@ -220,20 +220,19 @@ const Home = () => {
           </div>
         </div>
 
-                {/* Divider */}
-        <hr className="my-8 border-t border-gray-300 w-full" />
+                
 
         {/* Sponsor Logos */}
-        <div className="mt-6 flex justify-center items-center gap-8 flex-wrap">
+        <div className="mt-6 mt-4 flex justify-center items-center gap-8 flex-wrap">
           <img
             src="/Sponser1.JPG"
             alt="Sponsor 1"
-            className="h-12 sm:h-14 md:h-16 object-contain"
+            className="h-14 sm:h-16 md:h-18 object-contain"
           />
           <img
             src="/Sponser2.png"
             alt="Sponsor 2"
-            className="h-12 sm:h-14 md:h-16 object-contain"
+            className="h-14 sm:h-16 md:h-18 object-contain"
           />
         </div>
 
