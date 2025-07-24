@@ -226,12 +226,12 @@ const Home = () => {
   <h2 className="text-2xl font-semibold text-gray-700 mb-6">Our Beloved Sponsors</h2>
   <div className="flex justify-center items-center gap-12 mb-10">
     <img
-      src="/1511c6d9-4b44-426a-b3df-5b76a531fb83.png"
+      src="/Sponser1.JPG"
       alt="Gyan Circle Ventures"
       className="h-24 w-auto object-contain"
     />
     <img
-      src="/9038da96-f2b7-4abd-8d47-c041031e7fff.png"
+      src="/Sponser2.png"
       alt="Meity Startup Hub"
       className="h-24 w-auto object-contain"
     />
