@@ -222,22 +222,23 @@ const Home = () => {
 
                 
 
-       <div className="text-center">
-  <h2 className="text-5xl font-serif font-medium text-gray-800 mb-14">Key supporters</h2>
-  <div className="flex justify-center items-center gap-12 mb-28">
-    <img
-      src="/Sponser1.JPG"
-      alt="Gyan Circle Ventures"
-      className="h-32 w-auto object-contain"
-    />
-    <img
-      src="/Sponser2.png"
-      alt="Meity Startup Hub"
-      className="h-32 w-auto object-contain"
-    />
-  </div>
-</div>
-
+        <div className="my-16 sm:my-20 lg:my-28 px-4 sm:px-6 lg:px-20 text-center">
+          <h2 className="text-2xl sm:text-3xl lg:text-[2.6rem] font-serif font-medium text-gray-800 mb-12 sm:mb-16">
+            Key Supporters
+          </h2>
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-10 sm:gap-14 lg:gap-20 mb-24">
+            <img
+              src="/Sponser1.JPG"
+              alt="Gyan Circle Ventures"
+              className="h-24 sm:h-28 lg:h-32 w-auto object-contain"
+            />
+            <img
+              src="/Sponser2.png"
+              alt="Meity Startup Hub"
+              className="h-24 sm:h-28 lg:h-32 w-auto object-contain"
+            />
+          </div>
+        </div>
 
       </main>
     </div>
