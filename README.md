@@ -18,7 +18,6 @@ The Fields and Waves Visualization Lab is a web-based platform designed to provi
 - [Contributors](#contributors)
 - [How to Get Started](#how-to-get-started)
 - [Extending the Project](#extending-the-project)
-- [License](#license)
 
 ---
 
@@ -70,7 +69,7 @@ The project is divided into two main parts:
 
 ## Key Features
 
-- **Interactive 3D Visualizations:** Vector algebra, calculus, electrostatics, Maxwell’s equations, wave propagation.
+- **Interactive 3D Visualizations:** Vector algebra, calculus, electrostatics, Maxwell’s equations.
 - **Quizzes & Assessments:** MCQ & fill-in-the-blank with feedback & explanations.
 - **User Authentication:** Email/password, Google OAuth, JWT sessions.
 - **User Dashboard:** Progress tracking, analytics, quiz history.
@@ -163,7 +162,6 @@ The project is divided into two main parts:
 - **Vector Calculus:** Gradient, divergence, curl, coordinate systems
 - **Electrostatics:** Coulomb’s law, field, potential, dipole, Gauss law
 - **Maxwell’s Equations:** Magnetism, Faraday’s law, Ampere’s law, EMF
-- **Wave Propagation:** Power, plane waves, reflection, energy
 
 > Each topic includes interactive 2D/3D visualizations with controls.
 
@@ -250,7 +248,7 @@ cd backend && npm run dev
 
 - **Improve visualizations:**
 
-  - Use Three.js, p5.js, Geogebra
+  - Use Three.js(React Three Fiber) or any other tool
 
 - **Enhance analytics:**
 
@@ -258,13 +256,8 @@ cd backend && npm run dev
 
 - **Improve UI/UX:**
 
-  - Use Figma for prototypes and Tailwind CSS for design
+  - Use Figma or Canva for prototypes and Tailwind CSS for design
 
----
-
-## License
-
-MIT License
 
 ---
 
