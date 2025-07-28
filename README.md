@@ -225,7 +225,7 @@ cd ../backend && npm install
 
 ```bash
 cd frontend && npm run dev
-cd backend && npm run dev
+cd backend && node app.js
 ```
 
 5. **Access the app:**
