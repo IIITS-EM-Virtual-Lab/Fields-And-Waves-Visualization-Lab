@@ -42,7 +42,6 @@ The project is divided into two main parts:
 - Redux Toolkit
 - React Router
 - Three.js, @react-three/fiber, @react-three/drei
-- p5.js
 - Recharts
 - MathJax / KaTeX
 
@@ -59,19 +58,13 @@ The project is divided into two main parts:
 
 **Design:**
 
-- Figma
-- Geogebra
+- Canva
 
 **Deployment:**
 
 - Vercel (frontend)
 - Render (backend)
 - MongoDB Atlas (database)
-
-**Testing & Linting:**
-
-- ESLint
-- TypeScript strict mode
 
 ---
 
@@ -199,15 +192,15 @@ The project is divided into two main parts:
 - **Frontend:** Vercel
 - **Backend:** Render
 - **Database:** MongoDB Atlas
-- **CI/CD:** Auto-deploy (if configured)
-- **Linting:** ESLint + TypeScript strict
 
 ---
 
 ## Contributors
 
-- **H S R S Subrahmanyam Bitra:** Dev, backend, visualizations, Geogebra
-- **Nasari Nitish:** Content, UI/UX, frontend
+- **Kothamasu Mohith Ram Sai Karthik Phalgun:** Dev, backend, frontend, visualizations
+- **Sriman Reddy Bommireddy:** Dev, backend, frontend
+- **Eraveni Sai Likhith:** Content
+- **Abdul Khadar:** Content
 
 ---
 
