@@ -156,9 +156,9 @@ export default function GaussLawMagnetismVisualizer() {
   const flux = 0; // Gauss law: Net flux = 0 for magnetic monopoles
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4">
+    <div className="flex flex-col items-center gap-4 p-4 w-full">
       {/* Controls */}
-      <div className="grid grid-cols-2 gap-4 max-w-4xl w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl w-full">
         <div>
           <label className="font-bold">Magnet Length: </label>
           <input
@@ -168,6 +168,7 @@ export default function GaussLawMagnetismVisualizer() {
             step="0.1"
             value={magnetLength}
             onChange={(e) => setMagnetLength(+e.target.value)}
+            className="w-full"
           />
           <span>{magnetLength.toFixed(1)} m</span>
         </div>
@@ -180,15 +181,16 @@ export default function GaussLawMagnetismVisualizer() {
             step="1"
             value={lineCount}
             onChange={(e) => setLineCount(+e.target.value)}
+            className="w-full"
           />
           <span>{lineCount}</span>
         </div>
         <div>
-          <label>
-            <input
+          <label className="flex items-center"><input
               type="checkbox"
               checked={showGaussian}
               onChange={(e) => setShowGaussian(e.target.checked)}
+              className="mr-2"
             />
             Show Gaussian Surface
           </label>
@@ -202,10 +204,10 @@ export default function GaussLawMagnetismVisualizer() {
 
       {/* 3D Canvas */}
       <div
-        className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-4"
-        style={{ height: 500, width: 800, zIndex: 0 }}
+        className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-4 w-full max-w-4xl aspect-video bg-white"
+        style={{ zIndex: 0 }}
       >
-        <Canvas camera={{ position: [8, 8, 8], fov: 45 }}>
+        <Canvas className="!h-full !w-full" camera={{ position: [8, 8, 8], fov: 45 }}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
           <OrbitControls />

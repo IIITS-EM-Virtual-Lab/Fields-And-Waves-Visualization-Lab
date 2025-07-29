@@ -150,40 +150,48 @@ function ElectricDipoleVisualizer() {
     const V_total = useMemo(() => V_pos + V_neg, [V_pos, V_neg]);
 
     return (
-        <div className="flex flex-col items-center gap-4 p-4">
+        <div className="flex flex-col items-center gap-4 p-4 w-full">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl w-full">
                 <div>
                     <h2 className="font-bold mb-1">Charges:</h2>
-                    <label>+q: <input type="number" value={posq} min={0} step={1e-9} onChange={(e) => setPosQ(parseFloat(e.target.value))} className="border px-2 py-1 w-24 ml-1" /> C</label>
-                    <label className='ml-4'>-q: <input type="number" value={negq} max={0} step={1e-9} onChange={(e) => setNegQ(parseFloat(e.target.value))} className="border px-2 py-1 w-24 ml-1" /> C</label>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                        <label className="flex items-center">+q: <input type="number" value={posq} min={0} step={1e-9} onChange={(e) => setPosQ(parseFloat(e.target.value))} className="border px-2 py-1 w-24 max-w-full ml-1" /> C</label>
+                        <label className="flex items-center ml-0 sm:ml-4">-q: <input type="number" value={negq} max={0} step={1e-9} onChange={(e) => setNegQ(parseFloat(e.target.value))} className="border px-2 py-1 w-24 max-w-full ml-1" /> C</label>
+                    </div>
                 </div>
                 <div>
                     <h2 className="font-bold mb-1">Test Particle Position(P):</h2>
-                    <label>X: <input type="number" value={testX} onChange={(e) => setTestX(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
-                    <label className="ml-2">Y: <input type="number" value={testY} onChange={(e) => setTestY(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
-                    <label className="ml-2">Z: <input type="number" value={testZ} onChange={(e) => setTestZ(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                        <label className="flex items-center">X: <input type="number" value={testX} onChange={(e) => setTestX(Number(e.target.value))} className="border px-2 py-1 w-20 max-w-full ml-1" /></label>
+                        <label className="flex items-center ml-0 sm:ml-2">Y: <input type="number" value={testY} onChange={(e) => setTestY(Number(e.target.value))} className="border px-2 py-1 w-20 max-w-full ml-1" /></label>
+                        <label className="flex items-center ml-0 sm:ml-2">Z: <input type="number" value={testZ} onChange={(e) => setTestZ(Number(e.target.value))} className="border px-2 py-1 w-20 max-w-full ml-1" /></label>
+                    </div>
                 </div>
                 <div>
                     <h2 className="font-bold mb-1">Positive Charge Position:</h2>
-                    <label>X: <input type="number" value={posX} onChange={(e) => setPosX(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
-                    <label className="ml-2">Y: <input type="number" value={posY} onChange={(e) => setPosY(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
-                    <label className="ml-2">Z: <input type="number" value={posZ} onChange={(e) => setPosZ(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                        <label className="flex items-center">X: <input type="number" value={posX} onChange={(e) => setPosX(Number(e.target.value))} className="border px-2 py-1 w-20 max-w-full ml-1" /></label>
+                        <label className="flex items-center ml-0 sm:ml-2">Y: <input type="number" value={posY} onChange={(e) => setPosY(Number(e.target.value))} className="border px-2 py-1 w-20 max-w-full ml-1" /></label>
+                        <label className="flex items-center ml-0 sm:ml-2">Z: <input type="number" value={posZ} onChange={(e) => setPosZ(Number(e.target.value))} className="border px-2 py-1 w-20 max-w-full ml-1" /></label>
+                    </div>
                 </div>
 
                 <div>
                     <h2 className="font-bold mb-1">Negative Charge Position:</h2>
-                    <label>X: <input type="number" value={negX} onChange={(e) => setNegX(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
-                    <label className="ml-2">Y: <input type="number" value={negY} onChange={(e) => setNegY(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
-                    <label className="ml-2">Z: <input type="number" value={negZ} onChange={(e) => setNegZ(Number(e.target.value))} className="border px-2 py-1 w-20" /></label>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                        <label className="flex items-center">X: <input type="number" value={negX} onChange={(e) => setNegX(Number(e.target.value))} className="border px-2 py-1 w-20 max-w-full ml-1" /></label>
+                        <label className="flex items-center ml-0 sm:ml-2">Y: <input type="number" value={negY} onChange={(e) => setNegY(Number(e.target.value))} className="border px-2 py-1 w-20 max-w-full ml-1" /></label>
+                        <label className="flex items-center ml-0 sm:ml-2">Z: <input type="number" value={negZ} onChange={(e) => setNegZ(Number(e.target.value))} className="border px-2 py-1 w-20 max-w-full ml-1" /></label>
+                    </div>
                 </div>
 
-                <div className="flex gap-4">
-                    <label><input type="checkbox" checked={showField} onChange={(e) => setShowField(e.target.checked)} /> Show Electric Field</label>
-                    <label><input type="checkbox" checked={showDipoleVector} onChange={(e) => setShowDipoleVector(e.target.checked)} /> Show Dipole Vector</label>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2">
+                    <label className="flex items-center"><input type="checkbox" checked={showField} onChange={(e) => setShowField(e.target.checked)} className="mr-1" /> Show Electric Field</label>
+                    <label className="flex items-center"><input type="checkbox" checked={showDipoleVector} onChange={(e) => setShowDipoleVector(e.target.checked)} className="mr-1" /> Show Dipole Vector</label>
                 </div>
             </div>
 
-            <div>
+            <div className="w-full max-w-4xl">
                 <label>Electric Dipole = ({dipoleVector.getComponent(0).toFixed(2)}, {dipoleVector.getComponent(1).toFixed(2)}, {dipoleVector.getComponent(2).toFixed(2)})</label>
                 <br />
                 <label>Electric Field at point P due to Electric Dipole (E) = ({E_total.getComponent(0).toFixed(2)}, {E_total.getComponent(1).toFixed(2)}, {E_total.getComponent(2).toFixed(2)})</label>
@@ -191,8 +199,8 @@ function ElectricDipoleVisualizer() {
                 <label>Electric Field at point P due to Electric Dipole (V) = {V_total}</label>
             </div>
 
-            <div className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-6" style={{ height: 500, width: 800, zIndex: 0 }}>
-                <Canvas style={{ height: '100%', width: '100%' }} camera={{position: [2, 4, 5]}}>
+            <div className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-6 w-full max-w-4xl aspect-video bg-white" style={{ zIndex: 0 }}>
+                <Canvas className="!h-full !w-full" camera={{position: [2, 4, 5]}}>
                     <ambientLight intensity={0.5} />
                     <pointLight position={[10, 10, 10]} />
                     <OrbitControls />

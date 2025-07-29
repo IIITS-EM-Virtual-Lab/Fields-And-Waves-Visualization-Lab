@@ -41,8 +41,8 @@ function AmpereLawVisualizer() {
     }, [Bmag]);
 
     return (
-        <div className="flex flex-col items-center gap-4 p-4">
-            <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col items-center gap-4 p-2 sm:p-4 w-full">
+            <div className="w-full max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <h2 className="font-bold mb-2">Input Parameters:</h2>
                     <label className="block mb-2">

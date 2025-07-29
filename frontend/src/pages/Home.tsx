@@ -97,7 +97,7 @@ const Home = () => {
     <div className="flex flex-col min-h-screen bg-white">
       <main className="flex-grow">
         {/* Hero Section */}
-        <div className="flex flex-col lg:flex-row items-center min-h-[60vh] lg:h-[70vh] px-4 sm:px-6 lg:px-12 py-8 lg:py-0">
+        <div className="flex flex-col lg:flex-row items-center min-h-[60vh] lg:h-[70vh] px-4 sm:px-6 md:px-10 lg:px-12 py-8 md:py-12 lg:py-0 gap-8 lg:gap-0">
           <div className="w-full lg:w-1/2 flex flex-col items-center order-2 lg:order-1 mt-6 lg:mt-[42px]">
             <img
               src="/JC Bose.jpeg"
@@ -107,17 +107,17 @@ const Home = () => {
             <p className="text-sm sm:text-base text-gray-900 font-bold">Sir J.C. Bose</p>
           </div>
 
-          <div className="w-full lg:w-1/2 space-y-3 order-1 lg:order-2 text-center lg:text-left">
-            <h1 className="text-2xl sm:text-3xl lg:text-[2.4rem] font-serif leading-tight lg:leading-snug text-gray-900">
+          <div className="w-full lg:w-1/2 space-y-3 order-1 lg:order-2 text-center lg:text-left px-2 sm:px-4 md:px-8 lg:px-0">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.4rem] font-serif leading-tight lg:leading-snug text-gray-900">
               For curious minds, passionate<br />educators, and future engineers.
             </h1>
-            <p className="text-base sm:text-lg font-serif font-light text-gray-700">
+            <p className="text-base sm:text-lg md:text-xl font-serif font-light text-gray-700">
               <span className="relative inline-block">
                 Master electromagnetics — visually, interactively, and with purpose.
                 <span className="absolute left-0 bottom-0 w-full h-[2px] bg-green-300"></span>
               </span>
             </p>
-            <p className="text-sm sm:text-base lg:text-[1.05rem] font-light text-gray-700 max-w-md mx-auto lg:mx-0 leading-6 lg:leading-7">
+            <p className="text-sm sm:text-base md:text-lg lg:text-[1.05rem] font-light text-gray-700 max-w-md mx-auto lg:mx-0 leading-6 lg:leading-7">
               An open visualisation lab to explore, experiment, and understand the
               forces that shape our world.
             </p>

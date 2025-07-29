@@ -40,9 +40,9 @@ function CylindricalVisualizer() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4">
-      <div className="relative overflow-hidden rounded-lg border-2 border-blue-600" style={{ height: 500, width: 800, zIndex: 0 }}>
-        <Canvas style={{ height: '100%', width: '100%' }} camera={{position: [6, 2, 0]}}>
+    <div className="flex flex-col items-center gap-4 p-4 w-full">
+      <div className="relative overflow-hidden rounded-lg border-2 border-blue-600 w-full max-w-4xl aspect-video bg-white" style={{ zIndex: 0 }}>
+        <Canvas className="!h-full !w-full" camera={{position: [6, 2, 0]}}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
           <OrbitControls />
@@ -63,7 +63,7 @@ function CylindricalVisualizer() {
             <div style={{ color: 'purple', whiteSpace: 'nowrap', userSelect: 'none', fontSize: '20px' }}>&rho; = {rho.toFixed(2)}</div>
           </Html>
           <Html position={[0.7 * Math.cos(phi / 2), 0.7 * Math.sin(phi / 2), 0]} center distanceFactor={8}>
-            <div style={{ color: 'blue', whiteSpace: 'nowrap', userSelect: 'none', fontSize: '20px' }}>&phi; = {(phi * 180 / Math.PI).toFixed(1)}°</div>
+            <div style={{ color: 'blue', whiteSpace: 'nowrap', userSelect: 'none', fontSize: '20px' }}>&phi; = {(phi * 180 / Math.PI).toFixed(1)}0</div>
           </Html>
           <Html position={[x, y, z / 2]} center distanceFactor={8}>
             <div style={{ color: 'green', whiteSpace: 'nowrap', userSelect: 'none', fontSize: '20px' }}>z = {z.toFixed(2)}</div>
@@ -71,22 +71,22 @@ function CylindricalVisualizer() {
         </Canvas>
       </div>
 
-      <div className="flex gap-8 text-sm mt-4">
-        <div>
+      <div className="flex flex-col md:flex-row gap-8 text-sm mt-4 w-full max-w-4xl">
+        <div className="flex-1">
           <h2 className="font-bold mb-2">Cartesian Coordinates:</h2>
-          <div className="flex gap-4">
-            <label>X: <input type="number" value={x} onChange={(e) => { setX(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20" /></label>
-            <label>Y: <input type="number" value={y} onChange={(e) => { setY(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20" /></label>
-            <label>Z: <input type="number" value={z} onChange={(e) => { setZ(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20" /></label>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+            <label className="flex items-center">X: <input type="number" value={x} onChange={(e) => { setX(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
+            <label className="flex items-center">Y: <input type="number" value={y} onChange={(e) => { setY(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
+            <label className="flex items-center">Z: <input type="number" value={z} onChange={(e) => { setZ(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
           </div>
         </div>
 
-        <div>
+        <div className="flex-1">
           <h2 className="font-bold mb-2">Cylindrical Coordinates:</h2>
-          <div className="flex gap-4">
-            <label>&rho;: <input type="number" value={rho.toFixed(2)} onChange={(e) => { setRho(Number(e.target.value)); setLastChanged('cylindrical'); }} className="border p-1 ml-1 w-20" /></label>
-            <label>&phi;&deg;: <input type="number" value={(phi * 180 / Math.PI).toFixed(2)} onChange={(e) => { setPhi(Number(e.target.value) * Math.PI / 180); setLastChanged('cylindrical'); }} className="border p-1 ml-1 w-20" /></label>
-            <label>Z: <input type="number" value={z} onChange={(e) => { setZ(Number(e.target.value)); setLastChanged('cylindrical'); }} className="border p-1 ml-1 w-20" /></label>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+            <label className="flex items-center">&rho;: <input type="number" value={rho.toFixed(2)} onChange={(e) => { setRho(Number(e.target.value)); setLastChanged('cylindrical'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
+            <label className="flex items-center">&phi;&deg;: <input type="number" value={(phi * 180 / Math.PI).toFixed(2)} onChange={(e) => { setPhi(Number(e.target.value) * Math.PI / 180); setLastChanged('cylindrical'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
+            <label className="flex items-center">Z: <input type="number" value={z} onChange={(e) => { setZ(Number(e.target.value)); setLastChanged('cylindrical'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
           </div>
         </div>
       </div>

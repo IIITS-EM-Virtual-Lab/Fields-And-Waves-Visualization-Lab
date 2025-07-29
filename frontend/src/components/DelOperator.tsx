@@ -45,18 +45,18 @@ function DelOperator() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4">
-        <div className="flex gap-4">
-            <div>
+    <div className="flex flex-col items-center gap-4 p-2 sm:p-4 w-full">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl">
+            <div className="flex-1">
                 <h2 className="font-bold">Scalar Field F(x, y, z):</h2>
-                <input type="text" value={scalarField} onChange={(e) => setScalarField(e.target.value)} className="border p-1 w-60" />
+                <input type="text" value={scalarField} onChange={(e) => setScalarField(e.target.value)} className="border p-1 w-full min-w-0" />
             </div>
-            <div>
+            <div className="flex-1">
                 <h2 className="font-bold">Vector Field F(x, y, z):</h2>
-                <div className="flex gap-2">
-                    <input value={vectorField[0]} onChange={(e) => setVectorField([e.target.value, vectorField[1], vectorField[2]])} className="border p-1 w-20" />
-                    <input value={vectorField[1]} onChange={(e) => setVectorField([vectorField[0], e.target.value, vectorField[2]])} className="border p-1 w-20" />
-                    <input value={vectorField[2]} onChange={(e) => setVectorField([vectorField[0], vectorField[1], e.target.value])} className="border p-1 w-20" />
+                <div className="flex gap-2 w-full">
+                    <input value={vectorField[0]} onChange={(e) => setVectorField([e.target.value, vectorField[1], vectorField[2]])} className="border p-1 w-full min-w-0" />
+                    <input value={vectorField[1]} onChange={(e) => setVectorField([vectorField[0], e.target.value, vectorField[2]])} className="border p-1 w-full min-w-0" />
+                    <input value={vectorField[2]} onChange={(e) => setVectorField([vectorField[0], vectorField[1], e.target.value])} className="border p-1 w-full min-w-0" />
                 </div>
             </div>
             <div>
