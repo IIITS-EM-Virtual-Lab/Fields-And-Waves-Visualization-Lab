@@ -49,7 +49,7 @@ function FaradayVisualizer() {
     }, [areaVector]);
 
     return (
-        <div className="flex flex-col items-center gap-4 p-4 w-full">
+        <div className="flex flex-col items-center gap-4 p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-5xl">
                 <div>
                     <h2 className="font-bold mb-2">Magnetic Field (B):</h2>
@@ -100,10 +100,10 @@ function FaradayVisualizer() {
                             <h2 className="font-bold mb-2">Time-Varying Field Equations (when animated):</h2>
                             <div><strong>B(t)</strong> = sin(t) ẑ</div>
                             <div><strong>Φ(t)</strong> = sin(t)</div>
-                            <div><strong>ℰ(t)</strong> = -cos(t)</div>
+                            <div><strong>Ɛ(t)</strong> = -cos(t)</div>
                             <div>At time t = {time.toFixed(2)} s</div>
                             <div>Φ(t) = {Math.sin(time).toFixed(3)} Wb</div>
-                            <div>ℰ(t) = {-Math.cos(time).toFixed(3)} V</div>
+                            <div>Ɛ(t) = {-Math.cos(time).toFixed(3)} V</div>
                         </div>
                     )}
                     {animateRing && (
@@ -111,10 +111,10 @@ function FaradayVisualizer() {
                             <h2 className="font-bold mb-2">Rotating Ring Equations:</h2>
                             <div><strong>A(t)</strong> = A [0, sin(t), cos(t)]</div>
                             <div><strong>Φ(t)</strong> = B·A = Bz * cos(t)</div>
-                            <div><strong>ℰ(t)</strong> = Bz * sin(t)</div>
+                            <div><strong>Ɛ(t)</strong> = Bz * sin(t)</div>
                             <div>At time t = {time.toFixed(2)} s</div>
                             <div>Φ(t) = {(B.z * Math.cos(time)).toFixed(3)} Wb</div>
-                            <div>ℰ(t) = {(B.z * Math.sin(time)).toFixed(3)} V</div>
+                            <div>Ɛ(t) = {(B.z * Math.sin(time)).toFixed(3)} V</div>
                         </div>
                     )}
                     <label className="block">
@@ -144,12 +144,12 @@ function FaradayVisualizer() {
                 <div className="bg-white border rounded p-4 shadow">
                     <h2 className="font-bold mb-2">Flux & EMF</h2>
                     <div>Magnetic Flux (Φ): {flux.toExponential(3)} Wb</div>
-                    <div>Induced EMF (ℰ): {emf.toFixed(3)} V</div>
+                    <div>Induced EMF (Ɛ): {emf.toFixed(3)} V</div>
                 </div>
             </div>
 
-            <div className="mt-4 relative overflow-hidden rounded-lg border-2 border-blue-600 w-full max-w-4xl aspect-video bg-white" style={{ zIndex: 0 }}>
-                <Canvas className="!h-full !w-full" camera={{position: [5, 2, 5]}}>
+            <div className="mt-4 relative overflow-hidden rounded-lg border-2 border-blue-600" style={{ height: 500, width: 800, zIndex: 0 }}>
+                <Canvas camera={{position: [5, 2, 5]}}>
                     <ambientLight intensity={0.5} />
                     <pointLight position={[10, 10, 10]} />
                     <OrbitControls />
