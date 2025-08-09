@@ -68,7 +68,7 @@ function FaradayVisualizer() {
                         <span className="ml-2">{bMagnitude.toFixed(2)}</span>
                     </label>
                     <label className="block mb-2">
-                        Angle (b8) between B and A:
+                        Angle (θ) between B and A:
                         <input
                             type="range"
                             min="0"
@@ -100,10 +100,10 @@ function FaradayVisualizer() {
                             <h2 className="font-bold mb-2">Time-Varying Field Equations (when animated):</h2>
                             <div><strong>B(t)</strong> = sin(t) ẑ</div>
                             <div><strong>Φ(t)</strong> = sin(t)</div>
-                            <div><strong>ℰ(t)</strong> = -cos(t)</div>
+                            <div><strong>Ɛ(t)</strong> = -cos(t)</div>
                             <div>At time t = {time.toFixed(2)} s</div>
                             <div>Φ(t) = {Math.sin(time).toFixed(3)} Wb</div>
-                            <div>ℰ(t) = {-Math.cos(time).toFixed(3)} V</div>
+                            <div>Ɛ(t) = {-Math.cos(time).toFixed(3)} V</div>
                         </div>
                     )}
                     {animateRing && (
@@ -111,10 +111,10 @@ function FaradayVisualizer() {
                             <h2 className="font-bold mb-2">Rotating Ring Equations:</h2>
                             <div><strong>A(t)</strong> = A [0, sin(t), cos(t)]</div>
                             <div><strong>Φ(t)</strong> = B·A = Bz * cos(t)</div>
-                            <div><strong>ℰ(t)</strong> = Bz * sin(t)</div>
+                            <div><strong>Ɛ(t)</strong> = Bz * sin(t)</div>
                             <div>At time t = {time.toFixed(2)} s</div>
                             <div>Φ(t) = {(B.z * Math.cos(time)).toFixed(3)} Wb</div>
-                            <div>ℰ(t) = {(B.z * Math.sin(time)).toFixed(3)} V</div>
+                            <div>Ɛ(t) = {(B.z * Math.sin(time)).toFixed(3)} V</div>
                         </div>
                     )}
                     <label className="block">
