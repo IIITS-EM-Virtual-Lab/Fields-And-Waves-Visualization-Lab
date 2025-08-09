@@ -47,17 +47,17 @@ function GaussLawVisualizer() {
   }, [charge, surfaceRadius, chargeValue]);
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4 w-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl w-full">
+    <div className="flex flex-col items-center gap-4 p-4">
+      <div className="grid grid-cols-2 gap-4 max-w-4xl w-full">
         <div>
           <h2 className="font-bold mb-1">Point Charge:</h2>
           <label>Charge (C):
-            <input type="number" value={chargeValue} onChange={(e) => setChargeValue(Number(e.target.value))} className="border px-2 py-1 w-32 max-w-full ml-2" step="1e-9" />
+            <input type="number" value={chargeValue} onChange={(e) => setChargeValue(Number(e.target.value))} className="border px-2 py-1 w-32 ml-2" step="1e-9" />
           </label>
-          <div className="mt-2 flex flex-col sm:flex-row gap-2 sm:gap-2">
-            <label className="flex items-center">X: <input type="number" value={chargePosition[0]} onChange={(e) => setChargePosition([+e.target.value, chargePosition[1], chargePosition[2]])} className="border w-20 max-w-full px-2 py-1 ml-1" /></label>
-            <label className="flex items-center">Y: <input type="number" value={chargePosition[1]} onChange={(e) => setChargePosition([chargePosition[0], +e.target.value, chargePosition[2]])} className="border w-20 max-w-full px-2 py-1 ml-1" /></label>
-            <label className="flex items-center">Z: <input type="number" value={chargePosition[2]} onChange={(e) => setChargePosition([chargePosition[0], chargePosition[1], +e.target.value])} className="border w-20 max-w-full px-2 py-1 ml-1" /></label>
+          <div className="mt-2">
+            <label>X: <input type="number" value={chargePosition[0]} onChange={(e) => setChargePosition([+e.target.value, chargePosition[1], chargePosition[2]])} className="border w-20 px-2 py-1 ml-1" /></label>
+            <label className="ml-2">Y: <input type="number" value={chargePosition[1]} onChange={(e) => setChargePosition([chargePosition[0], +e.target.value, chargePosition[2]])} className="border w-20 px-2 py-1 ml-1" /></label>
+            <label className="ml-2">Z: <input type="number" value={chargePosition[2]} onChange={(e) => setChargePosition([chargePosition[0], chargePosition[1], +e.target.value])} className="border w-20 px-2 py-1 ml-1" /></label>
           </div>
         </div>
 
@@ -72,8 +72,8 @@ function GaussLawVisualizer() {
         <span className="font-bold">Electric Flux: </span>Φ = {flux.toExponential(3)} N.m²/C
       </div>
 
-      <div className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-6 w-full max-w-4xl aspect-video bg-white" style={{ zIndex: 0 }}>
-        <Canvas className="!h-full !w-full">
+      <div className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-6" style={{ height: 500, width: 800, zIndex: 0 }}>
+        <Canvas style={{ height: '100%', width: '100%' }}>
           <ambientLight intensity={0.4} />
           <pointLight position={[10, 10, 10]} />
           <OrbitControls />

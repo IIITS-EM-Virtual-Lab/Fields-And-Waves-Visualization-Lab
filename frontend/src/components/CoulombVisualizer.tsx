@@ -84,7 +84,7 @@ function CoulombVisualizer() {
     }, []);
 
     return (
-        <div className="relative overflow-hidden w-full h-screen bg-white border-2 border-blue-600 z-0">
+        <div className="relative overflow-hidden w-full h-screen relative bg-white border-2 border-blue-600 z-0">
             <Canvas onCreated={({ camera }) => ((window as any).camera = camera)} camera={{position: [7, 7, 7]}}>
                 <ambientLight intensity={0.5} />
                 <pointLight position={[10, 10, 10]} />
@@ -106,7 +106,7 @@ function CoulombVisualizer() {
                 <FieldVisualizer charges={charges} visible={showField} arrowColor="gray" />
             </Canvas>
 
-            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-white p-2 rounded shadow-md max-w-[90vw]">
+            <div className="absolute top-4 left-4 bg-white p-2 rounded shadow-md">
                 <label className="flex items-center gap-2">
                     <input
                         type="checkbox"
@@ -117,7 +117,7 @@ function CoulombVisualizer() {
                 </label>
             </div>
 
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-white rounded-lg p-2 sm:p-4 shadow-md flex flex-wrap items-center gap-2 sm:gap-4 max-w-[98vw]">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white rounded-lg p-4 shadow-md flex items-center gap-4">
                 <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-green-600"></div>
                     <button onClick={() => addNewCharge(1)} className="px-2 py-1 bg-blue-200 rounded">Add +</button>
@@ -131,7 +131,7 @@ function CoulombVisualizer() {
                     value={inputCharge}
                     min={0}
                     onChange={(e) => setInputCharge(parseFloat(e.target.value))}
-                    className="border px-2 py-1 w-16 sm:w-20 min-w-0"
+                    className="border px-2 py-1 w-20"
                 />
                 <button
                     onClick={() => setTrashMode((prev) => !prev)}

@@ -29,8 +29,8 @@ function ElectricPotentialVisualizer() {
   }, [q, distance]);
 
   return (
-    <div className="flex flex-col items-center gap-4 p-2 sm:p-4 w-full">
-      <div className="grid grid-cols-1 gap-4 w-full max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl">
+    <div className="flex flex-col items-center gap-4 p-4">
+      <div className="grid grid-cols-1 gap-4 w-full max-w-4xl">
         <div>
           <h2 className="font-bold mb-1">Point Charge:</h2>
           <label>q (C): <input type="number" value={q} step={1e-9} onChange={(e) => setQ(Number(e.target.value))} className="border px-2 py-1 w-32" /></label>
@@ -51,7 +51,7 @@ function ElectricPotentialVisualizer() {
         </div>
       </div>
 
-      <div className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-6 w-full aspect-video max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl" style={{ zIndex: 0 }}>
+      <div className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-6" style={{ height: 500, width: 800, zIndex: 0 }}>
         <Canvas style={{ height: '100%', width: '100%' }} camera={{position: [2, 4, 5]}}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />

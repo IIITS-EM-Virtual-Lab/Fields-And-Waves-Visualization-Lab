@@ -56,9 +56,9 @@ function SphericalVisualizer() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4 w-full">
-      <div className="relative overflow-hidden rounded-lg border-2 border-blue-600 w-full max-w-4xl aspect-video bg-white" style={{ zIndex: 0 }}>
-        <Canvas className="!h-full !w-full" camera={{position: [5, 2, 5]}}>
+    <div className="flex flex-col items-center gap-4 p-4">
+      <div className="relative overflow-hidden rounded-lg border-2 border-blue-600" style={{ height: 500, width: 800, zIndex: 0 }}>
+        <Canvas style={{ height: '100%', width: '100%' }} camera={{position: [5, 2, 5]}}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
           <OrbitControls />
@@ -87,22 +87,22 @@ function SphericalVisualizer() {
         </Canvas>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8 text-sm mt-4 w-full max-w-4xl">
-        <div className="flex-1">
+      <div className="flex gap-8 text-sm mt-4">
+        <div>
           <h2 className="font-bold mb-2">Cartesian Coordinates:</h2>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-            <label className="flex items-center">X: <input type="number" value={x.toFixed(2)} onChange={(e) => { setX(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
-            <label className="flex items-center">Y: <input type="number" value={y.toFixed(2)} onChange={(e) => { setY(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
-            <label className="flex items-center">Z: <input type="number" value={z.toFixed(2)} onChange={(e) => { setZ(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
+          <div className="flex gap-4">
+            <label>X: <input type="number" value={x.toFixed(2)} onChange={(e) => { setX(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20" /></label>
+            <label>Y: <input type="number" value={y.toFixed(2)} onChange={(e) => { setY(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20" /></label>
+            <label>Z: <input type="number" value={z.toFixed(2)} onChange={(e) => { setZ(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20" /></label>
           </div>
         </div>
 
-        <div className="flex-1">
+        <div>
           <h2 className="font-bold mb-2">Spherical Coordinates:</h2>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-            <label className="flex items-center">r: <input type="number" value={r.toFixed(2)} onChange={(e) => { setR(Number(e.target.value)); setLastChanged('spherical'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
-            <label className="flex items-center">&theta;&deg;: <input type="number" value={(theta * 180 / Math.PI).toFixed(2)} onChange={(e) => { setTheta(Number(e.target.value) * Math.PI / 180); setLastChanged('spherical'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
-            <label className="flex items-center">&phi;&deg;: <input type="number" value={(phi * 180 / Math.PI).toFixed(2)} onChange={(e) => { setPhi(Number(e.target.value) * Math.PI / 180); setLastChanged('spherical'); }} className="border p-1 ml-1 w-20 max-w-full" /></label>
+          <div className="flex gap-4">
+            <label>r: <input type="number" value={r.toFixed(2)} onChange={(e) => { setR(Number(e.target.value)); setLastChanged('spherical'); }} className="border p-1 ml-1 w-20" /></label>
+            <label>&theta;&deg;: <input type="number" value={(theta * 180 / Math.PI).toFixed(2)} onChange={(e) => { setTheta(Number(e.target.value) * Math.PI / 180); setLastChanged('spherical'); }} className="border p-1 ml-1 w-20" /></label>
+            <label>&phi;&deg;: <input type="number" value={(phi * 180 / Math.PI).toFixed(2)} onChange={(e) => { setPhi(Number(e.target.value) * Math.PI / 180); setLastChanged('spherical'); }} className="border p-1 ml-1 w-20" /></label>
           </div>
         </div>
       </div>

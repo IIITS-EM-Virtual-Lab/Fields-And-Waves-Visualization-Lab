@@ -193,9 +193,9 @@ const Navbar = () => {
 
   return (
     <header className="bg-white fixed top-0 left-0 w-full z-50 border-b border-gray-200 font-sans">
-      <div className="max-w-full md:max-w-[1200px] mx-auto h-[60px] md:h-[72px] flex items-center justify-between px-3 sm:px-5 text-[16px] md:text-[18px] text-[#1a1a1a]">
+      <div className="max-w-[1200px] mx-auto h-[72px] flex items-center justify-between px-5 text-[18px] text-[#1a1a1a]">
         {/* Desktop Layout */}
-        <div className="hidden md:flex items-center gap-4 lg:gap-6 relative">
+        <div className="hidden md:flex items-center gap-6 relative">
           {/* Explore Dropdown */}
           <div ref={dropdownRef}>
             <button
@@ -206,7 +206,7 @@ const Navbar = () => {
             </button>
 
             {showExplore && (
-              <div className="absolute top-[48px] left-0 w-screen max-w-[95vw] md:w-[810px] bg-white border border-gray-200 shadow-xl p-4 md:p-6 flex flex-col md:flex-row gap-6 md:gap-12 text-sm z-50">
+              <div className="absolute top-[48px] left-0 w-[810px] bg-white border border-gray-200 shadow-xl p-6 flex gap-12 text-sm z-50">
                 {exploreModules.map((mod, i) => (
                   <div key={i}>
                     <h4
@@ -239,7 +239,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Search */}
-          <div ref={searchRef} className="flex items-center border border-[#0f172a] rounded px-2 md:px-3 py-1 md:py-1.5 relative w-32 md:w-auto">
+          <div ref={searchRef} className="flex items-center border border-[#0f172a] rounded px-3 py-1.5 relative">
             <Search size={18} className="text-[#2563eb] mr-2" />
             <input
               type="text"
@@ -247,12 +247,12 @@ const Navbar = () => {
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               onKeyDown={handleSearchSubmit}
-              className="outline-none text-[15px] md:text-[16px] text-[#2563eb] bg-transparent w-20 md:w-36 font-medium"
+              className="outline-none text-[16px] text-[#2563eb] bg-transparent w-36 font-medium"
             />
             
             {/* Search Results Dropdown */}
             {showSearchResults && searchResults.length > 0 && (
-              <div className="absolute top-[45px] left-0 w-[90vw] max-w-[300px] bg-white border border-gray-200 shadow-xl max-h-[400px] overflow-y-auto z-50">
+              <div className="absolute top-[45px] left-0 w-[300px] bg-white border border-gray-200 shadow-xl max-h-[400px] overflow-y-auto z-50">
                 {searchResults.map((result, index) => (
                   <div
                     key={index}
@@ -272,7 +272,7 @@ const Navbar = () => {
             
             {/* No Results Message */}
             {showSearchResults && searchResults.length === 0 && searchQuery.trim() !== "" && (
-              <div className="absolute top-[45px] left-0 w-[90vw] max-w-[300px] bg-white border border-gray-200 shadow-xl z-50">
+              <div className="absolute top-[45px] left-0 w-[300px] bg-white border border-gray-200 shadow-xl z-50">
                 <div className="px-4 py-3 text-[#666] text-[14px]">
                   No results found for "{searchQuery}"
                 </div>
@@ -282,7 +282,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Layout - Left Side */}
-        <div className="flex md:hidden items-center gap-2 sm:gap-3">
+        <div className="flex md:hidden items-center gap-3">
           {/* Logo and Name */}
           <div
             className="flex items-center gap-2 cursor-pointer"
@@ -296,15 +296,15 @@ const Navbar = () => {
               }
             }}
           >
-            <img src="/fwvlab.png" alt="Logo" className="h-7 w-7 sm:h-8 sm:w-8" />
-            <h1 className="text-[#a00032] font-lato font-bold text-[12px] sm:text-[14px] leading-tight">
+            <img src="/fwvlab.png" alt="Logo" className="h-8 w-8" />
+            <h1 className="text-[#a00032] font-lato font-bold text-[14px] leading-tight">
               Fields and Waves<br/>Visualization Lab
             </h1>
           </div>
         </div>
 
         {/* Desktop Center Logo */}
-        <div className="hidden md:flex items-center gap-2 md:ml-[-80px] cursor-pointer"
+        <div className="hidden md:flex items-center gap-2 ml-[-80px] cursor-pointer"
           onClick={() => {
             if (!isAuthenticated) {
               navigate("/");
@@ -315,14 +315,14 @@ const Navbar = () => {
             }
           }}
         >
-          <img src="/fwvlab.png" alt="Logo" className="h-8 w-9 lg:h-10 lg:w-11" />
-          <h1 className="text-[#a00032] font-lato font-bold text-[15px] lg:text-[18px]">
+          <img src="/fwvlab.png" alt="Logo" className="h-10 w-11" />
+          <h1 className="text-[#a00032] font-lato font-bold text-[18px]">
             Fields and Waves Visualization Lab
           </h1>
         </div>
 
         {/* Mobile Layout - Right Side */}
-        <div className="flex md:hidden items-center gap-2 sm:gap-3">
+        <div className="flex md:hidden items-center gap-3">
           {/* Search Icon */}
           <button
             onClick={() => setShowMobileSearch(true)}
@@ -341,7 +341,7 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Right Section */}
-        <div className="hidden md:flex items-center gap-3 lg:gap-4 text-[15px] md:text-[16px] font-semibold">
+        <div className="hidden md:flex items-center gap-4 text-[16px] font-semibold">
           {!isAuthenticated ? (
             <>
               <button onClick={() => navigate("/login")} className="text-[#2563eb] hover:underline">
@@ -407,7 +407,7 @@ const Navbar = () => {
 
       {/* Mobile Search Modal */}
       {showMobileSearch && (
-        <div className="fixed inset-0 bg-white z-50 md:hidden flex flex-col">
+        <div className="fixed inset-0 bg-white z-50 md:hidden">
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center gap-3">
               <button
@@ -416,7 +416,7 @@ const Navbar = () => {
               >
                 <X size={20} />
               </button>
-              <div className="flex-1 flex items-center border border-[#0f172a] rounded px-2 py-2">
+              <div className="flex-1 flex items-center border border-[#0f172a] rounded px-3 py-2">
                 <Search size={18} className="text-[#2563eb] mr-2" />
                 <input
                   type="text"
@@ -424,7 +424,7 @@ const Navbar = () => {
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
                   onKeyDown={handleSearchSubmit}
-                  className="outline-none text-[15px] sm:text-[16px] text-[#2563eb] bg-transparent flex-1 font-medium"
+                  className="outline-none text-[16px] text-[#2563eb] bg-transparent flex-1 font-medium"
                   autoFocus
                 />
               </div>
@@ -432,7 +432,7 @@ const Navbar = () => {
           </div>
           
           {/* Mobile Search Results */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex-1 overflow-y-auto">
             {searchResults.length > 0 ? (
               searchResults.map((result, index) => (
                 <div
@@ -459,12 +459,12 @@ const Navbar = () => {
 
       {/* Mobile Menu Modal */}
       {showMobileMenu && (
-        <div className="fixed inset-0 bg-white z-50 md:hidden flex flex-col">
+        <div className="fixed inset-0 bg-white z-50 md:hidden">
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <img src="/fwvlab.png" alt="Logo" className="h-7 w-7 sm:h-8 sm:w-8" />
-                <h1 className="text-[#a00032] font-lato font-bold text-[12px] sm:text-[14px] leading-tight">
+                <img src="/fwvlab.png" alt="Logo" className="h-8 w-8" />
+                <h1 className="text-[#a00032] font-lato font-bold text-[14px] leading-tight">
                   Fields and Waves<br/>Visualization Lab
                 </h1>
               </div>
@@ -477,7 +477,7 @@ const Navbar = () => {
             </div>
           </div>
           
-          <div className="flex-1 overflow-y-auto min-h-0 p-2 sm:p-4">
+          <div className="flex-1 overflow-y-auto p-4">
             {/* Authentication Section */}
             {!isAuthenticated ? (
               <div className="mb-6 pb-4 border-b border-gray-200">
@@ -526,12 +526,12 @@ const Navbar = () => {
             )}
 
             {/* Modules Section */}
-            <div className="space-y-1 sm:space-y-2">
+            <div className="space-y-2">
               {exploreModules.map((module, index) => (
                 <div key={index} className="border-b border-gray-100 last:border-b-0">
                   <button
                     onClick={() => toggleModuleExpansion(module.title)}
-                    className="w-full flex items-center justify-between py-2 sm:py-3 text-left text-[#1a1a1a] font-semibold text-[15px] sm:text-[16px] hover:text-[#2563eb]"
+                    className="w-full flex items-center justify-between py-3 text-left text-[#1a1a1a] font-semibold text-[16px] hover:text-[#2563eb]"
                   >
                     <span>{module.title}</span>
                     <ChevronDown 
@@ -543,12 +543,12 @@ const Navbar = () => {
                   </button>
                   
                   {expandedModules[module.title] && (
-                    <div className="pb-2 sm:pb-3 pl-2 sm:pl-4">
+                    <div className="pb-3 pl-4">
                       {module.items.map((item, itemIndex) => (
                         <button
                           key={itemIndex}
                           onClick={() => handleMobileNavigation(item.path)}
-                          className="w-full text-left py-1 sm:py-2 text-[#2563eb] text-[13px] sm:text-[14px] hover:underline"
+                          className="w-full text-left py-2 text-[#2563eb] text-[14px] hover:underline"
                         >
                           {item.name}
                         </button>

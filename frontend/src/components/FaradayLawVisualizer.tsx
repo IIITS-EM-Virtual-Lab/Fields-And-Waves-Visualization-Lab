@@ -68,7 +68,7 @@ function FaradayVisualizer() {
                         <span className="ml-2">{bMagnitude.toFixed(2)}</span>
                     </label>
                     <label className="block mb-2">
-                        Angle (θ) between B and A:
+                        Angle (b8) between B and A:
                         <input
                             type="range"
                             min="0"
