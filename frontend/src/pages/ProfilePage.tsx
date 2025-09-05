@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
-import { FaUser, FaCog, FaSignOutAlt, FaUsers, FaTrash, FaUserShield, FaQuestionCircle, FaEdit, FaPlus } from 'react-icons/fa';
+import { FaUser, FaCog, FaUsers, FaTrash, FaUserShield, FaQuestionCircle, FaEdit, FaPlus, FaBars, FaTimes } from 'react-icons/fa';
 import axios from 'axios';
 import './ProfilePage.css';
 
@@ -46,6 +46,7 @@ interface FeedbackEntry {
 const ProfilePage = () => {
   const { client, token } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState('profile');
+  const [sidebarOpen, setSidebarOpen] = useState(false); // NEW: mobile sidebar
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -54,13 +55,11 @@ const ProfilePage = () => {
   // Quiz management states
   const [selectedModule, setSelectedModule] = useState('');
   const [selectedChapter, setSelectedChapter] = useState('');
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null);
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [newQuestionType, setNewQuestionType] = useState<'MCQ' | 'BLANK'>('MCQ');
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const modules = [
@@ -131,29 +130,24 @@ const ProfilePage = () => {
   }, [activeTab, selectedModule, selectedChapter]);
 
   useEffect(() => {
-  if (activeTab === 'feedback') {
-    fetchFeedback();
-  }
-}, [activeTab]);
+    if (activeTab === 'feedback') {
+      fetchFeedback();
+    }
+  }, [activeTab]);
 
-const fetchFeedback = async () => {
-  try {
-    const response = await axios.get("https://fields-and-waves-visualization-lab.onrender.com/api/feedback");
-    setFeedbackList(response.data);
-  } catch (err) {
-    console.error("Error fetching feedback:", err);
-  }
-};
-
+  const fetchFeedback = async () => {
+    try {
+      const response = await axios.get("https://fields-and-waves-visualization-lab.onrender.com/api/feedback");
+      setFeedbackList(response.data);
+    } catch (err) {
+      console.error("Error fetching feedback:", err);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       setError('');
-      console.log('Token being sent:', token);
-      console.log('Token type:', typeof token);
-      console.log('Token length:', token ? token.length : 0);
-      
       const response = await axios.get('https://fields-and-waves-visualization-lab.onrender.com/api/users', {
         headers: {
           Authorization: `Bearer ${token}`
@@ -173,9 +167,9 @@ const fetchFeedback = async () => {
       setLoading(true);
       setError('');
       const response = await axios.get(
-  selectedChapter === '__module__'
-    ? `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/module/${selectedModule}/common`
-    : `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/module/${selectedModule}/chapter/${selectedChapter}`,
+        selectedChapter === '__module__'
+          ? `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/module/${selectedModule}/common`
+          : `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/module/${selectedModule}/chapter/${selectedChapter}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -185,7 +179,6 @@ const fetchFeedback = async () => {
       setCurrentQuiz(response.data.data);
     } catch (err: any) {
       if (err.response?.status === 404) {
-        // Quiz doesn't exist, create it
         try {
           const createResponse = await axios.post(
             'https://fields-and-waves-visualization-lab.onrender.com/api/quizzes',
@@ -202,7 +195,6 @@ const fetchFeedback = async () => {
           );
           setCurrentQuiz(createResponse.data.data);
         } catch (createErr: any) {
-          console.error('Create error response:', createErr.response); // Debug log
           setError('Failed to create quiz');
           console.error('Error creating quiz:', createErr);
         }
@@ -217,7 +209,6 @@ const fetchFeedback = async () => {
 
   const handleDeleteUser = async (userId: string) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
-
     try {
       await axios.delete(`https://fields-and-waves-visualization-lab.onrender.com/api/users/${userId}`, {
         headers: {
@@ -233,15 +224,12 @@ const fetchFeedback = async () => {
 
   const handleToggleAdmin = async (userId: string, currentAdminStatus: boolean) => {
     try {
-      await axios.patch(`https://fields-and-waves-visualization-lab.onrender.com/api/users/${userId}/toggle-admin`, 
+      await axios.patch(
+        `https://fields-and-waves-visualization-lab.onrender.com/api/users/${userId}/toggle-admin`,
         { isAdmin: !currentAdminStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setUsers(users.map(user => 
+      setUsers(users.map(user =>
         user._id === userId ? { ...user, isAdmin: !currentAdminStatus } : user
       ));
     } catch (err) {
@@ -256,11 +244,7 @@ const fetchFeedback = async () => {
     try {
       await axios.delete(
         `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/${currentQuiz._id}/questions/${questionId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setCurrentQuiz(prev => prev ? {
         ...prev,
@@ -277,13 +261,6 @@ const fetchFeedback = async () => {
     setShowAddQuestion(true);
   };
 
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
   const handleAddQuestion = async (questionData: FormData) => {
     if (!currentQuiz) return;
 
@@ -298,11 +275,7 @@ const fetchFeedback = async () => {
           }
         }
       );
-      
-      // Reset states
       setImagePreview(null);
-      
-      // Refresh quiz data
       fetchChapterQuiz();
       setShowAddQuestion(false);
       setEditingQuestion(null);
@@ -318,14 +291,14 @@ const fetchFeedback = async () => {
     return (
       <div className="quiz-management">
         <h2>Quiz Management</h2>
-        
+
         {/* Module and Chapter Selection */}
         <div className="quiz-selection">
-          <select 
-            value={selectedModule} 
+          <select
+            value={selectedModule}
             onChange={(e) => {
               setSelectedModule(e.target.value);
-              setSelectedChapter(''); // Reset chapter when module changes
+              setSelectedChapter('');
             }}
             className="module-select"
           >
@@ -351,22 +324,21 @@ const fetchFeedback = async () => {
               </option>
             ))}
           </select>
-
         </div>
 
-               {/* Quiz Content */}
+        {/* Quiz Content */}
         {selectedModule && selectedChapter && (
           <div className="quiz-content">
             <div className="quiz-header">
               <h3>
-                Questions for{" "}
-                {selectedChapter === "__module__"
+                Questions for{' '}
+                {selectedChapter === '__module__'
                   ? `${selectedModule.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} (Entire Module)`
                   : selectedChapter.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
                 }
               </h3>
 
-              <button 
+              <button
                 className="add-question-btn"
                 onClick={() => {
                   setEditingQuestion(null);
@@ -378,7 +350,7 @@ const fetchFeedback = async () => {
             </div>
 
             {error && <div className="error-message">{error}</div>}
-            
+
             {loading ? (
               <div className="loading">Loading questions...</div>
             ) : currentQuiz ? (
@@ -411,13 +383,13 @@ const fetchFeedback = async () => {
                       </div>
                     )}
                     <div className="question-actions">
-                      <button 
+                      <button
                         className="edit-btn"
                         onClick={() => handleEditQuestion(question)}
                       >
                         <FaEdit /> Edit
                       </button>
-                      <button 
+                      <button
                         className="delete-btn"
                         onClick={() => handleDeleteQuestion(question._id)}
                       >
@@ -437,12 +409,13 @@ const fetchFeedback = async () => {
 
         {/* Add/Edit Question Modal */}
         {showAddQuestion && (
-          <div className="modal">
+          <div className="modal" role="dialog" aria-modal="true" aria-label={editingQuestion ? 'Edit Question' : 'Add Question'}>
             <div className="modal-content">
               <div className="modal-header">
                 <h3>{editingQuestion ? 'Edit Question' : 'Add New Question'}</h3>
-                <button 
+                <button
                   className="close-btn"
+                  aria-label="Close"
                   onClick={() => {
                     setShowAddQuestion(false);
                     setEditingQuestion(null);
@@ -451,6 +424,7 @@ const fetchFeedback = async () => {
                   ×
                 </button>
               </div>
+
               <select
                 value={editingQuestion?.type || newQuestionType}
                 onChange={(e) => setNewQuestionType(e.target.value as 'MCQ' | 'BLANK')}
@@ -460,59 +434,55 @@ const fetchFeedback = async () => {
                 <option value="MCQ">Multiple Choice</option>
                 <option value="BLANK">Fill in the Blank</option>
               </select>
-              
-              {/* Question Form */}
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                
-                const questionImageInput = e.currentTarget.querySelector('input[name="questionImage"]') as HTMLInputElement;
-                const solutionImageInput = e.currentTarget.querySelector('input[name="solutionImage"]') as HTMLInputElement;
-                
-               const explanationValue = (formData.get('explanation') as string)?.trim();
 
-              const questionData = {
-                type: newQuestionType,
-                question: formData.get('question') as string,
-                options: newQuestionType === 'MCQ'
-                  ? (formData.get('options') as string).split('\n').filter(Boolean)
-                  : [],
-                correctAnswer: newQuestionType === 'MCQ'
-                  ? formData.get('correctAnswer') as string
-                  : (formData.get('correctAnswer') as string).split('\n').filter(Boolean),
-                explanation: explanationValue || '', // If empty, set as ''
-                difficulty: formData.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD',
-                points: Number(formData.get('points'))
-              };
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const questionData = {
+                    type: editingQuestion?.type || newQuestionType,
+                    question: (formData.get('question') as string) || '',
+                    options:
+                      (editingQuestion?.type || newQuestionType) === 'MCQ'
+                        ? ((formData.get('options') as string) || '')
+                            .split('\n').map(s => s.trim()).filter(Boolean)
+                        : [],
+                    correctAnswer:
+                      (editingQuestion?.type || newQuestionType) === 'MCQ'
+                        ? (formData.get('correctAnswer') as string)
+                        : ((formData.get('correctAnswer') as string) || '')
+                            .split('\n').map(s => s.trim()).filter(Boolean),
+                    explanation: ((formData.get('explanation') as string) || '').trim(),
+                    difficulty: formData.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD',
+                    points: Number(formData.get('points') || 1),
+                  };
 
+                  const apiFormData = new FormData();
+                  Object.entries(questionData).forEach(([key, value]) => {
+                    if ((key === 'options' || key === 'correctAnswer') && value !== undefined) {
+                      apiFormData.append(key, JSON.stringify(value));
+                    } else if (value !== undefined) {
+                      if (key === 'explanation' && !value) return;
+                      apiFormData.append(key, value as string);
+                    }
+                  });
 
-                const apiFormData = new FormData();
-                Object.entries(questionData).forEach(([key, value]) => {
-                  if ((key === 'options' || key === 'correctAnswer') && value !== undefined) {
-                    apiFormData.append(key, JSON.stringify(value));
-                  } else if (value !== undefined) {
-                    if (key === 'explanation' && !value) return; 
-                    apiFormData.append(key, value as string);
+                  const questionImageInput = e.currentTarget.querySelector('input[name="questionImage"]') as HTMLInputElement;
+                  const solutionImageInput = e.currentTarget.querySelector('input[name="solutionImage"]') as HTMLInputElement;
+
+                  if (questionImageInput?.files?.[0]) {
+                    apiFormData.append('questionImage', questionImageInput.files[0]);
                   }
-                });
+                  if (solutionImageInput?.files?.[0]) {
+                    apiFormData.append('solutionImage', solutionImageInput.files[0]);
+                  }
 
-                if (questionImageInput?.files?.[0]) {
-                  apiFormData.append('questionImage', questionImageInput.files[0]);
-                }
-                if (solutionImageInput?.files?.[0]) {
-                  apiFormData.append('solutionImage', solutionImageInput.files[0]);
-                }
+                  handleAddQuestion(apiFormData);
+                }}
+              >
+                <textarea name="question" placeholder="Enter your question" defaultValue={editingQuestion?.question} required />
 
-                handleAddQuestion(apiFormData);
-              }}>
-                <textarea
-                  name="question"
-                  placeholder="Enter your question"
-                  defaultValue={editingQuestion?.question}
-                  required
-                />
-                
-                {newQuestionType === 'MCQ' && (
+                {(editingQuestion?.type || newQuestionType) === 'MCQ' && (
                   <>
                     <textarea
                       name="options"
@@ -529,13 +499,12 @@ const fetchFeedback = async () => {
                     />
                   </>
                 )}
-                
-                {newQuestionType === 'BLANK' && (
+
+                {(editingQuestion?.type || newQuestionType) === 'BLANK' && (
                   <textarea
                     name="correctAnswer"
                     placeholder="Enter possible answers (one per line)"
-                    defaultValue={Array.isArray(editingQuestion?.correctAnswer) ? 
-                      editingQuestion.correctAnswer.join('\n') : ''}
+                    defaultValue={Array.isArray(editingQuestion?.correctAnswer) ? editingQuestion.correctAnswer.join('\n') : ''}
                     required
                   />
                 )}
@@ -546,24 +515,13 @@ const fetchFeedback = async () => {
                   defaultValue={editingQuestion?.explanation}
                 />
 
-                <select
-                  name="difficulty"
-                  defaultValue={editingQuestion?.difficulty || 'EASY'}
-                  required
-                >
+                <select name="difficulty" defaultValue={editingQuestion?.difficulty || 'EASY'} required>
                   <option value="EASY">Easy</option>
                   <option value="MEDIUM">Medium</option>
                   <option value="HARD">Hard</option>
                 </select>
-                
-                <input
-                  type="number"
-                  name="points"
-                  placeholder="Points"
-                  defaultValue={editingQuestion?.points || 1}
-                  min="1"
-                  required
-                />
+
+                <input type="number" name="points" placeholder="Points" defaultValue={editingQuestion?.points || 1} min="1" required />
 
                 <label>
                   Upload Question Image:
@@ -579,8 +537,8 @@ const fetchFeedback = async () => {
                   <button type="submit" className="save-btn">
                     {editingQuestion ? 'Update Question' : 'Add Question'}
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="cancel-btn"
                     onClick={() => {
                       setShowAddQuestion(false);
@@ -598,8 +556,7 @@ const fetchFeedback = async () => {
     );
   };
 
-  const renderFeedback = () => {
-  return (
+  const renderFeedback = () => (
     <div className="feedback-content">
       <h2>Received Feedback</h2>
       {feedbackList.length === 0 ? (
@@ -620,9 +577,6 @@ const fetchFeedback = async () => {
       )}
     </div>
   );
-};
-
-
 
   const renderContent = () => {
     switch (activeTab) {
@@ -667,7 +621,7 @@ const fetchFeedback = async () => {
               <div className="loading">Loading users...</div>
             ) : (
               <div className="users-table-container">
-                <table className="users-table">
+                <table className="users-table" role="table">
                   <thead>
                     <tr>
                       <th>Name</th>
@@ -679,15 +633,16 @@ const fetchFeedback = async () => {
                   <tbody>
                     {users.map(user => (
                       <tr key={user._id}>
-                        <td>{user.name}</td>
-                        <td>{user.email}</td>
-                        <td>{user.isAdmin ? 'Admin' : 'User'}</td>
-                        <td className="action-buttons">
+                        <td data-label="Name">{user.name}</td>
+                        <td data-label="Email">{user.email}</td>
+                        <td data-label="Role">{user.isAdmin ? 'Admin' : 'User'}</td>
+                        <td data-label="Actions" className="action-buttons">
                           <button
                             className={`action-button toggle-admin ${user.isAdmin ? 'disabled' : ''}`}
                             onClick={() => handleToggleAdmin(user._id, user.isAdmin)}
                             title={user.isAdmin ? "User is already an admin" : "Make Admin"}
                             disabled={user.isAdmin}
+                            aria-disabled={user.isAdmin}
                           >
                             <FaUserShield />
                           </button>
@@ -696,6 +651,7 @@ const fetchFeedback = async () => {
                             onClick={() => handleDeleteUser(user._id)}
                             title={user.isAdmin ? "Cannot delete admin user" : "Delete User"}
                             disabled={user.isAdmin}
+                            aria-disabled={user.isAdmin}
                           >
                             <FaTrash />
                           </button>
@@ -704,25 +660,83 @@ const fetchFeedback = async () => {
                     ))}
                   </tbody>
                 </table>
+
+                {/* Mobile cards (progressive enhancement via CSS display) */}
+                <div className="users-cards">
+                  {users.map(user => (
+                    <div key={user._id} className="user-card">
+                      <div className="uc-row"><span>Name</span><strong>{user.name}</strong></div>
+                      <div className="uc-row"><span>Email</span><strong>{user.email}</strong></div>
+                      <div className="uc-row"><span>Role</span><strong>{user.isAdmin ? 'Admin' : 'User'}</strong></div>
+                      <div className="uc-actions">
+                        <button
+                          className={`action-button toggle-admin ${user.isAdmin ? 'disabled' : ''}`}
+                          onClick={() => handleToggleAdmin(user._id, user.isAdmin)}
+                          title={user.isAdmin ? "User is already an admin" : "Make Admin"}
+                          disabled={user.isAdmin}
+                          aria-disabled={user.isAdmin}
+                        >
+                          <FaUserShield />
+                        </button>
+                        <button
+                          className={`action-button delete ${user.isAdmin ? 'disabled' : ''}`}
+                          onClick={() => handleDeleteUser(user._id)}
+                          title={user.isAdmin ? "Cannot delete admin user" : "Delete User"}
+                          disabled={user.isAdmin}
+                          aria-disabled={user.isAdmin}
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
               </div>
             )}
           </div>
         );
       case 'quizzes':
         return renderQuizManagement();
-      case 'feedback':  // fix here
+      case 'feedback':
         return renderFeedback();
-
       default:
         return null;
     }
   };
 
+  // Close sidebar on tab switch (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [activeTab]);
+
   return (
     <div className="profile-page">
-      <div className="sidebar">
+      {/* Mobile header with hamburger */}
+      <div className="mobile-topbar">
+        <button
+          className="hamburger-btn"
+          aria-label="Open menu"
+          onClick={() => setSidebarOpen(true)}
+        >
+          <FaBars />
+        </button>
+        <h1 className="topbar-title">Dashboard</h1>
+      </div>
+
+      {/* Backdrop for mobile sidebar */}
+      {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+
+      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <h3>Menu</h3>
+          <button
+            className="close-sidebar-btn"
+            aria-label="Close menu"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <FaTimes />
+          </button>
         </div>
         <div className="sidebar-items">
           {sidebarItems.map((item) => (
@@ -730,6 +744,9 @@ const fetchFeedback = async () => {
               key={item.id}
               className={`sidebar-item ${activeTab === item.id ? 'active' : ''}`}
               onClick={() => setActiveTab(item.id)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveTab(item.id)}
             >
               <span className="sidebar-icon">{item.icon}</span>
               <span className="sidebar-label">{item.label}</span>
@@ -737,6 +754,7 @@ const fetchFeedback = async () => {
           ))}
         </div>
       </div>
+
       <div className="main-content">
         {renderContent()}
       </div>
