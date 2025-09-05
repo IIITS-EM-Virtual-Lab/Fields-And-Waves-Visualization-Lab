@@ -32,7 +32,7 @@ function DisplacementCurrentVisualizer() {
     const displacementCurrent = useMemo(() => epsilon0 * dFluxDt, [dFluxDt]);
 
     return (
-        <div className="flex flex-col items-center gap-4 p-4">
+        <div className="flex flex-col items-center gap-4 p-4 w-full">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-5xl">
                 <div>
                     <h2 className="font-bold mb-2">Capacitor Settings:</h2>
@@ -50,7 +50,7 @@ function DisplacementCurrentVisualizer() {
                         <span className="ml-2">{plateDistance.toFixed(2)} m</span>
                     </label>
                     <label className="block mb-2">
-                        Voltage Amplitude (V₀):
+                        Voltage Amplitude (V):
                         <input
                         type="range"
                         min="1"
@@ -96,8 +96,8 @@ function DisplacementCurrentVisualizer() {
                 </div>
             </div>
 
-            <div className="mt-6 border-2 border-blue-600 rounded-lg overflow-hidden" style={{ height: 500, width: 800, zIndex: 0 }}>
-                <Canvas camera={{ position: [5, 0, 5], fov: 45 }}>
+            <div className="mt-6 border-2 border-blue-600 rounded-lg overflow-hidden w-full max-w-4xl aspect-video bg-white" style={{ zIndex: 0 }}>
+                <Canvas className="!h-full !w-full" camera={{ position: [5, 0, 5], fov: 45 }}>
                     <ambientLight intensity={0.5} />
                     <pointLight position={[10, 10, 10]} />
                     <OrbitControls />

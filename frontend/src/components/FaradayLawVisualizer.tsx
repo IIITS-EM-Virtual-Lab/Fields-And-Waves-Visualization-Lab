@@ -49,7 +49,7 @@ function FaradayVisualizer() {
     }, [areaVector]);
 
     return (
-        <div className="flex flex-col items-center gap-4 p-4">
+        <div className="flex flex-col items-center gap-4 p-4 w-full">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-5xl">
                 <div>
                     <h2 className="font-bold mb-2">Magnetic Field (B):</h2>
@@ -144,12 +144,12 @@ function FaradayVisualizer() {
                 <div className="bg-white border rounded p-4 shadow">
                     <h2 className="font-bold mb-2">Flux & EMF</h2>
                     <div>Magnetic Flux (Φ): {flux.toExponential(3)} Wb</div>
-                    <div>Induced EMF (Ɛ): {emf.toFixed(3)} V</div>
+                    <div>Induced EMF (ℰ): {emf.toFixed(3)} V</div>
                 </div>
             </div>
 
-            <div className="mt-4 relative overflow-hidden rounded-lg border-2 border-blue-600" style={{ height: 500, width: 800, zIndex: 0 }}>
-                <Canvas camera={{position: [5, 2, 5]}}>
+            <div className="mt-4 relative overflow-hidden rounded-lg border-2 border-blue-600 w-full max-w-4xl aspect-video bg-white" style={{ zIndex: 0 }}>
+                <Canvas className="!h-full !w-full" camera={{position: [5, 2, 5]}}>
                     <ambientLight intensity={0.5} />
                     <pointLight position={[10, 10, 10]} />
                     <OrbitControls />
