@@ -1,151 +1,129 @@
+/* ---------- Global & layout ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
 .wave-container {
-    margin: 1em;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    background-color: #f9f9f9;
-    color: #333;
+  width: 100%;
+  max-width: 1200px;
+  margin: 1rem auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #ffffff;
+  color: #1f2937;
+  line-height: 1.6;
+  overflow: visible;
 }
 
-.wave-container h1 {
-    font-size: 2.5em; /* Increased font size */
-    font-weight: bold;
-    margin-bottom: 20px;
-    text-align: center;
-    color: #1a202c;
-}
-
-.wave-container h2 {
-    font-size: 2em; /* Increased font size */
-    font-weight: bold;
-    margin-top: 20px;
-    margin-bottom: 40px; /* Added margin-bottom for gap between topics */
-    color: #2d3748;
-}
-
-.wave-container p {
-    font-size: 1em;
-    line-height: 1.6;
-    margin-bottom: 10px;
-    color: #4a5568;
-}
-
-.wave-container ul {
-    list-style-type: disc;
-    padding-left: 20px;
-    margin-bottom: 20px;
-}
-
-.wave-container li {
-    margin-bottom: 10px;
-}
-
-.wave-container img {
-    max-width: 100%;
-    height: auto;
-    margin: 10px 0;
-}
-
-.wave-container .iframe-container {
-    padding: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.wave-container iframe {
-    border: 1px solid #e4e4e4;
-    border-radius: 4px;
-}
-
+/* Headings */
+.wave-container h1,
 .wave-container .text-2xl {
-    font-size: 2em; /* Increased font size */
-    font-weight: bold;
-    margin-top: 20px;
-    color: #2d3748;
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0.25rem 0 0.75rem;
+  text-align: center;
+  color: #0b1320;
 }
-
+.wave-container h2,
 .wave-container .text-xl {
-    font-size: 1.75em; /* Increased font size */
-    font-weight: bold;
-    margin-top: 20px;
-    color: #2d3748;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
 }
 
-.wave-container .text-lg {
-    font-size: 1.25em; /* Increased font size */
-    line-height: 1.6;
-    margin-bottom: 10px;
-    color: #4a5568;
+/* Paragraphs */
+.wave-container p,
+.wave-container .text-lg,
+.wave-container .wave-text {
+  font-size: 1rem;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+  word-wrap: break-word;
 }
 
-.wave-container .leading-relaxed {
-    line-height: 1.6;
+/* Utilities */
+.wave-container .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.wave-container .mb-6 { margin-bottom: 1.5rem; }
+.wave-container .mt-6 { margin-top: 1.5rem; }
+.wave-container .mt-8 { margin-top: 2rem; }
+.wave-container .mb-4 { margin-bottom: 1rem; }
+.wave-container .ml-6 { margin-left: 1.5rem; }
+.wave-container .space-y-2 > * + * { margin-top: 0.5rem; }
+.wave-container .p-10 { padding: 2.5rem; }
+
+/* Sections */
+.wave-container .topic { margin-bottom: 1.5rem; }
+
+/* ---------- Visualizer container ---------- */
+.visualizer-container {
+  position: relative;
+  margin: 0.5rem 0 1.5rem 0;
+  border: 2px solid #2563eb;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  background: #ffffff;
 }
 
-.wave-container .font-bold {
-    font-weight: bold;
+/* Controls overlay */
+.visualizer-container .controls {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 5;
+  background: rgba(255,255,255,0.95);
+  padding: 12px;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  font-size: 0.85rem;
+}
+.visualizer-container .controls label { display: block; margin-bottom: 0.4rem; color: #1f2937; }
+.visualizer-container .controls input,
+.visualizer-container .controls select {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 2px 6px;
+  background-color: #fff;
+}
+.visualizer-container .controls input[type="range"] { cursor: pointer; }
+.visualizer-container .controls .current-medium { font-size: 0.8rem; margin-top: 6px; color: #4b5563; }
+
+/* ---------- 2D SVG model ---------- */
+.wave2d-svg { width: 100%; height: auto; display: block; border-radius: 10px; border: 1px solid #e5eaf1; }
+
+/* Text styles used inside SVG (must rely on 'fill' for color) */
+.badge  { font: 600 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; fill: #1e3a8a; }
+.tag    { font: 700 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; fill: #111827; }
+.legend { font: 600 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; fill: #374151; }
+
+/* ---------- Hints (page footer under viz) ---------- */
+.r3f-hints, .hints {
+  padding: 0.5rem 0.8rem;
+  color: #4b5563;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.85rem;
 }
 
-.wave-container .font-extrabold {
-    font-weight: 800;
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .wave-container { padding: 16px; margin: 0.6rem; }
+  .wave-container h1, .wave-container .text-2xl { font-size: 1.35rem; }
+  .wave-container h2, .wave-container .text-xl { font-size: 1.05rem; }
+  .wave-container .p-10 { padding: 1rem; }
+  .visualizer-container .controls { top: 8px; left: 8px; padding: 10px; }
 }
-
-.wave-container .uppercase {
-    text-transform: uppercase;
-}
-
-.wave-container .text-center {
-    text-align: center;
-}
-
-.wave-container .py-6 {
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
-}
-
-.wave-container .mb-6 {
-    margin-bottom: 1.5rem;
-}
-
-.wave-container .mt-6 {
-    margin-top: 1.5rem;
-}
-
-.wave-container .mt-8 {
-    margin-top: 2rem;
-}
-
-.wave-container .mb-4 {
-    margin-bottom: 1rem;
-}
-
-.wave-container .ml-6 {
-    margin-left: 1.5rem;
-}
-
-.wave-container .space-y-2 > * + * {
-    margin-top: 0.5rem;
-}
-
-.wave-container .p-10 {
-    padding: 2.5rem;
-}
-
-.wave-container .flex {
-    display: flex;
-}
-
-.wave-container .justify-center {
-    justify-content: center;
-}
-
-.wave-container .items-center {
-    align-items: center;
-}
-
-/* Added margin-bottom for gap between topics */
-.wave-container .topic {
-    margin-bottom: 40px;
+@media (max-width: 600px) {
+  .wave-container { padding: 12px; }
+  .wave-container h1, .wave-container .text-2xl { font-size: 1.1rem; }
+  .wave-container h2, .wave-container .text-xl { font-size: 1rem; }
+  .wave-container p, .wave-container .text-lg { font-size: 0.95rem; }
+  .visualizer-container .controls { padding: 8px; }
+  .visualizer-container .controls input { width: 68px; }
+  .badge, .tag { font-size: 11px; }
 }

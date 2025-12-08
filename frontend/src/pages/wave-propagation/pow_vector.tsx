@@ -1,104 +1,83 @@
-import React from 'react';
-import { BlockMath, InlineMath } from 'react-katex';
-import 'katex/dist/katex.min.css';
-import './pow_vector.css'; // Ensure the CSS file name and path are correct
+import React from "react";
+import { BlockMath, InlineMath } from "react-katex";
+import "katex/dist/katex.min.css";
+import "./pow_vector.css";
+import PoyntingVisualizer from "../../components/PoyntingVisualizer";
 
 const PowVector: React.FC = () => {
   return (
-    <div className="pow-container">
-      {/* Title Section */}
-      <div className="text-2xl font-extrabold uppercase text-center py-6 text-gray-900">
-        Power and the Poynting Vector
+    <div className="pow-container hc">
+      <div className="pow-title">Power and the Poynting Vector</div>
+
+      {/* Maxwell curl equations */}
+      <div className="pow-subtitle">Starting from Maxwell’s Equations</div>
+      <div className="pow-equation">
+        <BlockMath math={"\\nabla \\times \\mathbf{E} = -\\mu\\,\\dfrac{\\partial \\mathbf{H}}{\\partial t}"} />
+        <BlockMath math={"\\nabla \\times \\mathbf{H} = \\sigma\\,\\mathbf{E} + \\varepsilon\\,\\dfrac{\\partial \\mathbf{E}}{\\partial t}"} />
       </div>
-      {/* Power Section */}
-      <div className="topic">
-        <div className="text-xl font-bold text-gray-900 mt-8 mb-4">
-          Power
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          Power is the rate at which energy is transferred or converted. In the context of electromagnetic waves, power is the amount of energy transferred per unit time by the wave. The power <InlineMath math="P" /> can be calculated using the formula:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="P = \frac{dW}{dt}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          where <InlineMath math="W" /> is the energy and <InlineMath math="t" /> is the time.
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          In electrical circuits, power can also be calculated using the voltage <InlineMath math="V" /> and current <InlineMath math="I" />:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="P = VI" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          For example, consider an electromagnetic wave transferring energy at a rate of 100 Joules per second. The power of the wave is:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="P = 100 \, \text{W}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          Another example is a circuit with a voltage of 10 volts and a current of 2 amperes. The power in the circuit is:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="P = 10 \, \text{V} \times 2 \, \text{A} = 20 \, \text{W}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          In the context of electromagnetic waves, power density is often used. Power density is the power per unit area and is given by:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="S = \frac{P}{A}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          where <InlineMath math="S" /> is the power density and <InlineMath math="A" /> is the area.
-        </div>
+
+      {/* Poynting theorem (differential form) */}
+      <div className="pow-subtitle">Poynting’s Theorem (Local Form)</div>
+      <div className="pow-text">
+        Dot the second equation with <InlineMath math={"\\mathbf{E}"} /> and the first with{" "}
+        <InlineMath math={"\\mathbf{H}"} />, use{" "}
+        <InlineMath math={"\\nabla\\cdot(\\mathbf{A}\\times\\mathbf{B}) = \\mathbf{B}\\cdot(\\nabla\\times\\mathbf{A}) - \\mathbf{A}\\cdot(\\nabla\\times\\mathbf{B})"} />, and collect terms:
       </div>
-      {/* Poynting Vector Section */}
-      <div className="topic">
-        <div className="text-xl font-bold text-gray-900 mt-8 mb-4">
-          Poynting Vector
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          The Poynting vector represents the directional energy flux (the rate of energy transfer per unit area) of an electromagnetic field. It is defined as the cross product of the electric field <InlineMath math="\mathbf{E}" /> and the magnetic field <InlineMath math="\mathbf{H}" />:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\mathbf{S} = \mathbf{E} \times \mathbf{H}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          where <InlineMath math="\mathbf{S}" /> is the Poynting vector.
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          The magnitude of the Poynting vector gives the power per unit area carried by the wave. The direction of the Poynting vector indicates the direction of energy propagation.
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          For example, consider an electromagnetic wave with an electric field <InlineMath math="\mathbf{E} = 50 \, \text{V/m}" /> and a magnetic field <InlineMath math="\mathbf{H} = 0.1 \, \text{A/m}" />. The Poynting vector is:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\mathbf{S} = 50 \, \text{V/m} \times 0.1 \, \text{A/m} = 5 \, \text{W/m}^2" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          This means that the wave carries 5 watts of power per square meter in the direction of the Poynting vector.
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          The Poynting vector is crucial in understanding how electromagnetic waves transport energy through space. It is used in various applications, including wireless communication, antenna design, and energy harvesting.
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          The time-averaged Poynting vector, also known as the average power density, is given by:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\langle \mathbf{S} \rangle = \frac{1}{2} \text{Re} (\mathbf{E} \times \mathbf{H}^*)" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          where <InlineMath math="\mathbf{H}^*" /> is the complex conjugate of the magnetic field.
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          For a plane wave propagating in the z-direction, the Poynting vector can be simplified to:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\mathbf{S} = \frac{1}{\eta} |\mathbf{E}|^2 \hat{z}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          where <InlineMath math="\eta" /> is the intrinsic impedance of the medium and <InlineMath math="\hat{z}" /> is the unit vector in the z-direction.
-        </div>
+      <div className="pow-equation">
+        <BlockMath math={
+          "\\nabla\\cdot(\\mathbf{E}\\times\\mathbf{H}) = -\\,\\dfrac{\\partial}{\\partial t}\\left(\\tfrac{1}{2}\\,\\varepsilon E^{2} + \\tfrac{1}{2}\\,\\mu H^{2}\\right) - \\sigma E^{2}"
+        } />
+      </div>
+      <div className="pow-text">
+        LHS: divergence of power flow <InlineMath math={"\\mathbf{S}=\\mathbf{E}\\times\\mathbf{H}"} />.  
+        RHS: decrease of stored energy densities <InlineMath math={"u_e=\\tfrac{1}{2}\\varepsilon E^{2},\\; u_m=\\tfrac{1}{2}\\mu H^{2}"} /> and Ohmic loss <InlineMath math={"\\sigma E^{2}"} />.
+      </div>
+
+      {/* Integral form */}
+      <div className="pow-subtitle">Integral (Global) Form</div>
+      <div className="pow-equation">
+        <BlockMath math={
+          "\\oint_S (\\mathbf{E}\\times\\mathbf{H})\\cdot d\\mathbf{S} = -\\dfrac{d}{dt}\\int_V \\left(\\tfrac{1}{2}\\varepsilon E^{2} + \\tfrac{1}{2}\\mu H^{2}\\right) dV - \\int_V \\sigma E^{2} dV"
+        } />
+      </div>
+      <div className="pow-text">
+        Total power leaving a volume equals the rate of decrease of stored field energy minus Ohmic power dissipated.
+      </div>
+
+      {/* Poynting vector definitions */}
+      <div className="pow-subtitle">Poynting Vector</div>
+      <div className="pow-equation">
+        <BlockMath math={"\\boxed{\\;\\mathbf{S} = \\mathbf{E}\\times\\mathbf{H}\\;}"} />
+      </div>
+      <div className="pow-text">
+        Instantaneous power density (W/m²). For time-harmonic fields:
+      </div>
+      <div className="pow-equation">
+        <BlockMath math={"\\boxed{\\;\\langle \\mathbf{S} \\rangle = \\tfrac{1}{2}\\,\\Re\\{\\mathbf{E}\\times\\mathbf{H}^*\\}\\;}"} />
+      </div>
+
+      {/* Lossy uniform plane wave */}
+      <div className="pow-subtitle">Uniform Plane Wave in a Lossy Medium</div>
+      <div className="pow-text">
+        Propagation along +z, attenuation <InlineMath math={"\\alpha"} />, complex impedance <InlineMath math={"\\eta = |\\eta|\\angle\\theta_{\\eta}"} />:
+      </div>
+      <div className="pow-equation">
+        <BlockMath math={"\\mathbf{E}(z,t)=E_0 e^{-\\alpha z}\\cos(\\omega t-\\beta z)\\,\\mathbf{a}_x"} />
+        <BlockMath math={"\\mathbf{H}(z,t)=\\dfrac{E_0}{|\\eta|} e^{-\\alpha z}\\cos(\\omega t-\\beta z-\\theta_{\\eta})\\,\\mathbf{a}_y"} />
+      </div>
+      <div className="pow-text">Time-average Poynting vector:</div>
+      <div className="pow-equation">
+        <BlockMath math={"\\boxed{\\;\\langle\\mathbf{S}\\rangle(z)=\\dfrac{E_0^{2}}{2|\\eta|}\\,e^{-2\\alpha z}\\cos\\theta_{\\eta}\\,\\mathbf{a}_z\\;}"} />
+      </div>
+
+      {/* Visual */}
+      <div className="pow-subtitle">Interactive Visual</div>
+      <div className="pow-text">
+        Adjust <b>E₀</b>, <b>f</b>, <b>α</b>, <b>|η|</b>, <b>θη</b>, and <b>σ</b>. Green = instantaneous <InlineMath math={"\\mathbf{S}"} />, purple = ⟨<InlineMath math={"\\mathbf{S}"} />⟩. Bars show <InlineMath math={"u_e"} />, <InlineMath math={"u_m"} />, and <InlineMath math={"\\sigma E^2"} /> at z=0.
+      </div>
+
+      <div className="pow-visual">
+        <PoyntingVisualizer />
       </div>
     </div>
   );
