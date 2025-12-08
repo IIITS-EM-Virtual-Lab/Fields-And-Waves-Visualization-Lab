@@ -652,3 +652,236 @@
   color: #666;
   margin-top: 0.5rem;
 }
+
+/* ---------- Responsive Enhancements ---------- */
+
+/* Mobile top bar (only visible < 1024px) */
+.mobile-topbar {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+}
+.hamburger-btn, .close-sidebar-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #333;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+.hamburger-btn:hover, .close-sidebar-btn:hover {
+  background: #f5f5f5;
+}
+.topbar-title {
+  font-size: 1.1rem;
+  margin: 0;
+  color: #333;
+}
+
+/* Sidebar overlay/backdrop for mobile */
+.sidebar-backdrop {
+  display: none;
+}
+
+/* Improve page padding on small screens */
+@media (max-width: 1280px) {
+  .main-content {
+    padding: 20px;
+  }
+}
+
+/* Tablet & down */
+@media (max-width: 1024px) {
+  .profile-page {
+    flex-direction: column;
+  }
+
+  .mobile-topbar {
+    display: flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -270px; /* hidden by default */
+    width: 260px;
+    height: 100vh;
+    z-index: 1200;
+    transition: left 0.3s ease;
+  }
+  .sidebar.open {
+    left: 0;
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px 14px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1150;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+
+  /* Profile section stacks vertically */
+  .profile-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-avatar {
+    width: 96px;
+    height: 96px;
+  }
+
+  /* Quiz filters stack */
+  .quiz-selection {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .module-select,
+  .chapter-select {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* Narrow phones */
+@media (max-width: 768px) {
+  .profile-content,
+  .settings-content,
+  .logout-content,
+  .users-content,
+  .quiz-content {
+    padding: 18px;
+  }
+
+  .profile-content h2,
+  .users-content h2,
+  .feedback-content h2 {
+    font-size: 1.15rem;
+  }
+
+  /* Data table becomes cards on mobile */
+  .users-table-container {
+    overflow: visible;
+  }
+  .users-table {
+    display: none;
+  }
+  .users-cards {
+    display: grid;
+    gap: 12px;
+  }
+  .user-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .user-card .uc-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dashed #eee;
+  }
+  .user-card .uc-row:last-child {
+    border-bottom: 0;
+  }
+  .user-card .uc-row span {
+    color: #666;
+    font-size: 0.9rem;
+  }
+  .user-card .uc-row strong {
+    color: #333;
+    font-weight: 600;
+    word-break: break-all;
+  }
+  .user-card .uc-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  /* Question cards tighter spacing */
+  .question-card {
+    padding: 16px;
+  }
+  .question-text {
+    font-size: 15px;
+  }
+
+  /* Modal uses more available space */
+  .modal-content {
+    width: 95%;
+    max-width: 560px;
+    max-height: 92vh;
+    padding: 18px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 420px) {
+  .sidebar {
+    width: 88%;
+    left: -92%;
+  }
+  .sidebar.open {
+    left: 0;
+  }
+
+  .sidebar-item {
+    padding: 12px 16px;
+  }
+
+  .modal-content {
+    border-radius: 8px;
+  }
+
+  .add-question-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+/* Hover affordances on touch devices (optional softening) */
+@media (hover: none) {
+  .sidebar-item:hover,
+  .edit-btn:hover,
+  .delete-btn:hover,
+  .upload-button:hover,
+  .add-question-btn:hover {
+    filter: brightness(0.98);
+  }
+}
+
+/* Prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .modal-content {
+    transition: none !important;
+  }
+}
