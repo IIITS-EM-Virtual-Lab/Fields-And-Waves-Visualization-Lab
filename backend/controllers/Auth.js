@@ -164,13 +164,23 @@ exports.getGoogleAuthURL = async (req, res) => {
   }
 };
 
-// ✅ GOOGLE OAUTH - Callback
+// ✅ GOOGLE OAUTH - Callback (FIXED URL HANDLING)
 exports.handleGoogleCallback = async (req, res) => {
   try {
     const { code } = req.query;
 
+    // Get frontend URL and ensure it has protocol
+    let frontendUrl = process.env.FRONTEND_URL || 'https://www.fwvlab.com';
+    
+    // Add https:// if missing
+    if (!frontendUrl.startsWith('http://') && !frontendUrl.startsWith('https://')) {
+      frontendUrl = 'https://' + frontendUrl;
+    }
+
+    console.log('🌐 Frontend URL:', frontendUrl);
+
     if (!code) {
-      return res.redirect(`${process.env.FRONTEND_URL}/login?error=NoCode`);
+      return res.redirect(`${frontendUrl}/login?error=NoCode`);
     }
 
     const client = new OAuth2Client(
@@ -210,18 +220,22 @@ exports.handleGoogleCallback = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
-    // Redirect to frontend with user data
-    const frontendUrl = new URL(`${process.env.FRONTEND_URL}/login`);
-    frontendUrl.searchParams.set('token', token);
-    frontendUrl.searchParams.set('name', user.name);
-    frontendUrl.searchParams.set('email', user.email);
-    frontendUrl.searchParams.set('isAdmin', user.isAdmin.toString());
-    frontendUrl.searchParams.set('userId', user._id.toString());
+    // Build redirect URL with query parameters
+    const redirectUrl = `${frontendUrl}/login?token=${encodeURIComponent(token)}&name=${encodeURIComponent(user.name)}&email=${encodeURIComponent(user.email)}&isAdmin=${user.isAdmin}&userId=${user._id}`;
 
-    res.redirect(frontendUrl.toString());
+    console.log('🔄 Redirecting to:', redirectUrl);
+    res.redirect(redirectUrl);
+    
   } catch (err) {
     console.error('❌ Google auth error:', err);
-    res.redirect(`${process.env.FRONTEND_URL}/login?error=GoogleAuthFailed`);
+    
+    // Safe fallback URL
+    let frontendUrl = process.env.FRONTEND_URL || 'https://www.fwvlab.com';
+    if (!frontendUrl.startsWith('http://') && !frontendUrl.startsWith('https://')) {
+      frontendUrl = 'https://' + frontendUrl;
+    }
+    
+    res.redirect(`${frontendUrl}/login?error=GoogleAuthFailed`);
   }
 };
 
