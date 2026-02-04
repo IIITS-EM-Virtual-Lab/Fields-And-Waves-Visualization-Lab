@@ -13,7 +13,6 @@ const quizResultRoutes = require('./routes/quizResultRoutes');
 const passwordResetRoutes = require('./routes/passwordResetRoutes');
 const feedbackRoutes = require("./routes/feedbackRoutes");
 
-
 dotenv.config();
 
 const app = express();
@@ -21,26 +20,30 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/api/password-reset', passwordResetRoutes);
-app.use("/api/feedback", feedbackRoutes);
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ Mongo Error:', err));
 
-// Auth Routes
-app.post('/api/auth/initiate-signup', authController.initiateSignup);
-app.post('/api/auth/verify-and-signup', authController.verifyAndSignup);
-app.post('/api/auth/login', authController.login);
-app.get('/api/auth/me', auth, authController.getCurrentUser);
-app.get('/api/auth/google', authController.getGoogleAuthURL);
-app.get('/api/auth/google/callback', authController.handleGoogleCallback);
+// ✅ AUTH ROUTES (Updated - No OTP)
+app.post('/api/auth/signup', authController.signup);           // NEW: Direct signup
+app.post('/api/auth/login', authController.login);              // Login
+app.get('/api/auth/me', auth, authController.getCurrentUser);   // Get current user
+app.get('/api/auth/google', authController.getGoogleAuthURL);   // Google OAuth URL
+app.get('/api/auth/google/callback', authController.handleGoogleCallback); // Google callback
 
-// App Routes
+// Other Routes
+app.use('/api/password-reset', passwordResetRoutes);
+app.use("/api/feedback", feedbackRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/quizresult', quizResultRoutes);
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Server is running' });
+});
 
 // Error Middleware
 app.use((err, req, res, next) => {
