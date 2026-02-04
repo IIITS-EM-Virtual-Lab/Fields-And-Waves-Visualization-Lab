@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@react-three/drei": "^10.7.6",
+    "@react-three/fiber": "^9.4.0",
+    "katex": "^0.16.25",
+    "mathjs": "^14.6.0",
+    "react-circular-progressbar": "^2.2.0",
+    "react-katex": "^3.1.0",
+    "recharts": "^3.1.2",
+    "three": "^0.181.0"
+  },
+  "devDependencies": {
+    "@types/mathjs": "^9.4.1"
+  }
+}

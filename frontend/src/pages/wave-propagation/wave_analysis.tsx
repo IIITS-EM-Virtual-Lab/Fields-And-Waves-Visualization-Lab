@@ -1,125 +1,116 @@
-import './wave_analysis.css'; // Ensure the CSS file name and path are correct
-import { BlockMath, InlineMath } from 'react-katex';
-import 'katex/dist/katex.min.css';
+import React from "react";
+import { BlockMath, InlineMath } from "react-katex";
+import "katex/dist/katex.min.css";
+import WaveAnalysisVisualizer from "@/components/WaveAnalysisVisualizer";
+import "./wave_analysis.css";
 
 const WaveAnalysis: React.FC = () => {
   return (
     <div className="wave-container">
-      {/* Title Section */}
-      <div className="text-2xl font-extrabold uppercase text-center py-6 text-gray-900">
-        Wave Analysis
-      </div>
-      {/* Plane Waves in Lossless Dielectrics Section */}
-      <div className="topic">
-        <div className="text-xl font-bold text-gray-900 mt-8 mb-4">
-          Plane Waves in Lossless Dielectrics
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          In lossless dielectrics, the conductivity <InlineMath math="\sigma" /> is zero, which means there is no energy loss as the wave propagates through the medium. The wave equation in a lossless dielectric is given by:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\nabla^2 \mathbf{E} - \mu \epsilon \frac{\partial^2 \mathbf{E}}{\partial t^2} = 0" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          where <InlineMath math="\mathbf{E}" /> is the electric field, <InlineMath math="\mu" /> is the permeability, and <InlineMath math="\epsilon" /> is the permittivity of the medium.
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          The solution to this wave equation is a plane wave of the form:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\mathbf{E}(z, t) = \mathbf{E}_0 e^{j(\omega t - \beta z)}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          where <InlineMath math="\mathbf{E}_0" /> is the amplitude of the electric field, <InlineMath math="\omega" /> is the angular frequency, and <InlineMath math="\beta" /> is the phase constant.
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          For example, consider a plane wave with an angular frequency of <InlineMath math="\omega = 2\pi \times 10^9" /> rad/s propagating through a lossless dielectric with a permittivity of <InlineMath math="\epsilon = 8.85 \times 10^{-12}" /> F/m and a permeability of <InlineMath math="\mu = 4\pi \times 10^{-7}" /> H/m. The phase constant <InlineMath math="\beta" /> can be calculated as:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\beta = \omega \sqrt{\mu \epsilon}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          Substituting the values, we get:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\beta = 2\pi \times 10^9 \times \sqrt{4\pi \times 10^{-7} \times 8.85 \times 10^{-12}}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          This results in a phase constant of approximately <InlineMath math="\beta \approx 188.5" /> rad/m.
+      <div className="page-title">PLANE WAVES — VISUAL & THEORY</div>
+
+      <div className="figure-wrap">
+        <WaveAnalysisVisualizer />
+        <div className="figure-caption">
+          (a) <b>E</b>, <b>H</b> versus <b>z</b> at <i>t = 0</i> and (b) <b>E</b>, <b>H</b> versus <b>t</b> at <i>z = 0</i>.
+          For a conductor the green marker shows the <b>skin depth</b> \( \delta = 1/\alpha \).
         </div>
       </div>
-      {/* Plane Waves in Free Space Section */}
-      <div className="topic">
-        <div className="text-xl font-bold text-gray-900 mt-8 mb-4">
-          Plane Waves in Free Space
+
+      {/* Lossless dielectric */}
+      <section className="topic">
+        <h2>10.4 Plane Waves in Lossless Dielectrics</h2>
+        <p>For a lossless dielectric, \( \sigma \approx 0 \), \( \epsilon = \epsilon_0 \epsilon_r \), \( \mu = \mu_0 \mu_r \).</p>
+        <BlockMath math={`\\alpha = 0,\\quad \\beta = \\omega \\sqrt{\\mu\\,\\epsilon},\\quad
+                          v_p = \\frac{\\omega}{\\beta} = \\frac{1}{\\sqrt{\\mu\\epsilon}},\\quad
+                          \\lambda = \\frac{2\\pi}{\\beta}`} />
+        <BlockMath math={`\\eta = \\sqrt{\\frac{\\mu}{\\epsilon}}\\ \\angle 0^\\circ`} />
+        <p>Fields are in phase and mutually orthogonal:</p>
+        <BlockMath math={`\\mathbf{E}(z,t) = E_0\\cos(\\omega t - \\beta z)\\,\\hat{\\mathbf{x}},\\qquad
+                          \\mathbf{H}(z,t) = \\frac{E_0}{\\eta}\\cos(\\omega t - \\beta z)\\,\\hat{\\mathbf{y}}`} />
+        <BlockMath math={`\\hat{\\mathbf{a}}_k = \\hat{\\mathbf{a}}_E \\times \\hat{\\mathbf{a}}_H`} />
+      </section>
+
+      {/* Free space */}
+      <section className="topic">
+        <h2>10.5 Plane Waves in Free Space</h2>
+        <p>Set \( \\epsilon = \\epsilon_0,\\ \\mu = \\mu_0,\\ \\sigma=0\\).</p>
+        <BlockMath math={`\\alpha = 0,\\quad \\beta = \\omega\\sqrt{\\mu_0\\epsilon_0} = \\frac{\\omega}{c},\\quad
+                          v_p = c = \\frac{1}{\\sqrt{\\mu_0\\epsilon_0}}`} />
+        <BlockMath math={`\\eta_0 = \\sqrt{\\frac{\\mu_0}{\\epsilon_0}} = 120\\pi \\ \\approx\\ 377\\ \\Omega`} />
+        <BlockMath math={`\\mathbf{E} = E_0\\cos(\\omega t - \\beta z)\\,\\hat{\\mathbf{x}},\\qquad
+                          \\mathbf{H} = \\frac{E_0}{\\eta_0}\\cos(\\omega t - \\beta z)\\,\\hat{\\mathbf{y}}`} />
+      </section>
+
+      {/* Good conductors */}
+      <section className="topic">
+        <h2>10.6 Plane Waves in Good Conductors</h2>
+        <p>For a good conductor \( \\sigma \\gg \\omega\\epsilon \\):</p>
+        <BlockMath math={`\\alpha = \\beta = \\sqrt{\\frac{\\pi f\\,\\mu\\,\\sigma}{2}}`} />
+        <BlockMath math={`\\eta \\approx (1+j)\\sqrt{\\frac{\\omega\\mu}{2\\sigma}}\\ =\\ |\\eta|\\ \\angle 45^\\circ`} />
+        <p>Thus <b>E leads H by 45°</b>, and the fields decay exponentially.</p>
+        <BlockMath math={`\\mathbf{E}(z,t) = E_0\\,e^{-\\alpha z}\\cos(\\omega t - \\beta z)\\,\\hat{\\mathbf{x}},
+                          \\qquad
+                          \\mathbf{H}(z,t) = \\frac{E_0}{|\\eta|}\\,e^{-\\alpha z}\\cos(\\omega t - \\beta z - 45^\\circ)\\,\\hat{\\mathbf{y}}`} />
+        <h3>Skin Depth</h3>
+        <BlockMath math={`\\delta = \\frac{1}{\\alpha} = \\frac{1}{\\sqrt{\\pi f\\,\\mu\\,\\sigma/2}}`} />
+        <p>At \( z=\\delta \), the amplitude reduces to \( E_0 e^{-1} \\approx 0.368 E_0 \).</p>
+      </section>
+
+      {/* Summary table */}
+      <section className="topic">
+        <h2>Summary — Useful Formulas</h2>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Quantity</th>
+                <th>Lossless Medium</th>
+                <th>Free Space</th>
+                <th>Good Conductor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Attenuation \(\\alpha\)</td>
+                <td><InlineMath math="0" /></td>
+                <td><InlineMath math="0" /></td>
+                <td><InlineMath math="\\sqrt{\\pi f\\mu\\sigma/2}" /></td>
+              </tr>
+              <tr>
+                <td>Phase const. \(\\beta\)</td>
+                <td><InlineMath math="\\omega\\sqrt{\\mu\\epsilon}" /></td>
+                <td><InlineMath math="\\omega/c" /></td>
+                <td><InlineMath math="\\sqrt{\\pi f\\mu\\sigma/2}" /></td>
+              </tr>
+              <tr>
+                <td>Impedance \(\\eta\)</td>
+                <td><InlineMath math="\\sqrt{\\mu/\\epsilon}" /></td>
+                <td><InlineMath math="\\sqrt{\\mu_0/\\epsilon_0}=377\\,\\Omega" /></td>
+                <td><InlineMath math="(1+j)\\sqrt{\\omega\\mu/(2\\sigma)}" /></td>
+              </tr>
+              <tr>
+                <td>Phase velocity \(v_p\)</td>
+                <td><InlineMath math="1/\\sqrt{\\mu\\epsilon}" /></td>
+                <td><InlineMath math="c" /></td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>Wavelength \(\\lambda\)</td>
+                <td><InlineMath math="2\\pi/\\beta" /></td>
+                <td><InlineMath math="2\\pi/\\beta" /></td>
+                <td>—</td>
+              </tr>
+              <tr>
+                <td>Skin depth \(\\delta\)</td>
+                <td>—</td>
+                <td>—</td>
+                <td><InlineMath math="1/\\alpha" /></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div className="text-lg leading-relaxed mb-6">
-          In free space, the permittivity <InlineMath math="\epsilon" /> is <InlineMath math="\epsilon_0" /> and the permeability <InlineMath math="\mu" /> is <InlineMath math="\mu_0" />. The wave equation in free space is given by:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\nabla^2 \mathbf{E} - \mu_0 \epsilon_0 \frac{\partial^2 \mathbf{E}}{\partial t^2} = 0" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          The solution to this wave equation is a plane wave of the form:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\mathbf{E}(z, t) = \mathbf{E}_0 e^{j(\omega t - \beta z)}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          where <InlineMath math="\beta = \frac{\omega}{c}" /> and <InlineMath math="c = \frac{1}{\sqrt{\mu_0 \epsilon_0}}" /> is the speed of light in free space.
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          For example, consider a plane wave with an angular frequency of <InlineMath math="\omega = 2\pi \times 10^9" /> rad/s propagating through free space. The speed of light <InlineMath math="c" /> is approximately <InlineMath math="3 \times 10^8" /> m/s. The phase constant <InlineMath math="\beta" /> can be calculated as:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\beta = \frac{\omega}{c}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          Substituting the values, we get:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\beta = \frac{2\pi \times 10^9}{3 \times 10^8}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          This results in a phase constant of approximately <InlineMath math="\beta \approx 20.94" /> rad/m.
-        </div>
-      </div>
-      {/* Plane Waves in Good Conductors Section */}
-      <div className="topic">
-        <div className="text-xl font-bold text-gray-900 mt-8 mb-4">
-          Plane Waves in Good Conductors
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          In good conductors, the conductivity <InlineMath math="\sigma" /> is very high. The wave equation in a good conductor is given by:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\nabla^2 \mathbf{E} - \mu \epsilon \frac{\partial^2 \mathbf{E}}{\partial t^2} = \mu \sigma \frac{\partial \mathbf{E}}{\partial t}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          The solution to this wave equation is a plane wave of the form:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\mathbf{E}(z, t) = \mathbf{E}_0 e^{-\alpha z} e^{j(\omega t - \beta z)}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          where <InlineMath math="\alpha" /> is the attenuation constant and <InlineMath math="\beta" /> is the phase constant. For good conductors, these constants are given by:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\alpha = \beta = \sqrt{\frac{\pi f \mu \sigma}{2}}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          where <InlineMath math="f" /> is the frequency of the wave.
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          For example, consider a plane wave with a frequency of <InlineMath math="f = 10^9" /> Hz propagating through a good conductor with a conductivity of <InlineMath math="\sigma = 5.8 \times 10^7" /> S/m, a permeability of <InlineMath math="\mu = 4\pi \times 10^{-7}" /> H/m, and a permittivity of <InlineMath math="\epsilon = 8.85 \times 10^{-12}" /> F/m. The attenuation constant <InlineMath math="\alpha" /> and phase constant <InlineMath math="\beta" /> can be calculated as:
-        </div>
-        <div className="text-2xl">
-          <BlockMath math="\alpha = \beta = \sqrt{\frac{\pi \times 10^9 \times 4\pi \times 10^{-7} \times 5.8 \times 10^7}{2}}" />
-        </div>
-        <div className="text-lg leading-relaxed mb-6">
-          This results in an attenuation constant and phase constant of approximately <InlineMath math="\alpha = \beta \approx 1.37 \times 10^4" /> m<sup>-1</sup>.
-        </div>
-      </div>
+      </section>
     </div>
   );
 };

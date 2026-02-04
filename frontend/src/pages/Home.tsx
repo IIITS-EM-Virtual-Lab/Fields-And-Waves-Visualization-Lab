@@ -48,16 +48,16 @@ const modules = [
       { name: "EMF", path: "/transformer-motional-emf" },
     ],
   },
-  // {
-  //   title: "Wave Propagation",
-  //   icon: "/assets/wave.gif",
-  //   topics: [
-  //     { name: "Types of Waves", path: "/types-of-waves" },
-  //     { name: "Wave Power Energy", path: "/wave-power-energy" },
-  //     { name: "Plane Wave Analysis", path: "/plane-wave-analysis" },
-  //     { name: "Wave Reflection", path: "/wave-reflection" },
-  //   ],
-  // },
+  {
+    title: "Wave Propagation",
+    icon: "/assets/wave.gif",
+    topics: [
+      { name: "Types of Waves", path: "/types-of-waves" },
+      { name: "Wave Power Energy", path: "/wave-power-energy" },
+      { name: "Plane Wave Analysis", path: "/plane-wave-analysis" },
+      { name: "Wave Reflection", path: "/wave-reflection" },
+    ],
+  },
 ];
 
 const aboutData = [

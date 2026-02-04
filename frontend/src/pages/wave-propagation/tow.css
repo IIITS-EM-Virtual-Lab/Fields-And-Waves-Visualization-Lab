@@ -1,44 +1,183 @@
-/* TypeOfWaves.css */
-
-.container {
-    margin: 1em;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
+:root {
+  --bg: #ffffff;
+  --card: #ffffff;
+  --text: #0b1220;
+  --text-strong: #000000;
+  --muted: #1e293b;
+  --accent: #1d4ed8;
+  --accent-2: #15803d;
+  --border: #cbd5e1;
+  --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
-.header {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-.wave-list {
-    list-style-type: none;
-    padding: 0;
+body {
+  margin: 0;
+  background: #f8fafc;
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.65;
 }
 
-.wave-item {
-    background-color: #f0f0f0;
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 5px;
-    width: 100%;
-    max-width: 600px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Container */
+.wave-container {
+  max-width: 1400px;
+  margin: 30px auto;
+  padding: 30px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
 }
 
-.wave-item:hover {
-    background-color: #e0e0e0;
-}
-
+/* Headings */
 .wave-title {
-    font-size: 18px;
-    font-weight: bold;
+  font-size: clamp(30px, 3.6vw, 44px);
+  font-weight: 900;
+  color: var(--text-strong);
+  margin-bottom: 10px;
 }
 
-.wave-description {
-    font-size: 14px;
-    color: #666;
+.wave-subtitle {
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 900;
+  color: var(--text-strong);
+  border-left: 4px solid var(--accent);
+  padding-left: 10px;
+  margin-top: 28px;
+  margin-bottom: 10px;
+}
+
+/* Paragraph Text */
+.wave-text {
+  color: var(--text);
+  font-size: 17px;
+  margin-bottom: 10px;
+}
+
+.wave-text b {
+  color: var(--text-strong);
+}
+
+/* Lists */
+.wave-list {
+  margin: 10px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wave-list li {
+  position: relative;
+  padding-left: 22px;
+  margin: 8px 0;
+  color: var(--text);
+}
+
+.wave-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Equation Blocks */
+.wave-equation {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin: 12px 0 10px;
+  overflow-x: auto;
+}
+
+.wave-equation .katex,
+.wave-text .katex {
+  color: #000000 !important;
+  fill: #000000 !important;
+}
+
+/* 3D Visual */
+.wave-visual {
+  margin: 25px 0 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.wave-visual > * {
+  display: block;
+  width: 100%;
+  height: clamp(420px, 75vh, 780px);
+}
+
+/* Links and misc */
+.wave-container a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.wave-container a:hover {
+  text-decoration: underline;
+}
+
+/* Scrollbar for equations */
+.wave-equation::-webkit-scrollbar {
+  height: 8px;
+}
+
+.wave-equation::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.wave-equation::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .wave-container {
+    padding: 20px;
+  }
+  .wave-visual > * {
+    height: clamp(360px, 60vh, 640px);
+  }
+}
+
+/* ===================== HIGH-CONTRAST MODE ===================== */
+.hc.wave-container {
+  background: #ffffff !important;
+  color: #0b1220 !important;
+}
+
+.hc .wave-title,
+.hc .wave-subtitle,
+.hc .wave-text,
+.hc .wave-list li,
+.hc .wave-equation,
+.hc .katex {
+  color: #0b1220 !important;
+  fill: #0b1220 !important;
+  stroke: #0b1220 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+.hc .wave-equation {
+  background: #f9fafb !important;
+  border-color: #cbd5e1 !important;
+}
+
+.hc .wave-subtitle {
+  border-left-color: #1d4ed8 !important;
 }
