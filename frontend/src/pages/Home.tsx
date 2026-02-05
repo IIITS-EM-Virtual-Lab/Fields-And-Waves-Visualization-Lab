@@ -228,6 +228,11 @@ const Home = () => {
           </h2>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-10 sm:gap-14 lg:gap-20 mb-24">
             <img
+              src="/IIIT_Sri_City_Logo.png"
+              alt="IIIT Sri City"
+              className="h-24 sm:h-28 lg:h-32 w-auto object-contain"
+            />
+            <img
               src="/Sponser1.JPG"
               alt="Gyan Circle Ventures"
               className="h-24 sm:h-28 lg:h-32 w-auto object-contain"
