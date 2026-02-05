@@ -1,85 +1,203 @@
 import React, { useState } from "react";
-import logo from "/fwvlab.png";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./login-signup.css";
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState("");
   const [isValidEmail, setIsValidEmail] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputEmail = e.target.value;
     setEmail(inputEmail);
-    setIsValidEmail(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputEmail));
+    setError("");
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setIsValidEmail(emailRegex.test(inputEmail));
   };
 
   const handleReset = async () => {
-    if (!isValidEmail) return;
+    if (!isValidEmail) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
 
     try {
-      await axios.post("https://fields-and-waves-visualization-lab.onrender.com/api/password-reset/request", {
-        email,
-      });
-      setEmailSent(true);
+      const response = await axios.post(
+        "https://fields-and-waves-visualization-lab.onrender.com/api/password-reset/request",
+        { email },
+        { validateStatus: status => status >= 200 && status < 500 }
+      );
+
+      if (response.data.success) {
+        setEmailSent(true);
+      } else {
+        setError(response.data.error || "Failed to send reset email");
+      }
     } catch (error: any) {
-      alert(error.response?.data?.error || "Failed to send reset email");
+      console.error("Password reset error:", error);
+      setError(error.response?.data?.error || "Failed to send reset email. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && isValidEmail && !isLoading) {
+      handleReset();
     }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-white">
-      {emailSent ? (
-        <div className="bg-[#f2f3f5] border border-gray-300 px-8 py-6 rounded-md shadow text-center w-[450px]">
-          <img
-            src="/fwvlab.png"
-            alt="Success"
-            className="w-16 h-16 mx-auto mb-4"
-          />
-          <p className="text-gray-700">
-            We’ve sent you a message at:
-            <br />
-            <span className="font-semibold text-black">{email}</span>
-            <br />
-            Follow the link in that message to reset your password.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-[#f2f3f5] rounded-md shadow border border-gray-200 px-10 py-8 w-[450px]">
-          <div className="flex items-center mb-4 space-x-4">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-16 h-16 object-contain rounded"
+    <div className="auth-wrapper">
+      <div className="auth-card">
+        {/* Left side with illustration */}
+        <div className="auth-left">
+          <div className="auth-illustration">
+            <img 
+              src="/college project-rafiki.png" 
+              alt="Password Reset Illustration" 
             />
-            <div>
-              <label className="block font-semibold text-m mb-1">Email</label>
-              <p className="text-m text-gray-600">
-                Enter your email to reset your password:
-              </p>
-            </div>
           </div>
-
-          <input
-            type="email"
-            value={email}
-            onChange={handleChange}
-            placeholder="Enter your email"
-            className="w-full px-4 py-2 rounded border border-gray-300 mb-4 text-sm focus:outline-none"
-          />
-
-          <button
-            onClick={handleReset}
-            disabled={!isValidEmail}
-            className={`w-full py-2 rounded text-white font-semibold text-sm transition ${
-              isValidEmail
-                ? "bg-gray-500 hover:bg-gray-600"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
-          >
-            Reset password
-          </button>
         </div>
-      )}
+
+        {/* Right side with form */}
+        <div className="auth-right">
+          <div className="auth-form-container">
+            {emailSent ? (
+              // Success state
+              <div className="auth-success-container">
+                <div className="auth-header">
+                  <div className="success-icon">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                      <circle cx="32" cy="32" r="32" fill="#4CAF50" fillOpacity="0.1"/>
+                      <circle cx="32" cy="32" r="24" fill="#4CAF50"/>
+                      <path d="M26 32L30 36L38 28" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <h2 className="auth-title">Check Your Email</h2>
+                  <p className="auth-subtitle">
+                    We've sent a password reset link to:
+                  </p>
+                  <p className="email-sent-to">{email}</p>
+                </div>
+
+                <div className="auth-info-box">
+                  <p className="info-text">
+                    Click the link in the email to reset your password. 
+                    The link will expire in 24 hours.
+                  </p>
+                </div>
+
+                <div className="auth-actions">
+                  <button
+                    className="auth-btn primary"
+                    onClick={() => navigate('/login')}
+                  >
+                    Back to Login
+                  </button>
+                  <button
+                    className="auth-btn secondary"
+                    onClick={() => {
+                      setEmailSent(false);
+                      setEmail("");
+                      setIsValidEmail(false);
+                    }}
+                  >
+                    Try Different Email
+                  </button>
+                </div>
+
+                <div className="auth-links">
+                  <p className="auth-link-text">
+                    Didn't receive the email?{' '}
+                    <button
+                      type="button"
+                      className="link-btn primary"
+                      onClick={() => {
+                        setEmailSent(false);
+                        handleReset();
+                      }}
+                    >
+                      Resend
+                    </button>
+                  </p>
+                </div>
+              </div>
+            ) : (
+              // Request form
+              <>
+                <div className="auth-header">
+                  <h2 className="auth-title">Forgot Password?</h2>
+                  <p className="auth-subtitle">
+                    No worries! Enter your email and we'll send you reset instructions.
+                  </p>
+                </div>
+
+                <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
+                  <div className="form-group">
+                    <label htmlFor="email" className="form-label">
+                      Email Address <span className="required">*</span>
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={handleChange}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Enter your email address"
+                      className={`auth-input ${error ? 'error' : ''}`}
+                      disabled={isLoading}
+                      autoFocus
+                    />
+                    {error && <span className="error-message">{error}</span>}
+                  </div>
+
+                  <div className="auth-actions">
+                    <button
+                      className={`auth-btn primary ${(!isValidEmail || isLoading) ? 'disabled' : ''}`}
+                      onClick={handleReset}
+                      disabled={!isValidEmail || isLoading}
+                    >
+                      {isLoading ? 'Sending...' : 'Send Reset Link'}
+                    </button>
+                  </div>
+
+                  <div className="auth-links">
+                    <button
+                      type="button"
+                      className="link-btn"
+                      onClick={() => navigate('/login')}
+                      disabled={isLoading}
+                    >
+                      ← Back to Login
+                    </button>
+                    <span className="auth-link-text">
+                      Don't have an account?{' '}
+                      <button
+                        type="button"
+                        className="link-btn primary"
+                        onClick={() => navigate('/signup')}
+                        disabled={isLoading}
+                      >
+                        Sign Up
+                      </button>
+                    </span>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

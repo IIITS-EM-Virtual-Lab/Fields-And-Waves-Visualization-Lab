@@ -1,103 +1,311 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import "./login-signup.css";
 
 const ResetPassword: React.FC = () => {
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState("");
-  const [status, setStatus] = useState("");
-  const [isValid, setIsValid] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState({ password: "", confirmPassword: "" });
+  const [tokenError, setTokenError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
+  
   const navigate = useNavigate();
-  const query = new URLSearchParams(useLocation().search);
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
   const token = query.get("token");
 
   useEffect(() => {
-    if (!token) setStatus("Invalid or missing token.");
+    if (!token) {
+      setTokenError("Invalid or missing reset token. Please request a new password reset.");
+    }
   }, [token]);
 
-  useEffect(() => {
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      setIsValid(false);
-    } else if (password !== confirm) {
-      setError("Passwords do not match");
-      setIsValid(false);
-    } else {
-      setError("");
-      setIsValid(true);
+  const validateForm = () => {
+    const newErrors = { password: "", confirmPassword: "" };
+    let isValid = true;
+
+    if (!password) {
+      newErrors.password = "Password is required";
+      isValid = false;
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      isValid = false;
     }
-  }, [password, confirm]);
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+      isValid = false;
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async () => {
+    if (!validateForm()) return;
+    if (!token) return;
+
+    setIsLoading(true);
+    setTokenError("");
+
     try {
-      const res = await axios.post("https://fields-and-waves-visualization-lab.onrender.com/api/password-reset/reset", {
-        token,
-        newPassword: password,
-      });
-      alert(res.data.message);
-      navigate("/login");
-    } catch (err: any) {
-      setStatus(err.response?.data?.error || "Reset failed");
-      setTimeout(() => navigate("/login"), 3000);
+      const response = await axios.post(
+        "https://fields-and-waves-visualization-lab.onrender.com/api/password-reset/reset",
+        { token, newPassword: password },
+        { validateStatus: status => status >= 200 && status < 500 }
+      );
+
+      if (response.data.success) {
+        setResetSuccess(true);
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
+      } else {
+        setTokenError(response.data.error || "Failed to reset password");
+      }
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      setTokenError(error.response?.data?.error || "Failed to reset password. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  return (
-    <div className="flex h-screen bg-gradient-to-b from-[#2ba8e1] to-[#6de6e7] font-sans">
-      {/* Left Side */}
-      <div className="w-1/2 bg-[#0a2540] text-white px-16 flex flex-col justify-center">
-        <h1 className="text-4xl font-semibold mb-4">Reset your password</h1>
-        <p className="text-sm leading-relaxed">
-          Pick a new password and get right back to learning!
-          <br />
-          For your security, please choose a password you’ve never used before.
-        </p>
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && password && confirmPassword && !isLoading) {
+      handleSubmit();
+    }
+  };
+
+  const isFormValid = () => {
+    return password.length >= 6 && password === confirmPassword;
+  };
+
+  if (tokenError && !token) {
+    return (
+      <div className="auth-wrapper">
+        <div className="auth-card">
+          <div className="auth-left">
+            <div className="auth-illustration">
+              <img 
+                src="/college project-rafiki.png" 
+                alt="Error Illustration" 
+              />
+            </div>
+          </div>
+
+          <div className="auth-right">
+            <div className="auth-form-container">
+              <div className="auth-header">
+                <div className="error-icon">
+                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                    <circle cx="32" cy="32" r="32" fill="#f44336" fillOpacity="0.1"/>
+                    <circle cx="32" cy="32" r="24" fill="#f44336"/>
+                    <path d="M32 24v16M32 44v.01" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <h2 className="auth-title">Invalid Reset Link</h2>
+                <p className="auth-subtitle">{tokenError}</p>
+              </div>
+
+              <div className="auth-actions">
+                <button
+                  className="auth-btn primary"
+                  onClick={() => navigate('/forgot-password')}
+                >
+                  Request New Reset Link
+                </button>
+                <button
+                  className="auth-btn secondary"
+                  onClick={() => navigate('/login')}
+                >
+                  Back to Login
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+    );
+  }
 
-      {/* Right Side */}
-      <div className="w-1/2 bg-white flex items-center justify-center">
-        <div className="w-[70%] max-w-md">
-          <h2 className="text-lg font-semibold mb-2">Create a new password</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Passwords should be at least 8 characters long and should contain a
-            mixture of letters, numbers, and other characters.
-          </p>
-
-          {status && <p className="text-red-500 text-sm mb-3">{status}</p>}
-          {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-
-          <div className="mb-4">
-            <label className="text-sm font-medium block mb-1">Create a new password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 px-4 py-2 rounded"
-            />
+  if (resetSuccess) {
+    return (
+      <div className="auth-wrapper">
+        <div className="auth-card">
+          <div className="auth-left">
+            <div className="auth-illustration">
+              <img 
+                src="/college project-rafiki.png" 
+                alt="Success Illustration" 
+              />
+            </div>
           </div>
 
-          <div className="mb-6">
-            <label className="text-sm font-medium block mb-1">Re-enter password</label>
-            <input
-              type="password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              className="w-full border border-gray-300 px-4 py-2 rounded"
+          <div className="auth-right">
+            <div className="auth-form-container">
+              <div className="auth-header">
+                <div className="success-icon">
+                  <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                    <circle cx="32" cy="32" r="32" fill="#4CAF50" fillOpacity="0.1"/>
+                    <circle cx="32" cy="32" r="24" fill="#4CAF50"/>
+                    <path d="M26 32L30 36L38 28" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <h2 className="auth-title">Password Reset Successful!</h2>
+                <p className="auth-subtitle">
+                  Your password has been successfully reset.
+                  Redirecting to login...
+                </p>
+              </div>
+
+              <div className="auth-actions">
+                <button
+                  className="auth-btn primary"
+                  onClick={() => navigate('/login')}
+                >
+                  Go to Login
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="auth-wrapper">
+      <div className="auth-card">
+        {/* Left side with illustration */}
+        <div className="auth-left">
+          <div className="auth-illustration">
+            <img 
+              src="/college project-rafiki.png" 
+              alt="Reset Password Illustration" 
             />
           </div>
+        </div>
 
-          <button
-            onClick={handleSubmit}
-            disabled={!isValid}
-            className={`w-full py-2 px-4 rounded font-semibold transition ${
-              isValid
-                ? "bg-[#717171] hover:bg-[#5a5a5a] text-white"
-                : "bg-gray-300 text-gray-600 cursor-not-allowed"
-            }`}
-          >
-            Reset and log in
-          </button>
+        {/* Right side with form */}
+        <div className="auth-right">
+          <div className="auth-form-container">
+            <div className="auth-header">
+              <h2 className="auth-title">Reset Password</h2>
+              <p className="auth-subtitle">
+                Enter your new password below
+              </p>
+            </div>
+
+            {tokenError && (
+              <div className="error-banner">
+                <p>{tokenError}</p>
+              </div>
+            )}
+
+            <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">
+                  New Password <span className="required">*</span>
+                </label>
+                <div className="password-input-wrapper">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setErrors({ ...errors, password: '' });
+                    }}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Enter new password (min 6 characters)"
+                    className={`auth-input ${errors.password ? 'error' : ''}`}
+                    disabled={isLoading}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {errors.password && <span className="error-message">{errors.password}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirmPassword" className="form-label">
+                  Confirm New Password <span className="required">*</span>
+                </label>
+                <div className="password-input-wrapper">
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setErrors({ ...errors, confirmPassword: '' });
+                    }}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Confirm your new password"
+                    className={`auth-input ${errors.confirmPassword ? 'error' : ''}`}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+              </div>
+
+              <div className="password-requirements">
+                <p className="requirements-title">Password Requirements:</p>
+                <ul className="requirements-list">
+                  <li className={password.length >= 6 ? 'valid' : ''}>
+                    At least 6 characters
+                  </li>
+                  <li className={password === confirmPassword && password ? 'valid' : ''}>
+                    Passwords match
+                  </li>
+                </ul>
+              </div>
+
+              <div className="auth-actions">
+                <button
+                  className={`auth-btn primary ${(!isFormValid() || isLoading) ? 'disabled' : ''}`}
+                  onClick={handleSubmit}
+                  disabled={!isFormValid() || isLoading}
+                >
+                  {isLoading ? 'Resetting...' : 'Reset Password'}
+                </button>
+              </div>
+
+              <div className="auth-links">
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={() => navigate('/login')}
+                  disabled={isLoading}
+                >
+                  ← Back to Login
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
