@@ -516,3 +516,111 @@
     max-width: 200px;
   }
 }
+
+/* ── Append these to the bottom of ChapterQuiz.css ── */
+
+.quiz-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 1.1rem;
+  color: #4a5568;
+}
+
+/* Difficulty tags on question card */
+.q-diff-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  letter-spacing: 0.04em;
+}
+.q-diff-tag.diff-easy   { background: #d1fae5; color: #065f46; }
+.q-diff-tag.diff-medium { background: #fef3c7; color: #92400e; }
+.q-diff-tag.diff-hard   { background: #fee2e2; color: #991b1b; }
+
+/* Intro difficulty counts */
+.intro-diff { font-weight: 600; }
+.intro-diff.easy   { color: #059669; }
+.intro-diff.medium { color: #d97706; }
+.intro-diff.hard   { color: #dc2626; }
+
+/* Results grid */
+.results-grid {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+.result-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px 28px;
+  min-width: 120px;
+}
+.result-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a202c;
+  line-height: 1;
+}
+.result-stat-label {
+  font-size: 0.8rem;
+  color: #718096;
+  margin-top: 6px;
+  text-align: center;
+}
+
+/* Review question badge */
+.review-question h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #3182ce;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.review-q-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.badge-correct   { background: #d1fae5; color: #065f46; }
+.badge-incorrect { background: #fee2e2; color: #991b1b; }
+.badge-skipped   { background: #fef3c7; color: #92400e; }
+
+/* Difficulty tag inside review */
+.review-diff-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  letter-spacing: 0.04em;
+}
+.diff-easy   { background: #d1fae5; color: #065f46; }
+.diff-medium { background: #fef3c7; color: #92400e; }
+.diff-hard   { background: #fee2e2; color: #991b1b; }
+
+/* Skipped indicator */
+.skipped-indicator {
+  padding: 12px;
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 12px;
+  color: #92400e;
+}

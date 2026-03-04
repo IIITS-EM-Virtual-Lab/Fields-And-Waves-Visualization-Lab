@@ -5,10 +5,21 @@ const QuizResult = require('../models/QuizResult');
 const Quiz = require('../models/Quiz');
 const { auth } = require('../middleware/auth');
 
-// Save quiz result
+// ── Save quiz result ────────────────────────────────────────
+// Fixed: now saves chapter and userAnswers (were missing before)
 router.post('/save', auth, async (req, res) => {
   try {
-    const { quizId, score, correctAnswers, totalQuestions, accuracy, module } = req.body;
+    const {
+      quizId,
+      score,
+      correctAnswers,
+      totalQuestions,
+      accuracy,
+      module,
+      chapter,
+      userAnswers
+    } = req.body;
+
     const userId = req.user.id;
 
     const newResult = new QuizResult({
@@ -19,7 +30,9 @@ router.post('/save', auth, async (req, res) => {
       totalQuestions,
       accuracy,
       module,
-      createdAt: new Date(),
+      chapter: chapter || '',
+      userAnswers: userAnswers || [],
+      completedAt: new Date(),
     });
 
     await newResult.save();
@@ -30,7 +43,7 @@ router.post('/save', auth, async (req, res) => {
   }
 });
 
-// Get quiz history
+// ── Get quiz history ────────────────────────────────────────
 router.get('/history/:userId', auth, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -42,7 +55,7 @@ router.get('/history/:userId', auth, async (req, res) => {
   }
 });
 
-// Get overall stats using best attempts
+// ── Overall stats (best attempt per quiz) ──────────────────
 router.get('/stats/:userId', auth, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -96,17 +109,16 @@ router.get('/stats/:userId', auth, async (req, res) => {
   }
 });
 
-// Get user's quiz results with detailed quiz questions
+// ── User quiz results with populated questions ──────────────
+// Fixed: only returns the questions the student actually answered
+// by filtering quiz questions to match the stored userAnswers questionIds
 router.get('/user/:userId', auth, async (req, res) => {
   try {
     const { userId } = req.params;
     const { page = 1, limit = 10, module, sortBy = 'completedAt', sortOrder = 'desc' } = req.query;
 
-    // Build query
     const query = { userId };
-    if (module) {
-      query.module = module;
-    }
+    if (module) query.module = module;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sortOptions = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
@@ -115,20 +127,33 @@ router.get('/user/:userId', auth, async (req, res) => {
       .populate({
         path: 'quizId',
         select: 'module chapter questions',
-        populate: {
-          path: 'questions',
-          select: 'question options correctAnswer explanation imageUrl solutionImageUrl points difficulty type'
-        }
       })
       .sort(sortOptions)
       .skip(skip)
       .limit(parseInt(limit));
 
+    // For each result, filter the quiz's questions down to only
+    // the ones the student actually saw (matched by userAnswers questionIds)
+    const enriched = results.map(result => {
+      const resultObj = result.toObject();
+
+      if (resultObj.quizId && resultObj.quizId.questions && resultObj.userAnswers) {
+        const answeredIds = new Set(
+          resultObj.userAnswers.map((ua) => ua.questionId.toString())
+        );
+        resultObj.quizId.questions = resultObj.quizId.questions.filter(
+          (q) => answeredIds.has(q._id.toString())
+        );
+      }
+
+      return resultObj;
+    });
+
     const total = await QuizResult.countDocuments(query);
 
     res.json({
       success: true,
-      data: results,
+      data: enriched,
       pagination: {
         currentPage: parseInt(page),
         totalPages: Math.ceil(total / parseInt(limit)),
@@ -148,8 +173,7 @@ router.get('/user/:userId', auth, async (req, res) => {
   }
 });
 
-
-// Get topic-wise stats using best attempts
+// ── Topic-wise stats (best attempt per quiz) ────────────────
 router.get('/stats-by-topic/:userId', auth, async (req, res) => {
   try {
     const { userId } = req.params;
