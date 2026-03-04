@@ -1,11 +1,9 @@
 const Quiz = require('../models/Quiz');
 const { v2: cloudinary } = require('cloudinary');
 const uploader = cloudinary.uploader;
-const Anthropic = require('@anthropic-ai/sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Get all quizzes for a module
 exports.getModuleQuizzes = async (req, res) => {
@@ -176,7 +174,7 @@ exports.addQuestion = async (req, res) => {
   }
 };
 
-// Update question with support for questionImage and solutionImage
+// Update question
 exports.updateQuestion = async (req, res) => {
   try {
     const { quizId, questionId } = req.params;
@@ -230,7 +228,7 @@ exports.deleteQuestion = async (req, res) => {
 };
 
 // ─────────────────────────────────────────────────────────────
-// AI Question Generation
+// AI Question Generation using Google Gemini (free tier)
 // POST /api/quizzes/generate-questions
 // Body: { topic, difficulty, count, module, chapter }
 // ─────────────────────────────────────────────────────────────
@@ -254,8 +252,6 @@ exports.generateQuestions = async (req, res) => {
     }
 
     const difficultyUpper = difficulty.toUpperCase();
-
-    // Points assigned by difficulty
     const pointsMap = { EASY: 1, MEDIUM: 2, HARD: 3 };
     const points = pointsMap[difficultyUpper];
 
@@ -291,25 +287,20 @@ Format:
   }
 ]`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4000,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ]
-    });
-
-    const rawText = message.content[0].text.trim();
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const result = await model.generateContent(prompt);
+    const rawText = result.response.text().trim();
 
     let questions;
     try {
       questions = JSON.parse(rawText);
     } catch (parseErr) {
-      // Sometimes AI wraps in ```json ... ``` even when told not to — strip it
-      const cleaned = rawText.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim();
+      // Strip markdown code fences if Gemini adds them
+      const cleaned = rawText
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/\s*```$/, '')
+        .trim();
       questions = JSON.parse(cleaned);
     }
 
@@ -317,7 +308,6 @@ Format:
       throw new Error('AI did not return an array of questions');
     }
 
-    // Normalise — ensure every field is present
     const normalised = questions.map(q => ({
       type: 'MCQ',
       question: q.question || '',
@@ -334,7 +324,7 @@ Format:
     });
 
   } catch (error) {
-    console.error('❌ AI question generation error:', error);
+    console.error('❌ Gemini question generation error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to generate questions',
