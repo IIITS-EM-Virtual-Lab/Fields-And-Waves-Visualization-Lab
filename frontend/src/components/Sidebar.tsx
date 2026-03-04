@@ -60,6 +60,14 @@ const sidebarData = [
       { name: "Wave Reflection", path: "/wave-reflection" },
     ],
   },
+  {
+  topic: "Transmission Lines",
+  icon: "/assets/transmission-lines.png",
+  subtopics: [
+    { name: "Characteristic Impedance", path: "/characteristic-impedance" },
+  ],
+},
+
 ];
 
 const Sidebar = () => {
