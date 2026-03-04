@@ -111,14 +111,10 @@ body {
   border: 1px solid #cbd5e1;
   border-radius: 16px;
   overflow: hidden;
-  background: #ffffff;
-}
-
-.wave-visual > * {
-  display: block;
-  width: 100%;
+  background: #ffffff;  
   height: clamp(420px, 75vh, 780px);
 }
+
 
 /* Links and misc */
 .wave-container a {
