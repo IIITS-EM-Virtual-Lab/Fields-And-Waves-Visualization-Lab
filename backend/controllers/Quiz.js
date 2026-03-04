@@ -1,142 +1,66 @@
 const Quiz = require('../models/Quiz');
 const { v2: cloudinary } = require('cloudinary');
 const uploader = cloudinary.uploader;
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
-// Get all quizzes for a module
 exports.getModuleQuizzes = async (req, res) => {
   try {
     const { moduleName } = req.params;
     const quiz = await Quiz.findOne({ module: moduleName, chapter: "" });
-
-    if (!quiz) {
-      return res.status(404).json({ success: false, message: "Module quiz not found" });
-    }
-
+    if (!quiz) return res.status(404).json({ success: false, message: "Module quiz not found" });
     res.status(200).json({ success: true, data: quiz });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching module-level quiz",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: "Error fetching module-level quiz", error: error.message });
   }
 };
 
-// Get quiz for a specific chapter
 exports.getChapterQuiz = async (req, res) => {
   try {
     const { moduleName, chapterName } = req.params;
-    const quiz = await Quiz.findOne({
-      module: moduleName,
-      chapter: chapterName
-    });
-
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        message: 'Quiz not found for this chapter'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: quiz
-    });
+    const quiz = await Quiz.findOne({ module: moduleName, chapter: chapterName });
+    if (!quiz) return res.status(404).json({ success: false, message: 'Quiz not found for this chapter' });
+    res.status(200).json({ success: true, data: quiz });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching chapter quiz',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Error fetching chapter quiz', error: error.message });
   }
 };
 
-// Create new quiz
 exports.createQuiz = async (req, res) => {
   try {
     const quiz = await Quiz.create(req.body);
-    res.status(201).json({
-      success: true,
-      data: quiz
-    });
+    res.status(201).json({ success: true, data: quiz });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Error creating quiz',
-      error: error.message
-    });
+    res.status(400).json({ success: false, message: 'Error creating quiz', error: error.message });
   }
 };
 
-// Update quiz
 exports.updateQuiz = async (req, res) => {
   try {
-    const quiz = await Quiz.findByIdAndUpdate(
-      req.params.quizId,
-      req.body,
-      { new: true, runValidators: true }
-    );
-
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        message: 'Quiz not found'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: quiz
-    });
+    const quiz = await Quiz.findByIdAndUpdate(req.params.quizId, req.body, { new: true, runValidators: true });
+    if (!quiz) return res.status(404).json({ success: false, message: 'Quiz not found' });
+    res.status(200).json({ success: true, data: quiz });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Error updating quiz',
-      error: error.message
-    });
+    res.status(400).json({ success: false, message: 'Error updating quiz', error: error.message });
   }
 };
 
-// Delete quiz
 exports.deleteQuiz = async (req, res) => {
   try {
     const quiz = await Quiz.findByIdAndDelete(req.params.quizId);
-
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        message: 'Quiz not found'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Quiz deleted successfully'
-    });
+    if (!quiz) return res.status(404).json({ success: false, message: 'Quiz not found' });
+    res.status(200).json({ success: true, message: 'Quiz deleted successfully' });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Error deleting quiz',
-      error: error.message
-    });
+    res.status(400).json({ success: false, message: 'Error deleting quiz', error: error.message });
   }
 };
 
 exports.addQuestion = async (req, res) => {
   try {
-    let {
-      question,
-      type,
-      options,
-      correctAnswer,
-      explanation,
-      difficulty,
-      points
-    } = req.body;
-
+    let { question, type, options, correctAnswer, explanation, difficulty, points } = req.body;
     const quiz = await Quiz.findById(req.params.quizId);
     if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
 
@@ -148,33 +72,24 @@ exports.addQuestion = async (req, res) => {
     }
 
     const questionObj = {
-      question,
-      type,
+      question, type,
       options: options || [],
       correctAnswer: correctAnswer || [],
-      explanation,
-      difficulty,
+      explanation, difficulty,
       points: Number(points)
     };
 
-    if (req.files?.questionImage?.[0]) {
-      questionObj.imageUrl = req.files.questionImage[0].path;
-    }
-
-    if (req.files?.solutionImage?.[0]) {
-      questionObj.solutionImageUrl = req.files.solutionImage[0].path;
-    }
+    if (req.files?.questionImage?.[0]) questionObj.imageUrl = req.files.questionImage[0].path;
+    if (req.files?.solutionImage?.[0]) questionObj.solutionImageUrl = req.files.solutionImage[0].path;
 
     quiz.questions.push(questionObj);
     await quiz.save();
-
     res.status(201).json({ message: 'Question added successfully', quiz });
   } catch (err) {
     res.status(500).json({ message: 'Failed to add question', error: err.message });
   }
 };
 
-// Update question
 exports.updateQuestion = async (req, res) => {
   try {
     const { quizId, questionId } = req.params;
@@ -189,18 +104,10 @@ exports.updateQuestion = async (req, res) => {
     const questionIndex = quiz.questions.findIndex(q => q._id.toString() === questionId);
     if (questionIndex === -1) return res.status(404).json({ success: false, message: 'Question not found' });
 
-    if (req.files?.questionImage?.[0]) {
-      updateData.imageUrl = req.files.questionImage[0].path;
-    }
-    if (req.files?.solutionImage?.[0]) {
-      updateData.solutionImageUrl = req.files.solutionImage[0].path;
-    }
+    if (req.files?.questionImage?.[0]) updateData.imageUrl = req.files.questionImage[0].path;
+    if (req.files?.solutionImage?.[0]) updateData.solutionImageUrl = req.files.solutionImage[0].path;
 
-    quiz.questions[questionIndex] = {
-      ...quiz.questions[questionIndex].toObject(),
-      ...updateData
-    };
-
+    quiz.questions[questionIndex] = { ...quiz.questions[questionIndex].toObject(), ...updateData };
     await quiz.save();
     res.status(200).json({ success: true, data: quiz });
   } catch (error) {
@@ -208,7 +115,6 @@ exports.updateQuestion = async (req, res) => {
   }
 };
 
-// Delete a question
 exports.deleteQuestion = async (req, res) => {
   try {
     const { quizId, questionId } = req.params;
@@ -220,7 +126,6 @@ exports.deleteQuestion = async (req, res) => {
 
     quiz.questions = quiz.questions.filter(q => q._id.toString() !== questionId);
     await quiz.save();
-
     res.status(200).json({ success: true, message: 'Question deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error deleting question', error: error.message });
@@ -228,27 +133,20 @@ exports.deleteQuestion = async (req, res) => {
 };
 
 // ─────────────────────────────────────────────────────────────
-// AI Question Generation using Google Gemini (free tier)
+// AI Question Generation using Groq (completely free)
 // POST /api/quizzes/generate-questions
-// Body: { topic, difficulty, count, module, chapter }
 // ─────────────────────────────────────────────────────────────
 exports.generateQuestions = async (req, res) => {
   try {
     const { topic, difficulty, count = 5, module, chapter } = req.body;
 
     if (!topic || !difficulty) {
-      return res.status(400).json({
-        success: false,
-        message: 'topic and difficulty are required'
-      });
+      return res.status(400).json({ success: false, message: 'topic and difficulty are required' });
     }
 
     const validDifficulties = ['EASY', 'MEDIUM', 'HARD'];
     if (!validDifficulties.includes(difficulty.toUpperCase())) {
-      return res.status(400).json({
-        success: false,
-        message: 'difficulty must be EASY, MEDIUM, or HARD'
-      });
+      return res.status(400).json({ success: false, message: 'difficulty must be EASY, MEDIUM, or HARD' });
     }
 
     const difficultyUpper = difficulty.toUpperCase();
@@ -287,15 +185,20 @@ Format:
   }
 ]`;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    const result = await model.generateContent(prompt);
-    const rawText = result.response.text().trim();
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.7,
+      max_tokens: 4000,
+    });
+
+    const rawText = chatCompletion.choices[0]?.message?.content?.trim();
+    if (!rawText) throw new Error('No response received from AI');
 
     let questions;
     try {
       questions = JSON.parse(rawText);
     } catch (parseErr) {
-      // Strip markdown code fences if Gemini adds them
       const cleaned = rawText
         .replace(/^```json\s*/i, '')
         .replace(/^```\s*/i, '')
@@ -304,9 +207,7 @@ Format:
       questions = JSON.parse(cleaned);
     }
 
-    if (!Array.isArray(questions)) {
-      throw new Error('AI did not return an array of questions');
-    }
+    if (!Array.isArray(questions)) throw new Error('AI did not return an array of questions');
 
     const normalised = questions.map(q => ({
       type: 'MCQ',
@@ -318,17 +219,10 @@ Format:
       points: points,
     }));
 
-    res.status(200).json({
-      success: true,
-      data: normalised
-    });
+    res.status(200).json({ success: true, data: normalised });
 
   } catch (error) {
-    console.error('❌ Gemini question generation error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to generate questions',
-      error: error.message
-    });
+    console.error('❌ Groq question generation error:', error);
+    res.status(500).json({ success: false, message: 'Failed to generate questions', error: error.message });
   }
 };
