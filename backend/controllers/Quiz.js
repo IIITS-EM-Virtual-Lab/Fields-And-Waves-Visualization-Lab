@@ -1,11 +1,15 @@
 const Quiz = require('../models/Quiz');
 const { v2: cloudinary } = require('cloudinary');
 const uploader = cloudinary.uploader;
+const Anthropic = require('@anthropic-ai/sdk');
 
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
 // Get all quizzes for a module
 exports.getModuleQuizzes = async (req, res) => {
-   try {
+  try {
     const { moduleName } = req.params;
     const quiz = await Quiz.findOne({ module: moduleName, chapter: "" });
 
@@ -19,16 +23,15 @@ exports.getModuleQuizzes = async (req, res) => {
       success: false,
       message: "Error fetching module-level quiz",
       error: error.message,
-    });
-  }
-
+    });
+  }
 };
 
 // Get quiz for a specific chapter
 exports.getChapterQuiz = async (req, res) => {
   try {
     const { moduleName, chapterName } = req.params;
-    const quiz = await Quiz.findOne({ 
+    const quiz = await Quiz.findOne({
       module: moduleName,
       chapter: chapterName
     });
@@ -126,10 +129,6 @@ exports.deleteQuiz = async (req, res) => {
 
 exports.addQuestion = async (req, res) => {
   try {
-    console.log('📦 Incoming BODY:', req.body);
-    console.log('🖼 Incoming FILES:', req.files);
-    console.log('🧾 Params:', req.params);
-
     let {
       question,
       type,
@@ -147,7 +146,6 @@ exports.addQuestion = async (req, res) => {
       if (typeof options === 'string') options = JSON.parse(options);
       if (typeof correctAnswer === 'string') correctAnswer = JSON.parse(correctAnswer);
     } catch (parseErr) {
-      console.error('❌ JSON Parse Error:', parseErr);
       return res.status(400).json({ message: 'Failed to parse options or correctAnswer', error: parseErr.message });
     }
 
@@ -174,11 +172,9 @@ exports.addQuestion = async (req, res) => {
 
     res.status(201).json({ message: 'Question added successfully', quiz });
   } catch (err) {
-    console.error('❌ Final Catch Error:', err);
     res.status(500).json({ message: 'Failed to add question', error: err.message });
   }
 };
-
 
 // Update question with support for questionImage and solutionImage
 exports.updateQuestion = async (req, res) => {
@@ -195,7 +191,6 @@ exports.updateQuestion = async (req, res) => {
     const questionIndex = quiz.questions.findIndex(q => q._id.toString() === questionId);
     if (questionIndex === -1) return res.status(404).json({ success: false, message: 'Question not found' });
 
-    // ✅ Replace existing images if new ones are uploaded
     if (req.files?.questionImage?.[0]) {
       updateData.imageUrl = req.files.questionImage[0].path;
     }
@@ -211,7 +206,6 @@ exports.updateQuestion = async (req, res) => {
     await quiz.save();
     res.status(200).json({ success: true, data: quiz });
   } catch (error) {
-    console.error('Error updating question:', error);
     res.status(500).json({ success: false, message: 'Error updating question', error: error.message });
   }
 };
@@ -232,5 +226,119 @@ exports.deleteQuestion = async (req, res) => {
     res.status(200).json({ success: true, message: 'Question deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error deleting question', error: error.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────
+// AI Question Generation
+// POST /api/quizzes/generate-questions
+// Body: { topic, difficulty, count, module, chapter }
+// ─────────────────────────────────────────────────────────────
+exports.generateQuestions = async (req, res) => {
+  try {
+    const { topic, difficulty, count = 5, module, chapter } = req.body;
+
+    if (!topic || !difficulty) {
+      return res.status(400).json({
+        success: false,
+        message: 'topic and difficulty are required'
+      });
+    }
+
+    const validDifficulties = ['EASY', 'MEDIUM', 'HARD'];
+    if (!validDifficulties.includes(difficulty.toUpperCase())) {
+      return res.status(400).json({
+        success: false,
+        message: 'difficulty must be EASY, MEDIUM, or HARD'
+      });
+    }
+
+    const difficultyUpper = difficulty.toUpperCase();
+
+    // Points assigned by difficulty
+    const pointsMap = { EASY: 1, MEDIUM: 2, HARD: 3 };
+    const points = pointsMap[difficultyUpper];
+
+    const prompt = `You are an expert professor creating MCQ exam questions for an undergraduate engineering course on Fields and Waves (Electromagnetics).
+
+Topic: ${topic}
+Module: ${module || 'General'}
+Chapter: ${chapter || 'General'}
+Difficulty: ${difficultyUpper}
+Number of questions: ${count}
+
+Generate exactly ${count} MCQ questions. Each question must:
+- Be relevant to the topic and appropriate for the difficulty level
+- Have exactly 4 options (A, B, C, D)
+- Have exactly one correct answer
+- Include a brief explanation for why the correct answer is right
+- For EASY: test basic concept recall
+- For MEDIUM: test application and understanding
+- For HARD: test problem-solving with calculations or deep analysis
+
+Respond ONLY with a valid JSON array. No preamble, no markdown, no backticks. Just the raw JSON array.
+
+Format:
+[
+  {
+    "question": "Question text here?",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correctAnswer": "Option A",
+    "explanation": "Explanation of why Option A is correct.",
+    "difficulty": "${difficultyUpper}",
+    "points": ${points},
+    "type": "MCQ"
+  }
+]`;
+
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+    });
+
+    const rawText = message.content[0].text.trim();
+
+    let questions;
+    try {
+      questions = JSON.parse(rawText);
+    } catch (parseErr) {
+      // Sometimes AI wraps in ```json ... ``` even when told not to — strip it
+      const cleaned = rawText.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim();
+      questions = JSON.parse(cleaned);
+    }
+
+    if (!Array.isArray(questions)) {
+      throw new Error('AI did not return an array of questions');
+    }
+
+    // Normalise — ensure every field is present
+    const normalised = questions.map(q => ({
+      type: 'MCQ',
+      question: q.question || '',
+      options: q.options || [],
+      correctAnswer: q.correctAnswer || '',
+      explanation: q.explanation || '',
+      difficulty: difficultyUpper,
+      points: points,
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: normalised
+    });
+
+  } catch (error) {
+    console.error('❌ AI question generation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate questions',
+      error: error.message
+    });
   }
 };

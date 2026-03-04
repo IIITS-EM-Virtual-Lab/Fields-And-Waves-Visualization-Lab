@@ -10,10 +10,11 @@ const {
   deleteQuiz,
   addQuestion,
   updateQuestion,
-  deleteQuestion
+  deleteQuestion,
+  generateQuestions          // ← NEW
 } = require('../controllers/Quiz');
 
-// ✅ Route definitions
+// Existing routes — unchanged
 router.get('/module/:moduleName/common', getModuleQuizzes);
 router.get('/module/:moduleName/chapter/:chapterName', getChapterQuiz);
 
@@ -21,7 +22,6 @@ router.post('/', auth, admin, createQuiz);
 router.put('/:quizId', auth, admin, updateQuiz);
 router.delete('/:quizId', auth, admin, deleteQuiz);
 
-// ✅ Upload with multiple fields
 router.post(
   '/:quizId/questions',
   auth,
@@ -46,5 +46,9 @@ router.put(
 
 router.delete('/:quizId/questions/:questionId', auth, admin, deleteQuestion);
 
+// ─── NEW: AI question generation ───────────────────────────
+// POST /api/quizzes/generate-questions
+// Must be placed BEFORE /:quizId routes to avoid param collision
+router.post('/generate-questions', auth, admin, generateQuestions);
 
 module.exports = router;
