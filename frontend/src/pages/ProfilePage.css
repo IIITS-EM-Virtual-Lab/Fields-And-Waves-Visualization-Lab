@@ -178,6 +178,11 @@
   overflow-x: auto;
 }
 
+/* Cards view is only for mobile — hidden on desktop */
+.users-cards {
+  display: none;
+}
+
 .users-table {
   width: 100%;
   border-collapse: collapse;
@@ -683,6 +688,11 @@
 .hamburger-btn:hover, .close-sidebar-btn:hover {
   background: #f5f5f5;
 }
+
+/* Hide the close X button on desktop — sidebar is always visible there */
+.close-sidebar-btn {
+  display: none;
+}
 .topbar-title {
   font-size: 1.1rem;
   margin: 0;
@@ -730,6 +740,11 @@
     justify-content: space-between;
     padding: 14px 20px 14px;
     border-bottom: 1px solid #eee;
+  }
+
+  /* Show the close X button only on mobile/tablet */
+  .close-sidebar-btn {
+    display: grid;
   }
 
   .sidebar-backdrop {
