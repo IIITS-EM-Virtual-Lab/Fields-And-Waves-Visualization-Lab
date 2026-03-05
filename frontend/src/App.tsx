@@ -29,6 +29,7 @@ import TypeOfWaves from "./pages/wave-propagation/waves_in_general";
 import WaveAnalysis from "./pages/wave-propagation/wave_analysis";
 import PowVector from "./pages/wave-propagation/pow_vector";
 import WaveReflection from "./pages/wave-propagation/wave_reflection";
+import TypesOfTransmissionLines from './pages/transmission-line/types_of_transmission_line';
 import CharacteristicImpedancePage from "./pages/transmission-line/CharacteristicImpedancePage.tsx";
 
 import Footer from "./components/Footer";
@@ -136,6 +137,7 @@ const AppRoutes = () => {
               path="/characteristic-impedance"
               element={<CharacteristicImpedancePage />}
             />
+            <Route path="/types-of-transmission-line" element={<TypesOfTransmissionLines />} />
 
             <Route path="/module/:moduleSlug" element={<ModulePage />} />
           </Route>
