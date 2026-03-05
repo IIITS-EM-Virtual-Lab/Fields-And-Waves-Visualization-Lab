@@ -71,7 +71,9 @@ const modules = [
     title: "Transmission Lines",
     icon: "/assets/transmission-lines.png",
     topics: [
+      { name: "Types of Transmission Line", path: "/types-of-transmission-line" },
       { name: "Characteristic Impedance", path: "/characteristic-impedance" },
+      { name: "Smith Chart", path: "/smith-chart" },
     ],
   },
 ];
@@ -112,7 +114,7 @@ const Home = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-white font-sans">
       <main className="flex-grow">
         {/* Hero Section */}
         <div className="flex flex-col lg:flex-row items-center min-h-[60vh] lg:h-[70vh] px-4 sm:px-6 lg:px-12 py-8 lg:py-0">
@@ -120,9 +122,9 @@ const Home = () => {
             <img
               src="/JC Bose.jpeg"
               alt="Sir J.C. Bose"
-              className="mb-3 rounded-md shadow-md w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-[75%] xl:max-w-[350px] 2xl:max-w-[450px] h-auto mx-auto"
+              className="mb-3 rounded-md shadow-md w-56 sm:w-64 lg:w-60 h-auto mx-auto grayscale hover:grayscale-0 transition-all duration-500"
             />
-            <p className="text-sm sm:text-base text-gray-900 font-bold">
+            <p className="text-sm sm:text-base text-gray-900 font-bold tracking-wide">
               Sir J.C. Bose
             </p>
           </div>
@@ -137,7 +139,7 @@ const Home = () => {
               <span className="relative inline-block">
                 Master electromagnetics — visually, interactively, and with
                 purpose.
-                <span className="absolute left-0 bottom-0 w-full h-[2px] "></span>
+                <span className="absolute left-0 bottom-0 w-full h-[2px] bg-green-300"></span>
               </span>
             </p>
             <p className="text-sm sm:text-base lg:text-[1.05rem] font-light text-gray-700 max-w-md mx-auto lg:mx-0 leading-6 lg:leading-7">
@@ -148,76 +150,79 @@ const Home = () => {
         </div>
 
         {/* Modules Section */}
-        <div className="bg-gray-100 py-6 sm:py-8 lg:py-10 px-4 sm:px-8 lg:px-16 rounded-md mt-6 lg:mt-10 mx-4 sm:mx-8 lg:mx-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+        <div className="mt-12 mx-4 sm:mx-8 lg:mx-20">
+          <div className="text-center mb-10">
+            <h2 className="text-4xl font-serif font-medium text-gray-800">Explore Modules</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {modules.map((mod, index) => (
-              <div key={index} className="w-full">
-                <button
-                  onClick={() => toggleDropdown(index)}
-                  className="flex items-center justify-between w-full text-left pb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded px-2 -mx-2"
-                >
-                  <div className="flex items-center gap-3">
-                    <img src={mod.icon} alt={mod.title} className="w-6 h-6" />
-                    <h2 className="text-lg sm:text-xl font-serif font-semibold text-gray-800">
-                      {mod.title}
-                    </h2>
+              <div
+                key={index}
+                className="flex flex-col rounded-xl border border-gray-100 bg-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden h-[340px]"
+              >
+                {/* Card Header */}
+                <div className="px-6 py-5 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 flex items-center gap-4 shrink-0">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-sm border border-gray-100 p-2">
+                    <img src={mod.icon} alt={mod.title} className="w-full h-full object-contain" />
                   </div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={`w-5 h-5 text-gray-600 transform transition-transform duration-200 flex-shrink-0 ${openStates[index] ? "rotate-180" : "rotate-0"}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                <div
-                  className={`transition-all duration-200 ease-in-out overflow-hidden ${openStates[index] ? "max-h-screen pt-2" : "max-h-0 pt-0"}`}
-                >
-                  <ul className="ml-8 sm:ml-9 text-sm sm:text-base lg:text-[1.05rem] font-light text-gray-800 space-y-1 leading-6">
+                  <h2 className="text-lg font-bold text-gray-800 tracking-tight leading-tight">
+                    {mod.title}
+                  </h2>
+                </div>
+
+                {/* Card Body - Scrollable Area */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+                  <ul className="space-y-1">
                     {mod.topics.map((topic, tidx) => (
                       <li key={tidx}>
-                        <a
-                          href={topic.path}
-                          className="hover:underline hover:text-blue-600 block py-1 transition-colors"
+                        <Link
+                          to={topic.path}
+                          className="flex items-center justify-between px-4 py-3 mx-2 rounded-lg group transition-colors hover:bg-blue-50"
                         >
-                          {topic.name}
-                        </a>
+                          <span className="text-sm font-medium text-gray-600 group-hover:text-blue-700 transition-colors">
+                            {topic.name}
+                          </span>
+                          <svg 
+                            className="w-4 h-4 text-gray-300 group-hover:text-blue-500 transform group-hover:translate-x-1 transition-all" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </Link>
                       </li>
                     ))}
                   </ul>
                 </div>
-                <hr
-                  className={`border-gray-300 ${openStates[index] ? "mt-6 lg:mt-8" : "mt-0"}`}
-                />
+                
+                {/* Visual fade for scrolling indication (optional aesthetic touch) */}
+                <div className="h-4 bg-gradient-to-t from-white to-transparent shrink-0 pointer-events-none" />
               </div>
             ))}
           </div>
         </div>
 
         {/* Why It Works Section */}
-        <div className="my-16 sm:my-20 lg:my-28 px-4 sm:px-6 lg:px-8">
+        <div className="my-14 sm:my-20 lg:my-18 px-4 sm:px-6 lg:px-8 bg-gray-50 py-16">
           <h2 className="text-center text-2xl sm:text-3xl lg:text-[2.6rem] font-serif font-medium text-gray-800 mb-12 sm:mb-14 lg:mb-16">
             Why It Works for You
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 sm:gap-12 lg:gap-20 text-center max-w-6xl mx-auto">
             {aboutData.map((card, index) => (
               <div key={index} className="flex flex-col items-center">
-                <img
-                  src={card.image}
-                  className="w-12 h-12 sm:w-14 sm:h-14 lg:w-[56px] lg:h-[56px] mb-4 sm:mb-5 lg:mb-6"
-                  alt={card.title}
-                />
-                <h3 className="text-xl sm:text-2xl lg:text-[1.6rem] font-serif font-medium text-gray-900 mb-2 sm:mb-3">
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-6">
+                  <img
+                    src={card.image}
+                    className="w-10 h-10"
+                    alt={card.title}
+                  />
+                </div>
+                <h3 className="text-xl sm:text-2xl lg:text-[1.4rem] font-serif font-medium text-gray-900 mb-3">
                   {card.title}
                 </h3>
-                <p className="text-sm sm:text-base lg:text-[0.9rem] text-gray-700 max-w-xs sm:max-w-sm lg:max-w-[20rem] leading-6 lg:leading-7">
+                <p className="text-sm sm:text-base text-gray-600 max-w-xs leading-relaxed">
                   {card.description}
                 </p>
               </div>
@@ -228,12 +233,12 @@ const Home = () => {
         {/* You Can Explore Section */}
         <div className="my-16 sm:my-20 lg:my-32 flex flex-col lg:flex-row items-center justify-between gap-12 sm:gap-16 lg:gap-20 px-4 sm:px-8 lg:px-20 lg:pl-32">
           <div className="w-full lg:w-1/2 space-y-4 sm:space-y-5 lg:space-y-6 text-center lg:text-left">
-            <p className="text-xs sm:text-sm uppercase tracking-wider text-gray-500 font-medium">
+            <p className="text-xs sm:text-sm uppercase tracking-wider text-blue-600 font-bold">
               Learners and Students
             </p>
             <h2 className="text-xl sm:text-2xl lg:text-[2.25rem] font-serif font-bold leading-tight lg:leading-snug">
               <span className="relative inline-block">
-                <span className="bg-green-100 px-1">You</span> can explore
+                <span className="bg-blue-100 text-blue-800 px-2 rounded mr-1">You</span> can explore
                 physics like never before.
               </span>
             </h2>
@@ -242,10 +247,10 @@ const Home = () => {
               theory, Maxwell's equations, and wave propagation through
               simulations and expert-driven lessons.
             </p>
-            <div className="pt-2 sm:pt-3 lg:pt-4">
+            <div className="pt-4">
               <button
                 onClick={() => navigate("/signup")}
-                className="bg-blue-600 text-white px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-sm sm:text-base lg:text-[1rem] rounded hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                className="bg-gray-900 text-white px-6 py-3 text-base rounded-lg hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
               >
                 Dive into the Lab
               </button>
@@ -255,11 +260,12 @@ const Home = () => {
             <img
               src="https://img.freepik.com/premium-vector/physics-learning-vector-illustration-featuring-students-exploring-electricity-magnetism-light-waves-forces-science-technology-exploration_2175-31406.jpg"
               alt="Learning Illustration"
-              className="max-w-xs sm:max-w-sm lg:max-w-sm w-full h-auto"
+              className="max-w-xs sm:max-w-md w-full h-auto rounded-2xl shadow-2xl"
             />
           </div>
         </div>
 
+        {/* Key Supporters */}
         <div className="my-16 sm:my-20 lg:my-28 px-4 sm:px-6 lg:px-20 text-center">
           <h2 className="text-2xl sm:text-3xl lg:text-[2.6rem] font-serif font-medium text-gray-800 mb-12 sm:mb-16">
             Key Supporters
@@ -268,6 +274,11 @@ const Home = () => {
             <img
               src="/Sponser1.JPG"
               alt="Gyan Circle Ventures"
+              className="h-24 sm:h-28 lg:h-32 w-auto object-contain"
+            />
+            <img
+              src="/IIIT_Sri_City_Logo.png"
+              alt="IIIT Sri City"
               className="h-24 sm:h-28 lg:h-32 w-auto object-contain"
             />
             <img
