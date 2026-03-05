@@ -21,7 +21,7 @@ const VectorCalculusIntro = () => {
             y="50"
             width="300"
             height="200"
-            fill="lightgray"
+            fill="white"
             stroke="black"
           />
           <line x1="50" y1="150" x2="350" y2="150" stroke="black" />

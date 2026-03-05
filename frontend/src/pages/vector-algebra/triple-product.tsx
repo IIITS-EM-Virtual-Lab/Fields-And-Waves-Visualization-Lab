@@ -3,6 +3,7 @@ import VectorTripleProduct from "@/components/VectorTripleProduct";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../../store/slices/authSlice';
+import { BlockMath, InlineMath } from "react-katex";
 
 const TripleProductPage = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -52,12 +53,25 @@ const TripleProductPage = () => {
           </div>
           
           <div className="flex justify-center p-8 sm:p-14">
-            <img
-              src="assets/vector-algebra/trip-1.png"
-              alt="scalar-triple-product"
-              className="max-w-full h-auto w-auto max-w-[600px]"
-            />
-          </div>
+  <BlockMath
+    math={`\\vec{a}\\cdot(\\vec{b}\\times\\vec{c})
+    = \\det
+    \\begin{bmatrix}
+    a_1 & a_2 & a_3 \\\\
+    b_1 & b_2 & b_3 \\\\
+    c_1 & c_2 & c_3
+    \\end{bmatrix}
+    =
+    \\det
+    \\begin{bmatrix}
+    a_1 & b_1 & c_1 \\\\
+    a_2 & b_2 & c_2 \\\\
+    a_3 & b_3 & c_3
+    \\end{bmatrix}
+    =
+    \\det[\\vec a\\ \\vec b\\ \\vec c]`}
+  />
+</div>
         </div>
         
         <div className="py-4 sm:py-8">

@@ -3,6 +3,7 @@ import VectorVisualizer from "@/components/VectorVisualizer";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../../store/slices/authSlice";
+import { BlockMath, InlineMath } from "react-katex";
 
 const Scalars = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -61,8 +62,8 @@ const Scalars = () => {
             </div>
             <div className="pt-8">
               To distinguish between a scalar and a vector, it is customary to
-              represent a vector by a letter with an arrow on top, such as A̅
-              and B̅, or by a letter in boldface type such as **A** and **B**.
+              represent a vector by a letter with an arrow on top, such as A̅ and
+              B̅, or by a letter in boldface type such as **A** and **B**.
             </div>
           </ul>
           <div className="w-full lg:w-1/2 flex justify-center">
@@ -89,12 +90,8 @@ const Scalars = () => {
         is along V, that is:
       </div>
 
-      <div className="flex justify-center py-8">
-        <img
-          src="/assets/vector-algebra/unit-vector.png"
-          alt="Unit Vector Formula"
-          className="w-[200px] max-w-full"
-        />
+      <div className="flex justify-center py-8 text-3xl">
+        <BlockMath math={"\\hat{v} = \\frac{\\vec{v}}{|\\vec{v}|}"} />
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
@@ -106,12 +103,36 @@ const Scalars = () => {
             A vector V in Cartesian (or rectangular) coordinates may be
             represented as:
           </div>
-          <div>
-            <img
-              src="/assets/vector-algebra/unit-v.png"
-              alt="Vector Representation"
-              className="max-w-full h-auto py-4"
-            />
+          <div className="py-4 text-center space-y-6">
+            <p>A unit vector is a vector with magnitude&nbsp;1</p>
+
+            <p>
+              To find a unit vector,&nbsp;
+              <InlineMath math={"\\vec{u}"} />
+              ,&nbsp; in the same direction of a vector,&nbsp;
+              <InlineMath math={"\\vec{v}"} />
+              ,&nbsp; we divide the vector by its magnitude
+            </p>
+
+            <div className="text-lg">
+              <BlockMath
+                math={
+                  "\\vec{u} = \\frac{\\vec{v}}{\\lVert \\vec{v} \\rVert} = \\frac{1}{\\lVert \\vec{v} \\rVert} \\vec{v}"
+                }
+              />
+            </div>
+
+            <p>
+              For a vector&nbsp;
+              <InlineMath math={"\\vec{v} = \\langle a, b \\rangle"} />
+              ,&nbsp; its magnitude is given by
+            </p>
+
+            <div className="text-lg">
+              <BlockMath
+                math={"\\lVert \\vec{v} \\rVert = \\sqrt{a^2 + b^2}"}
+              />
+            </div>
           </div>
         </div>
         <div className="w-full md:w-1/2 flex justify-center">

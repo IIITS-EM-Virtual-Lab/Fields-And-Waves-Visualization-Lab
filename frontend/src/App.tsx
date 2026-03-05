@@ -26,9 +26,13 @@ import EMFS from "./pages/maxwell-equations/emfs";
 import DisplacementCurrent from "./pages/maxwell-equations/displacement-current";
 import GaussLawMagnestismPage from "./pages/maxwell-equations/gauss-law-magnetism";
 import TypeOfWaves from "./pages/wave-propagation/waves_in_general";
-import WaveAnalysis from './pages/wave-propagation/wave_analysis';
-import PowVector from './pages/wave-propagation/pow_vector';
-import WaveReflection from './pages/wave-propagation/wave_reflection';
+import WaveAnalysis from "./pages/wave-propagation/wave_analysis";
+import PowVector from "./pages/wave-propagation/pow_vector";
+import WaveReflection from "./pages/wave-propagation/wave_reflection";
+import TypesOfTransmissionLines from './pages/transmission-line/types_of_transmission_line';
+import CharacteristicImpedancePage from "./pages/transmission-line/CharacteristicImpedancePage.tsx";
+import SmithChart from './pages/transmission-line/smith_chart';
+
 import Footer from "./components/Footer";
 import Settings from "./pages/settings";
 import Feedback from "./pages/feedback";
@@ -40,7 +44,7 @@ import Login from "./pages/login";
 import Signup from "./pages/signup";
 import ForgotPassword from "./pages/forgotpassword";
 import ProfilePage from "./pages/ProfilePage";
-import ChapterQuiz from './pages/ChapterQuiz';
+import ChapterQuiz from "./pages/ChapterQuiz";
 import UserDashboard from "./pages/UserDashboard";
 import ModulePage from "./pages/ModulePage";
 import ResetPassword from "./pages/reset-password";
@@ -61,55 +65,97 @@ const AppRoutes = () => {
           <Route path="/settings" element={<Settings />} />
           <Route path="/" element={<Home />} />
           <Route path="/profilepage" element={<ProfilePage />} />
-          <Route path="/quiz/:moduleName/:chapterName" element={<ChapterQuiz />} />
-          <Route path="/feedback" element ={<Feedback/>} />
+          <Route
+            path="/quiz/:moduleName/:chapterName"
+            element={<ChapterQuiz />}
+          />
+          <Route path="/feedback" element={<Feedback />} />
 
           <Route element={<ContentLayout />}>
             <Route path="/home" element={<Home />} />
             <Route path="/vector-addition" element={<VectorAdditionPage />} />
             <Route path="/scalars-and-vectors" element={<Scalars />} />
-            <Route path="/vector-multiplication" element={<VectorMultiplicationPage />} />
+            <Route
+              path="/vector-multiplication"
+              element={<VectorMultiplicationPage />}
+            />
             <Route path="/triple-product" element={<TripleProductPage />} />
 
-            <Route path="/vector-calculus-intro" element={<VectorCalculusIntro />} />
-            <Route path="/cylindrical-coordinates" element={<CylindricalCoordinatesPage />} />
-            <Route path="/spherical-coordinates" element={<SphericalCoordinatesPage />} />
+            <Route
+              path="/vector-calculus-intro"
+              element={<VectorCalculusIntro />}
+            />
+            <Route
+              path="/cylindrical-coordinates"
+              element={<CylindricalCoordinatesPage />}
+            />
+            <Route
+              path="/spherical-coordinates"
+              element={<SphericalCoordinatesPage />}
+            />
             <Route path="/del-operator" element={<DelOperatorPage />} />
-            <Route path="/cartesian-cylindrical-spherical" element={<CartesianCylindricalSphericalPage />} />
+            <Route
+              path="/cartesian-cylindrical-spherical"
+              element={<CartesianCylindricalSphericalPage />}
+            />
 
             <Route path="/electrostatics-intro" element={<CoulombsLawPage />} />
             <Route path="/electric-dipole" element={<ElectricDipolePage />} />
-            <Route path="/electric-potential" element={<ElectricPotentialPage />} />
-            <Route path="/electric-field-and-flux-density" element={<ElectricFluxPage />} />
+            <Route
+              path="/electric-potential"
+              element={<ElectricPotentialPage />}
+            />
+            <Route
+              path="/electric-field-and-flux-density"
+              element={<ElectricFluxPage />}
+            />
             <Route path="/field-operations" element={<GradientPage />} />
             <Route path="/gauss-law" element={<GaussLawPage />} />
 
             <Route path="/gauss-law-contd" element={<GaussLawContdPage />} />
-            <Route path="/gauss-law-magnetism" element={<GaussLawMagnestismPage />} />
+            <Route
+              path="/gauss-law-magnetism"
+              element={<GaussLawMagnestismPage />}
+            />
             <Route path="/ampere-law" element={<AmpereLawPage />} />
             <Route path="/faraday-law" element={<FaradayLawPage />} />
-            <Route path="/time-varying-potential" element={<TimeVaryingPotential />} />
+            <Route
+              path="/time-varying-potential"
+              element={<TimeVaryingPotential />}
+            />
             <Route path="/transformer-motional-emf" element={<EMFS />} />
-            <Route path="/displacement-current" element={<DisplacementCurrent />} />
+            <Route
+              path="/displacement-current"
+              element={<DisplacementCurrent />}
+            />
 
             <Route path="/types-of-waves" element={<TypeOfWaves />} />
             <Route path="/plane-wave-analysis" element={<WaveAnalysis />} />
             <Route path="/wave-power-energy" element={<PowVector />} />
-            <Route path="/wave-reflection" element={<WaveReflection />} /> 
+            <Route path="/wave-reflection" element={<WaveReflection />} />
+
+            <Route
+              path="/characteristic-impedance"
+              element={<CharacteristicImpedancePage />}
+            />
+            <Route path="/types-of-transmission-line" element={<TypesOfTransmissionLines />} />
+            <Route path="/smith-chart" element={<SmithChart />} />
 
             <Route path="/module/:moduleSlug" element={<ModulePage />} />
           </Route>
           <Route path="/content/:id" element={<Content />} />
           <Route path="/team" element={<Team />} />
-          <Route path="/quizzes/module/:moduleName/common" element={<ChapterQuiz />} />
+          <Route
+            path="/quizzes/module/:moduleName/common"
+            element={<ChapterQuiz />}
+          />
           <Route path="/userdashboard" element={<UserDashboard />} />
-         </Routes>
+        </Routes>
       </div>
-      <Footer /> 
+      <Footer />
     </div>
   );
 };
-
 
 const App = () => {
   return (

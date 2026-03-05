@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import CylindricalVisualizer from "@/components/CylindricalVisualizer";
+import { BlockMath,InlineMath } from "react-katex";
 
 const CylindricalCoordinatesPage = () => {
   return (
@@ -39,13 +40,12 @@ const CylindricalCoordinatesPage = () => {
         1. Differential displacement is given by
       </div>
       <div className="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 p-4 sm:p-8">
-        <span className="text-2xl sm:text-3xl font-semibold">dL =</span>
-        <img 
-          src="assets/vector-calculus/ccs-2.png" 
-          className="h-[40px] sm:h-[50px] max-w-full" 
-          alt="Differential displacement formula"
-        />
-      </div>
+  <span className="text-2xl sm:text-xl ">dL =</span>
+
+  <div className="text-xl sm:text-2xl">
+    <InlineMath math={`d\\rho\\,\\hat{a}_{\\rho} + \\rho\\,d\\phi\\,\\hat{a}_{\\phi} + dz\\,\\hat{a}_z`} />
+  </div>
+</div>
 
       <div className="font-semibold text-base sm:text-lg mb-4">
         2. Differential normal surface area is given by
@@ -61,13 +61,11 @@ const CylindricalCoordinatesPage = () => {
       <div className="font-semibold text-base sm:text-lg mb-4">
         3. Differential Volume is given by
       </div>
-      <div className="flex justify-center">
-        <img
-          src="assets/vector-calculus/ccs-4.png"
-          alt="Differential volume formula"
-          className="w-[150px] sm:w-[180px] md:w-[200px] max-w-full h-auto p-4 sm:p-8"
-        />
-      </div>
+      <div className="flex justify-center p-4 sm:p-8">
+  <div className="text-lg sm:text-xl md:text-2xl">
+    <BlockMath math={`dv = \\rho\\, d\\phi\\, dz\\, d\\rho`} />
+  </div>
+</div>
     </div>
   );
 };
