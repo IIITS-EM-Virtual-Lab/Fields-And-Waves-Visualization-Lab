@@ -64,7 +64,9 @@ const sidebarData = [
   topic: "Transmission Lines",
   icon: "/assets/transmission-lines.png",
   subtopics: [
+    { name: "Types of Transmission Line", path: "/types-of-transmission-line" },
     { name: "Characteristic Impedance", path: "/characteristic-impedance" },
+    { name: "Smith Chart", path: "/smith-chart" },
   ],
 },
 

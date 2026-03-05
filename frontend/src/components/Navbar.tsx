@@ -80,6 +80,7 @@ const exploreModules = [
     title: "Transmission Lines",
     items: [
       { name: "Types of Transmission Lines", path: "/types-of-transmission-line" },
+      { name: "Characteristic Impedance", path: "/characteristic-impedance" },
       { name: "Smith Chart", path: "/smith-chart" },
     ],
   },
