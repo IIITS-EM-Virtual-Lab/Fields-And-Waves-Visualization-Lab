@@ -33,6 +33,11 @@ const modules: Record<string, { name: string; path: string; topics: string[] }[]
     { name: "Time Varying Potential", path: "/time-varying-potential", topics: ["Time-Dependent Fields"] },
     { name: "EMF", path: "/transformer-motional-emf", topics: ["Motional EMF"] },
   ], 
+   "Transmission Lines":[  
+    
+      { name: "Characteristic Impedance", path: "/characteristic-impedance",topics:["Characteristic Impedance"] },
+    
+  ],
 };
 
 const moduleIcons: Record<string, string> = {

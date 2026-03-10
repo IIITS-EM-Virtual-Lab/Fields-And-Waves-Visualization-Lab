@@ -13,9 +13,9 @@ const WavesInGeneral: React.FC = () => {
         Electromagnetic (EM) waves are transverse and can travel in free space without a material medium.
       </div>
 
-      <div className="wave-visual">
+      {/*No need to warp this with wave.visual class */}
         <WavesLab />
-      </div>
+      
 
       <div className="wave-subtitle">General Form (Sinusoidal Plane Wave)</div>
       <div className="wave-text">A wave traveling in the +z direction is represented as:</div>

@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectCurrentToken } from '../store/slices/authSlice';
 import './ChapterQuiz.css';
 
+const API = 'https://fields-and-waves-visualization-lab.onrender.com';
+
 interface Question {
   _id: string;
   type: 'MCQ' | 'BLANK';
@@ -25,19 +27,6 @@ interface UserAnswer {
   points: number;
 }
 
-const redirectMap: Record<string, string> = {
-  'electrostatics/coulombs-law': '/electrostatics-intro',
-  'electrostatics/electric-flux': '/electric-field-and-flux-density',
-  'electrostatics/gradient': '/field-operations',
-  'electrostatics/electric-potential': '/electric-potential',
-  'electrostatics/electric-dipole': '/electric-dipole',
-
-  'vector-algebra/scalars': '/scalars-and-vectors',
-  'vector-algebra/addition': '/vector-addition',
-  'vector-algebra/multiplication': '/vector-multiplication',
-  'vector-algebra/triple-product': '/triple-product',
-};
-
 interface Quiz {
   _id: string;
   module: string;
@@ -45,16 +34,42 @@ interface Quiz {
   questions: Question[];
 }
 
+// ─── Randomly pick up to `n` items from an array ───────────
+function pickRandom<T>(arr: T[], n: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
+// ─── Build the quiz set: up to 3 easy, 4 medium, 3 hard ────
+function selectQuizQuestions(allQuestions: Question[]): Question[] {
+  const easy   = allQuestions.filter(q => q.difficulty === 'EASY');
+  const medium = allQuestions.filter(q => q.difficulty === 'MEDIUM');
+  const hard   = allQuestions.filter(q => q.difficulty === 'HARD');
+
+  const selected = [
+    ...pickRandom(easy,   Math.min(3, easy.length)),
+    ...pickRandom(medium, Math.min(4, medium.length)),
+    ...pickRandom(hard,   Math.min(3, hard.length)),
+  ];
+
+  // Shuffle the final set so difficulty order isn't always the same
+  return selected.sort(() => Math.random() - 0.5);
+}
+
 const ChapterQuiz = () => {
   const navigate = useNavigate();
   const { moduleName = '', chapterName = '' } = useParams<{ moduleName: string; chapterName: string }>();
+
+  // Raw quiz from API (full pool)
+  const [rawQuiz, setRawQuiz] = useState<Quiz | null>(null);
+  // Selected subset of questions shown to the student
   const [quiz, setQuiz] = useState<Quiz | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [intro, setIntro] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [answered, setAnswered] = useState(false);
-  const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [skipped, setSkipped] = useState(false);
   const [score, setScore] = useState(0);
@@ -67,21 +82,28 @@ const ChapterQuiz = () => {
   const currentUser = useSelector(selectCurrentUser);
   const token = useSelector(selectCurrentToken);
 
+  // ── Fetch full question pool then select random subset ──
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
         const url =
-          !chapterName || chapterName === "common"
-            ? `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/module/${moduleName}/common`
-            : `https://fields-and-waves-visualization-lab.onrender.com/api/quizzes/module/${moduleName}/chapter/${chapterName}`;
+          !chapterName || chapterName === 'common'
+            ? `${API}/api/quizzes/module/${moduleName}/common`
+            : `${API}/api/quizzes/module/${moduleName}/chapter/${chapterName}`;
+
         const res = await axios.get(url);
-        setQuiz({
+        const fullQuiz: Quiz = {
           _id: res.data.data._id,
           module: res.data.data.module,
           chapter: res.data.data.chapter,
           questions: res.data.data.questions,
-        });
+        };
 
+        setRawQuiz(fullQuiz);
+
+        // Select the random subset for this attempt
+        const selectedQuestions = selectQuizQuestions(fullQuiz.questions);
+        setQuiz({ ...fullQuiz, questions: selectedQuestions });
       } catch (err) {
         console.error('Error fetching quiz:', err);
       } finally {
@@ -94,142 +116,118 @@ const ChapterQuiz = () => {
   const currentQuestion = quiz?.questions[currentIndex];
 
   const handleOptionSelect = (opt: string) => {
-    if (!answered) {
-      setSelectedOption(opt);
-    }
+    if (!answered) setSelectedOption(opt);
   };
 
   const handleCheck = () => {
     if (!selectedOption || !currentQuestion || answered) return;
-    
-    const correctAnswer = Array.isArray(currentQuestion.correctAnswer)
-      ? currentQuestion.correctAnswer[0]
-      : currentQuestion.correctAnswer;
-    
+
     const isAnswerCorrect = Array.isArray(currentQuestion.correctAnswer)
       ? currentQuestion.correctAnswer.includes(selectedOption)
       : currentQuestion.correctAnswer === selectedOption;
 
     setIsCorrect(isAnswerCorrect);
     setAnswered(true);
-    setShowResult(true);
-    
-    const points = isAnswerCorrect ? currentQuestion.points : 0;
-    setScore(prev => prev + points);
-    
-    if (isAnswerCorrect) {
-      setCorrectCount(prev => prev + 1);
-    }
 
-    // Store user answer for review
-    const userAnswer: UserAnswer = {
+    const pts = isAnswerCorrect ? currentQuestion.points : 0;
+    setScore(prev => prev + pts);
+    if (isAnswerCorrect) setCorrectCount(prev => prev + 1);
+
+    setUserAnswers(prev => [...prev, {
       questionId: currentQuestion._id,
       selectedAnswer: selectedOption,
       isCorrect: isAnswerCorrect,
-      points: points
-    };
-    
-    setUserAnswers(prev => [...prev, userAnswer]);
+      points: pts,
+    }]);
   };
 
   const handleSkip = () => {
     if (!currentQuestion || answered) return;
-    
     setSkipped(true);
     setAnswered(true);
-    setShowResult(true);
     setIsCorrect(false);
-
-    // Store skipped answer for review
-    const userAnswer: UserAnswer = {
+    setUserAnswers(prev => [...prev, {
       questionId: currentQuestion._id,
       selectedAnswer: 'SKIPPED',
       isCorrect: false,
-      points: 0
-    };
-    
-    setUserAnswers(prev => [...prev, userAnswer]);
+      points: 0,
+    }]);
   };
 
-const submitQuizResult = async (finalScore: number, finalCorrectCount: number) => {
-  console.log(currentUser);
-  if (submitted || !currentUser?._id || !quiz?._id) {
-    console.log('❌ Cannot submit: missing data or already submitted');
-    return;
-  }
+  // ── Submit with explicit final values to avoid stale state ──
+  const submitQuizResult = async (
+    finalScore: number,
+    finalCorrectCount: number,
+    finalUserAnswers: UserAnswer[]
+  ) => {
+    if (submitted || !currentUser?._id || !quiz?._id) return;
 
-  try {
-    console.log('📤 Submitting quiz result:', {
-      userId: currentUser._id,
-      quizId: quiz._id,
-      score: finalScore,
-      correctAnswers: finalCorrectCount,
-      totalQuestions: quiz.questions.length,
-      userAnswers: userAnswers // Add user answers to submission
-    });
-    
-    const response = await axios.post('https://fields-and-waves-visualization-lab.onrender.com/api/quizresult/save', {
-  userId: currentUser._id,
-  quizId: quiz._id,
-  score: finalScore,
-  correctAnswers: finalCorrectCount,
-  totalQuestions: quiz.questions.length,
-  accuracy: Math.round((finalCorrectCount / quiz.questions.length) * 100),
-  module: quiz.module,
-  chapter: quiz.chapter,
-  userAnswers: userAnswers
-}, {
-  headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  }
-});
-
-
-    setSubmitted(true);
-    console.log('✅ Quiz result submitted successfully:', response.data);
-  } catch (err) {
-    console.error('❌ Error submitting quiz result:', err);
-  }
-};
+    try {
+      await axios.post(
+        `${API}/api/quizresult/save`,
+        {
+          userId: currentUser._id,
+          quizId: quiz._id,
+          score: finalScore,
+          correctAnswers: finalCorrectCount,
+          totalQuestions: quiz.questions.length,
+          accuracy: Math.round((finalCorrectCount / quiz.questions.length) * 100),
+          module: quiz.module,
+          chapter: quiz.chapter,
+          userAnswers: finalUserAnswers,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      setSubmitted(true);
+    } catch (err) {
+      console.error('❌ Error submitting quiz result:', err);
+    }
+  };
 
   const handleNext = async () => {
     if (!quiz) return;
     const nextIndex = currentIndex + 1;
 
     if (nextIndex >= quiz.questions.length) {
-      // Quiz completed - submit results
-      console.log("submit");
-      await submitQuizResult(score, correctCount);
+      // Build final values synchronously before state updates settle
+      const lastAnswer = userAnswers[userAnswers.length - 1];
+      // If the last question was just answered via handleCheck it's already in userAnswers
+      // but if handleNext is called right after handleCheck in the same tick, we need
+      // to use the latest accumulated state — which is correct here since handleCheck
+      // already pushed to userAnswers before handleNext is possible (button swap)
+      await submitQuizResult(score, correctCount, userAnswers);
       setShowResults(true);
       return;
     }
 
-    // Reset states for next question
     setCurrentIndex(nextIndex);
     setSelectedOption(null);
     setAnswered(false);
-    setShowResult(false);
     setIsCorrect(false);
     setSkipped(false);
   };
 
-  const getCorrectAnswer = (question: Question): string => {
-    return Array.isArray(question.correctAnswer)
+  const getCorrectAnswer = (question: Question): string =>
+    Array.isArray(question.correctAnswer)
       ? question.correctAnswer[0]
       : question.correctAnswer;
+
+  // ── Difficulty counts shown on intro screen ──
+  const getDifficultyCounts = () => {
+    if (!quiz) return { easy: 0, medium: 0, hard: 0 };
+    return {
+      easy:   quiz.questions.filter(q => q.difficulty === 'EASY').length,
+      medium: quiz.questions.filter(q => q.difficulty === 'MEDIUM').length,
+      hard:   quiz.questions.filter(q => q.difficulty === 'HARD').length,
+    };
   };
 
-  const renderSkippedResult = () => {
-    if (!skipped || !showResult) return null;
-
-    return (
-      <div className="result-feedback skipped">
-        <strong>Question Skipped</strong>
-      </div>
-    );
-  };
-
+  // ── Review ──────────────────────────────────────────────
   const renderReview = () => {
     if (!quiz || !showReview) return null;
 
@@ -240,63 +238,100 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
           <p>Total Points: <strong>{score}</strong></p>
           <p>Correct Answers: <strong>{correctCount} / {quiz.questions.length}</strong></p>
         </div>
-        
+
         <div className="review-questions">
           {quiz.questions.map((question, index) => {
-            const userAnswer = userAnswers[index];
+            // Match by string comparison — _id may come as ObjectId or string
+            const userAnswer = userAnswers.find(
+              ua => ua.questionId.toString() === question._id.toString()
+            );
             const correctAnswer = getCorrectAnswer(question);
-            
+
+            // If somehow no answer recorded (shouldn't happen), skip gracefully
+            if (!userAnswer) return null;
+
             return (
               <div key={question._id} className="review-question">
-                <h4>Question {index + 1}</h4>
+                <h4>Question {index + 1}
+                  <span className={`review-q-badge ${
+                    userAnswer.selectedAnswer === 'SKIPPED'
+                      ? 'badge-skipped'
+                      : userAnswer.isCorrect
+                      ? 'badge-correct'
+                      : 'badge-incorrect'
+                  }`}>
+                    {userAnswer.selectedAnswer === 'SKIPPED'
+                      ? 'Skipped'
+                      : userAnswer.isCorrect
+                      ? 'Correct'
+                      : 'Incorrect'}
+                  </span>
+                </h4>
+
+                <span className={`review-diff-tag diff-${question.difficulty.toLowerCase()}`}>
+                  {question.difficulty}
+                </span>
+
                 <p className="question-text">{question.question}</p>
-                
+
                 {question.imageUrl && (
                   <div className="question-image">
                     <img src={question.imageUrl} alt="Question" />
                   </div>
                 )}
-                
-                <div className="review-answers">
-                  {question.options?.map((option, optIndex) => {
-                    const isUserAnswer = userAnswer.selectedAnswer === option;
-                    const isCorrectAnswer = correctAnswer === option;
-                    
-                    let className = "review-option";
-                    if (isCorrectAnswer) className += " correct-answer";
-                    if (isUserAnswer && !isCorrectAnswer) className += " user-incorrect";
-                    if (isUserAnswer && isCorrectAnswer) className += " user-correct";
-                    
-                    return (
-                      <div key={optIndex} className={className}>
-                        <span className="option-label">{String.fromCharCode(65 + optIndex)}.</span> {option}
-                        {isUserAnswer && <span className="user-choice-indicator"> (Your choice)</span>}
-                        {isCorrectAnswer && <span className="correct-indicator"> ✓</span>}
-                      </div>
-                    );
-                  })}
-                  
-                  {userAnswer.selectedAnswer === 'SKIPPED' && (
-                    <div className="skipped-indicator">
-                      <strong>You skipped this question</strong>
+
+                {question.type === 'MCQ' && question.options && (
+                  <div className="review-answers">
+                    {question.options.map((option, optIndex) => {
+                      const isUserAnswer = userAnswer.selectedAnswer === option;
+                      const isCorrectOption = correctAnswer === option;
+
+                      let className = 'review-option';
+                      if (isCorrectOption) className += ' correct-answer';
+                      if (isUserAnswer && !isCorrectOption) className += ' user-incorrect';
+                      if (isUserAnswer && isCorrectOption) className += ' user-correct';
+
+                      return (
+                        <div key={optIndex} className={className}>
+                          <span className="option-label">{String.fromCharCode(65 + optIndex)}.</span>
+                          {option}
+                          {isUserAnswer && (
+                            <span className="user-choice-indicator"> (Your choice)</span>
+                          )}
+                          {isCorrectOption && (
+                            <span className="correct-indicator"> ✓</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {userAnswer.selectedAnswer === 'SKIPPED' && (
+                  <div className="skipped-indicator">
+                    <strong>You skipped this question</strong>
+                    <div className="review-option correct-answer" style={{ marginTop: 8 }}>
+                      <span className="option-label">✓</span> Correct answer: {correctAnswer}
                     </div>
-                  )}
-                </div>
-                
+                  </div>
+                )}
+
                 <div className={`review-result ${userAnswer.isCorrect ? 'correct' : 'incorrect'}`}>
                   <strong>
-                    {userAnswer.selectedAnswer === 'SKIPPED' ? 'Skipped' : 
-                     userAnswer.isCorrect ? 'Correct' : 'Incorrect'}
+                    {userAnswer.selectedAnswer === 'SKIPPED'
+                      ? 'Skipped — 0 points'
+                      : userAnswer.isCorrect
+                      ? `Correct — +${userAnswer.points} points`
+                      : `Incorrect — 0 / ${question.points} points`}
                   </strong>
-                  <span className="points"> (+{userAnswer.points} points)</span>
                 </div>
-                
+
                 {question.explanation && (
                   <div className="review-explanation">
                     <strong>Explanation:</strong> {question.explanation}
                   </div>
-                  )}
-                
+                )}
+
                 {question.solutionImageUrl && (
                   <div className="solution-image">
                     <img src={question.solutionImageUrl} alt="Solution" />
@@ -306,7 +341,7 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
             );
           })}
         </div>
-        
+
         <div className="review-buttons">
           <button onClick={() => window.location.reload()}>Reattempt Quiz</button>
           <button onClick={() => navigate(-1)}>Go Back</button>
@@ -315,20 +350,40 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
     );
   };
 
-  if (loading || !quiz) return <div>Loading...</div>;
+  // ── Guards ───────────────────────────────────────────────
+  if (loading || !quiz) return <div className="quiz-loading">Loading quiz...</div>;
 
+  if (quiz.questions.length === 0) {
+    return (
+      <div className="quiz-intro-page">
+        <div className="quiz-intro">
+          <h2>No Questions Available</h2>
+          <p>This quiz doesn't have enough questions yet. Please check back later.</p>
+          <button className="start-btn" onClick={() => navigate(-1)}>Go Back</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Intro screen ─────────────────────────────────────────
   if (intro) {
+    const counts = getDifficultyCounts();
     return (
       <div className="quiz-intro-page">
         <div className="quiz-intro">
           <h2>
-            {chapterName === "common"
+            {chapterName === 'common'
               ? `Course Challenge: ${moduleName.replace(/-/g, ' ').toUpperCase()}`
-              : "Course Challenge"}
+              : 'Course Challenge'}
           </h2>
           <p className="intro-subtitle">Ready for a challenge?</p>
           <p>Test your knowledge and earn points for what you already know!</p>
-          <p><strong>{quiz.questions.length} questions • 30–45 minutes</strong></p>
+          <p>
+            <strong>{quiz.questions.length} questions</strong> —
+            {counts.easy > 0 && <span className="intro-diff easy"> {counts.easy} Easy</span>}
+            {counts.medium > 0 && <span className="intro-diff medium"> · {counts.medium} Medium</span>}
+            {counts.hard > 0 && <span className="intro-diff hard"> · {counts.hard} Hard</span>}
+          </p>
           <p><em>Note: You get only one attempt per question.</em></p>
           <button className="start-btn" onClick={() => setIntro(false)}>Let's go</button>
         </div>
@@ -336,16 +391,28 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
     );
   }
 
-  if (showReview) {
-    return renderReview();
-  }
+  if (showReview) return renderReview();
 
+  // ── Results screen ───────────────────────────────────────
   if (showResults) {
+    const accuracy = Math.round((correctCount / quiz.questions.length) * 100);
     return (
       <div className="quiz-results">
-        <h2>Quiz Completed!</h2>
-        <p>Total Points Scored: <strong>{score}</strong></p>
-        <p>Correct Answers: <strong>{correctCount} / {quiz.questions.length}</strong></p>
+        <h2>Quiz Completed! 🎉</h2>
+        <div className="results-grid">
+          <div className="result-stat">
+            <span className="result-stat-value">{score}</span>
+            <span className="result-stat-label">Points Scored</span>
+          </div>
+          <div className="result-stat">
+            <span className="result-stat-value">{correctCount}/{quiz.questions.length}</span>
+            <span className="result-stat-label">Correct Answers</span>
+          </div>
+          <div className="result-stat">
+            <span className="result-stat-value">{accuracy}%</span>
+            <span className="result-stat-label">Accuracy</span>
+          </div>
+        </div>
         <div className="result-buttons">
           <button onClick={() => setShowReview(true)}>Review Answers</button>
           <button onClick={() => window.location.reload()}>Reattempt</button>
@@ -355,28 +422,40 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
     );
   }
 
+  // ── Quiz question screen ─────────────────────────────────
+  const correctAnswer = getCorrectAnswer(currentQuestion!);
+
   return (
     <div className="quiz-page">
       <div className="quiz-container">
         <div className="quiz-card">
+          {/* Difficulty tag */}
+          <span className={`q-diff-tag diff-${currentQuestion!.difficulty.toLowerCase()}`}>
+            {currentQuestion!.difficulty}
+          </span>
+
           <h3 className="question-text">{currentQuestion?.question}</h3>
+
           {currentQuestion?.imageUrl && (
             <div className="question-image">
               <img src={currentQuestion.imageUrl} alt="Question" />
             </div>
           )}
+
           <p className="instruction">Choose 1 answer:</p>
+
           <div className="options-list">
             {currentQuestion?.options?.map((opt, i) => {
               const isSelected = selectedOption === opt;
-              const correctAnswer = getCorrectAnswer(currentQuestion);
               const isCorrectOption = correctAnswer === opt;
 
-              let className = "option-item";
+              let className = 'option-item';
               if (answered && isSelected) {
-                className += isCorrectOption ? " correct selected" : " incorrect selected";
+                className += isCorrectOption ? ' correct selected' : ' incorrect selected';
+              } else if (answered && isCorrectOption) {
+                className += ' correct'; // highlight correct even if student chose wrong
               } else if (isSelected) {
-                className += " selected";
+                className += ' selected';
               }
 
               return (
@@ -395,6 +474,14 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
                   {answered && isSelected && (
                     <div className={`explanation ${isCorrectOption ? 'correct' : 'incorrect'}`}>
                       <strong>{isCorrectOption ? 'Correct!' : 'Incorrect.'}</strong>
+                      {!isCorrectOption && currentQuestion.explanation && (
+                        <span> {currentQuestion.explanation}</span>
+                      )}
+                    </div>
+                  )}
+                  {answered && !isSelected && isCorrectOption && (
+                    <div className="explanation correct">
+                      <strong>This was the correct answer.</strong>
                     </div>
                   )}
                 </div>
@@ -410,9 +497,9 @@ const submitQuizResult = async (finalScore: number, finalCorrectCount: number) =
               {!answered && (
                 <>
                   <button onClick={handleSkip} className="skip-btn">Skip</button>
-                  <button 
-                    onClick={handleCheck} 
-                    className="check-btn" 
+                  <button
+                    onClick={handleCheck}
+                    className="check-btn"
                     disabled={!selectedOption}
                   >
                     Check
