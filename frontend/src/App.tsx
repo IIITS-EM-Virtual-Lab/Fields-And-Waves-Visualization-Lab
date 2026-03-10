@@ -44,6 +44,7 @@ import ChapterQuiz from './pages/ChapterQuiz';
 import UserDashboard from "./pages/UserDashboard";
 import ModulePage from "./pages/ModulePage";
 import ResetPassword from "./pages/reset-password";
+import ChatBot from "./components/ChatBot";
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -104,6 +105,7 @@ const AppRoutes = () => {
           <Route path="/quizzes/module/:moduleName/common" element={<ChapterQuiz />} />
           <Route path="/userdashboard" element={<UserDashboard />} />
          </Routes>
+         <ChatBot />
       </div>
       <Footer /> 
     </div>
