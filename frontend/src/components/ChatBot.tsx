@@ -87,12 +87,11 @@ export default function ChatBot() {
 
     try {
       const response = await fetch(
-        "https://obeliskoid-elwanda-covetously.ngrok-free.dev/ask",
+        "https://fwvlab-fwv-ai-service.hf.space/ask",
         {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "69420" 
           },
           body: JSON.stringify({ query: userMessage }),
         }
