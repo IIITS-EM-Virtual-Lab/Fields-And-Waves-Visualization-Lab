@@ -197,7 +197,7 @@ The project is divided into two main parts:
 
 - **Kothamasu Mohith Ram Sai Karthik Phalgun:** Dev, backend, frontend, visualizations
 - **Sriman Reddy Bommireddy:** Dev, backend, frontend
-- **Eraveni Sai Likhith:** Content
+- **Eraveni Sai Likhith:** backend, frontend, visualizations
 - **Abdul Khadar:** Content
 
 ---
