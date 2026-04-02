@@ -466,13 +466,13 @@ const ChapterQuiz = () => {
 
   return (
     <div className="quiz-page">
-      <div className="quiz-container">
+      {/* ── Small fixed timer badge — top right corner ── */}
+      <div className={`quiz-timer-badge ${getTimerClass()}`}>
+        <span className="quiz-timer-icon">⏱</span>
+        <span className="quiz-timer-value">{formatTime(timeLeft)}</span>
+      </div>
 
-        {/* ── Sticky timer bar ── */}
-        <div className={`quiz-timer-bar ${getTimerClass()}`}>
-          <span className="quiz-timer-label">⏱ Time Remaining</span>
-          <span className="quiz-timer-value">{formatTime(timeLeft)}</span>
-        </div>
+      <div className="quiz-container">
 
         <div className="quiz-card">
           <span className={`q-diff-tag diff-${currentQuestion!.difficulty.toLowerCase()}`}>

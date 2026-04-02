@@ -637,68 +637,65 @@
   font-weight: 500;
 }
 
-/* Sticky timer bar that sits above the quiz card */
-.quiz-timer-bar {
-  display: flex;
-  justify-content: space-between;
+/* Small fixed badge — top-right corner, never disrupts layout */
+.quiz-timer-badge {
+  position: fixed;
+  top: 80px;          /* sits just below the site navbar */
+  right: 20px;
+  z-index: 100;
+  display: inline-flex;
   align-items: center;
-  width: 100%;
-  max-width: 700px;
-  margin: 0 auto 1rem auto;
-  padding: 0.6rem 1.25rem;
-  border-radius: 8px;
-  border: 1.5px solid #e2e8f0;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: background 0.4s ease, border-color 0.4s ease;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+  pointer-events: none;
+  user-select: none;
 }
 
-/* Colour states */
-.quiz-timer-bar.timer-green {
+.quiz-timer-badge.timer-green {
   background: #f0fff4;
   border-color: #68d391;
   color: #276749;
 }
 
-.quiz-timer-bar.timer-yellow {
+.quiz-timer-badge.timer-yellow {
   background: #fffff0;
-  border-color: #f6e05e;
+  border-color: #d69e2e;
   color: #744210;
 }
 
-.quiz-timer-bar.timer-red {
+.quiz-timer-badge.timer-red {
   background: #fff5f5;
   border-color: #fc8181;
   color: #c53030;
-  /* gentle pulse to draw attention */
   animation: timer-pulse 1s ease-in-out infinite;
 }
 
 @keyframes timer-pulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.7; }
+  50%       { opacity: 0.65; }
 }
 
-.quiz-timer-label {
+.quiz-timer-icon {
   font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.75;
 }
 
 .quiz-timer-value {
-  font-size: 1.35rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-size: 1rem;
   letter-spacing: 0.04em;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
-  .quiz-timer-bar {
-    font-size: 0.9rem;
-  }
-  .quiz-timer-value {
-    font-size: 1.15rem;
+  .quiz-timer-badge {
+    top: 70px;
+    right: 12px;
+    font-size: 0.85rem;
+    padding: 5px 11px;
   }
 }
