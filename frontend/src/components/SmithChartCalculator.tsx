@@ -10,12 +10,28 @@ declare global {
 }
 
 export default function SmithChartCalculator() {
+  // Chart Mode State
+  const [chartMode, setChartMode] = useState<"impedance" | "admittance">(
+    "impedance",
+  );
+
+  // Impedance States
   const [z0, setZ0] = useState<string>("50");
   const [rL, setRL] = useState<string>("50");
   const [xL, setXL] = useState<string>("25");
-  const [lengthWL, setLengthWL] = useState<string>("0.125");
-  const [plotlyLoaded, setPlotlyLoaded] = useState<boolean>(false);
 
+  // Length States
+  const [lengthMode, setLengthMode] = useState<"electrical" | "physical">(
+    "electrical",
+  );
+  const [lengthWL, setLengthWL] = useState<string>("0.125");
+
+  // Physical Parameter States
+  const [physLength, setPhysLength] = useState<string>("1.5"); // meters
+  const [frequency, setFrequency] = useState<string>("100"); // MHz
+  const [velocityFactor, setVelocityFactor] = useState<string>("1.0"); // Multiple of c
+
+  const [plotlyLoaded, setPlotlyLoaded] = useState<boolean>(false);
   const plotRef = useRef<HTMLDivElement>(null);
 
   // Plotly Initialization
@@ -43,15 +59,40 @@ export default function SmithChartCalculator() {
     const numXL = parseFloat(xL);
     const safeXL = isNaN(numXL) ? 0 : numXL;
 
-    const numLen = parseFloat(lengthWL);
-    const safeLen = isNaN(numLen) || numLen < 0 ? 0 : numLen;
+    // Calculate effective line length (in wavelengths) based on mode
+    let safeLen = 0;
+    if (lengthMode === "electrical") {
+      const numLen = parseFloat(lengthWL);
+      safeLen = isNaN(numLen) || numLen < 0 ? 0 : numLen;
+    } else {
+      const pLen = parseFloat(physLength);
+      const freqMHz = parseFloat(frequency);
+      const vf = parseFloat(velocityFactor);
+
+      const safePLen = isNaN(pLen) || pLen < 0 ? 0 : pLen;
+      const safeFreq = isNaN(freqMHz) || freqMHz < 0 ? 0 : freqMHz * 1e6; // Convert MHz to Hz
+      const safeVF = isNaN(vf) || vf <= 0 ? 1 : vf;
+
+      const c = 299792458; // Speed of light in m/s
+      const safePVel = safeVF * c;
+
+      safeLen = safePVel > 0 ? (safePLen * safeFreq) / safePVel : 0;
+    }
 
     // 1. Normalized Load Impedance
     const r = safeRL / safeZ0;
     const x = safeXL / safeZ0;
 
+    // 1b. Normalized Load Admittance (yL = g + jb)
+    const zDenom = r * r + x * x;
+    let g = Infinity;
+    let b = Infinity;
+    if (zDenom > 1e-10) {
+      g = r / zDenom;
+      b = -x / zDenom;
+    }
+
     // 2. Reflection Coefficient (Gamma) at Load
-    // Gamma = (z - 1) / (z + 1)
     const numReal = r - 1;
     const numImag = x;
     const denReal = r + 1;
@@ -73,14 +114,12 @@ export default function SmithChartCalculator() {
     if (gammaMag === 0) returnLoss = Infinity;
 
     // 4. Input Impedance (Z_in)
-    // Moving towards the generator rotates Gamma clockwise by 4*pi*(l/lambda)
     const phaseShift = -4 * Math.PI * safeLen;
     const gammaInPhaseRad = gammaPhaseRad + phaseShift;
 
     const gammaInReal = gammaMag * Math.cos(gammaInPhaseRad);
     const gammaInImag = gammaMag * Math.sin(gammaInPhaseRad);
 
-    // Convert Gamma_in back to normalized z_in = (1 + Gamma_in) / (1 - Gamma_in)
     const zInNumReal = 1 + gammaInReal;
     const zInNumImag = gammaInImag;
     const zInDenReal = 1 - gammaInReal;
@@ -100,9 +139,24 @@ export default function SmithChartCalculator() {
     const zinAbsR = zinNormR === Infinity ? Infinity : zinNormR * safeZ0;
     const zinAbsX = zinNormX === Infinity ? Infinity : zinNormX * safeZ0;
 
+    // 4b. Input Admittance (Y_in)
+    const zinDenMagSq2 = zinNormR * zinNormR + zinNormX * zinNormX;
+    let gin = Infinity;
+    let bin = Infinity;
+    if (zinDenMagSq2 > 1e-10) {
+      gin = zinNormR / zinDenMagSq2;
+      bin = -zinNormX / zinDenMagSq2;
+    }
+
+    const y0 = 1 / safeZ0;
+    const yinAbsG = gin === Infinity ? Infinity : gin * y0;
+    const yinAbsB = bin === Infinity ? Infinity : bin * y0;
+
     return {
       r,
       x,
+      g,
+      b,
       gammaMag,
       gammaPhaseDeg,
       gammaPhaseRad,
@@ -110,12 +164,17 @@ export default function SmithChartCalculator() {
       returnLoss,
       safeLen,
       safeZ0,
+      y0,
       zinNormR,
       zinNormX,
       zinAbsR,
       zinAbsX,
+      gin,
+      bin,
+      yinAbsG,
+      yinAbsB,
     };
-  }, [z0, rL, xL, lengthWL]);
+  }, [z0, rL, xL, lengthMode, lengthWL, physLength, frequency, velocityFactor]);
 
   // Generate Chart Data
   const chartData = useMemo(() => {
@@ -125,7 +184,7 @@ export default function SmithChartCalculator() {
     const arcX: number[] = [];
 
     if (results.gammaMag > 0.001 && results.gammaMag < 0.999) {
-      // 1. Full SWR Circle
+      // 1. Full SWR Circle (Mathematically identical for both Z and Y charts)
       for (let i = 0; i <= 100; i++) {
         const theta = (i / 100) * 2 * Math.PI;
         const u = results.gammaMag * Math.cos(theta);
@@ -138,14 +197,19 @@ export default function SmithChartCalculator() {
         }
       }
 
-      // 2. Arc toward Generator (from Z_L to Z_in)
+      // 2. Arc toward Generator (Rotated by 180 degrees if in admittance mode)
       if (results.safeLen > 0) {
         const effectiveLen = Math.min(results.safeLen, 0.5);
         const numPoints = Math.max(20, Math.floor(effectiveLen * 200));
 
+        const phaseBase =
+          chartMode === "impedance"
+            ? results.gammaPhaseRad
+            : results.gammaPhaseRad + Math.PI;
+
         for (let i = 0; i <= numPoints; i++) {
           const shift = (i / numPoints) * (4 * Math.PI * effectiveLen);
-          const phi = results.gammaPhaseRad - shift;
+          const phi = phaseBase - shift;
           const u = results.gammaMag * Math.cos(phi);
           const v = results.gammaMag * Math.sin(phi);
           const denom = Math.pow(1 - u, 2) + Math.pow(v, 2);
@@ -158,12 +222,13 @@ export default function SmithChartCalculator() {
       }
     }
     return { swrCircleR, swrCircleX, arcR, arcX };
-  }, [results]);
+  }, [results, chartMode]);
 
   useEffect(() => {
     if (!plotlyLoaded || !plotRef.current || !window.Plotly) return;
 
     const traces: PlotlyType.Data[] = [];
+    const isImp = chartMode === "impedance";
 
     // 1. SWR Circle (Dashed Green)
     if (chartData.swrCircleR.length > 0) {
@@ -191,37 +256,37 @@ export default function SmithChartCalculator() {
       } as unknown as PlotlyType.Data);
     }
 
-    // 3. Normalised Load Impedance z_load Point
+    // 3. Normalised Load Point (Dynamic zL or yL)
     traces.push({
       type: "scattersmith",
       mode: "markers",
-      name: "Normalised Load (z_load) ",
-      real: [results.r],
-      imag: [results.x],
+      name: isImp ? "Normalised Load (z_load)" : "Normalised Load (y_load)",
+      real: [isImp ? results.r : results.g],
+      imag: [isImp ? results.x : results.b],
       marker: {
         color: "#3b82f6",
         size: 12,
         symbol: "circle",
         line: { color: "white", width: 1 },
       },
-      hovertemplate: `<b>z_load</b><br>Real: %{real:.3f} <br>Imag: %{imag:.3f} <extra></extra>`,
+      hovertemplate: `<b>${isImp ? "z_load" : "y_load"}</b><br>${isImp ? "Real" : "Cond"}: %{real:.3f} <br>${isImp ? "Imag" : "Susc"}: %{imag:.3f} <extra></extra>`,
     } as unknown as PlotlyType.Data);
 
-    // 4. Normlalised Input Impedance z_in Point
+    // 4. Normalised Input Point (Dynamic zin or yin)
     if (results.safeLen > 0) {
       traces.push({
         type: "scattersmith",
         mode: "markers",
-        name: "Normalised Input (z_in)",
-        real: [results.zinNormR],
-        imag: [results.zinNormX],
+        name: isImp ? "Normalised Input (z_in)" : "Normalised Input (y_in)",
+        real: [isImp ? results.zinNormR : results.gin],
+        imag: [isImp ? results.zinNormX : results.bin],
         marker: {
           color: "#ef4444",
           size: 12,
           symbol: "diamond",
           line: { color: "white", width: 1 },
         },
-        hovertemplate: `<b>z_in</b><br>Real: %{real:.3f} <br>Imag: %{imag:.3f} <extra></extra>`,
+        hovertemplate: `<b>${isImp ? "z_in" : "y_in"}</b><br>${isImp ? "Real" : "Cond"}: %{real:.3f} <br>${isImp ? "Imag" : "Susc"}: %{imag:.3f} <extra></extra>`,
       } as unknown as PlotlyType.Data);
     }
 
@@ -246,13 +311,13 @@ export default function SmithChartCalculator() {
           tickfont: { color: "#3b82f6" },
         },
       },
-      margin: { l: 40, r: 40, t: 110, b: 40 },
+      margin: { l: 40, r: 40, t: 80, b: 40 },
       showlegend: true,
       legend: {
         orientation: "v",
         x: 0.5,
         xanchor: "center",
-        y: 1.27,
+        y: 1.3,
         yanchor: "top",
         font: { color: "#475569", size: 14 },
         bgcolor: "rgba(255,255,255,0)",
@@ -276,17 +341,26 @@ export default function SmithChartCalculator() {
       layout as unknown as PlotlyType.Layout,
       config,
     );
-  }, [results, chartData, plotlyLoaded]);
+  }, [results, chartData, plotlyLoaded, chartMode]);
 
   const handleInputChange =
     (setter: React.Dispatch<React.SetStateAction<string>>) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setter(e.target.value);
 
-  const formatComplex = (real: number, imag: number, isNorm = false) => {
+  // Dynamic formatting function to handle tiny admittance (S) values cleanly
+  const formatComplex = (
+    real: number,
+    imag: number,
+    mode: "norm" | "absZ" | "absY" = "absZ",
+  ) => {
     if (!isFinite(real) || !isFinite(imag)) return "∞";
-    const rStr = real.toFixed(isNorm ? 3 : 1);
-    const iStr = Math.abs(imag).toFixed(isNorm ? 3 : 1);
+    let digits = 1;
+    if (mode === "norm") digits = 3;
+    if (mode === "absY") digits = 4; // Extra precision for Siemens (S)
+
+    const rStr = real.toFixed(digits);
+    const iStr = Math.abs(imag).toFixed(digits);
     const sign = imag >= 0 ? "+" : "-";
     return `${rStr} ${sign} j${iStr}`;
   };
@@ -304,6 +378,30 @@ export default function SmithChartCalculator() {
           <div className="flex items-center gap-2 border-b border-slate-100 pb-2 mb-2">
             <Settings2 className="w-5 h-5 text-slate-400" />
             <h2 className="text-lg font-semibold text-slate-800">Parameters</h2>
+          </div>
+
+          {/* Chart Mode Toggle */}
+          <div className="flex bg-slate-100 p-1 rounded-lg">
+            <button
+              className={`flex-1 text-sm py-1.5 rounded-md font-medium transition-colors ${
+                chartMode === "impedance"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+              onClick={() => setChartMode("impedance")}
+            >
+              Impedance
+            </button>
+            <button
+              className={`flex-1 text-sm py-1.5 rounded-md font-medium transition-colors ${
+                chartMode === "admittance"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+              onClick={() => setChartMode("admittance")}
+            >
+              Admittance
+            </button>
           </div>
 
           <div className="space-y-4">
@@ -359,23 +457,109 @@ export default function SmithChartCalculator() {
               </div>
             </div>
 
-            <div className="pt-2">
-              <label className="block text-sm font-medium text-slate-600 mb-1">
-                Line Length (l)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  step="0.001"
-                  min="0"
-                  value={lengthWL}
-                  onChange={handleInputChange(setLengthWL)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition-colors"
-                />
-                <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
-                  λ
-                </span>
+            <div className="pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-sm font-medium text-slate-800">
+                  Line Length Input
+                </label>
+                <select
+                  value={lengthMode}
+                  onChange={(e) =>
+                    setLengthMode(e.target.value as "electrical" | "physical")
+                  }
+                  className="text-sm bg-slate-50 border border-slate-200 text-slate-700 rounded-md py-1 px-2 focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer"
+                >
+                  <option value="electrical">Electrical (λ)</option>
+                  <option value="physical">Physical Parameters</option>
+                </select>
               </div>
+
+              {lengthMode === "electrical" ? (
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">
+                    Line Length (l)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.001"
+                      min="0"
+                      value={lengthWL}
+                      onChange={handleInputChange(setLengthWL)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition-colors"
+                    />
+                    <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
+                      λ
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">
+                      Physical Length (L)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        value={physLength}
+                        onChange={handleInputChange(setPhysLength)}
+                        className="w-full text-sm border border-slate-200 rounded-md pl-3 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-red-500"
+                      />
+                      <span className="absolute right-3 top-1.5 text-xs text-slate-400 pointer-events-none">
+                        m
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">
+                        Freq (f)
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          value={frequency}
+                          onChange={handleInputChange(setFrequency)}
+                          className="w-full text-sm border border-slate-200 rounded-md pl-3 pr-10 py-1.5 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        />
+                        <span className="absolute right-2 top-1.5 text-xs text-slate-400 pointer-events-none">
+                          MHz
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1 whitespace-nowrap">
+                        Velocity Factor (VF)
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="1"
+                          value={velocityFactor}
+                          onChange={handleInputChange(setVelocityFactor)}
+                          className="w-full text-sm border border-slate-200 rounded-md pl-2 pr-6 py-1.5 focus:outline-none focus:ring-2 focus:ring-red-500"
+                        />
+                        <span className="absolute right-2 top-1.5 text-xs text-slate-400 pointer-events-none">
+                          c
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pt-2 text-xs text-slate-500 text-center border-t border-slate-200">
+                    Calculated Length:{" "}
+                    <span className="font-semibold text-red-600">
+                      {results.safeLen.toFixed(4)} λ
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -388,23 +572,47 @@ export default function SmithChartCalculator() {
           </div>
 
           <div className="space-y-3">
-            <div className="flex justify-between items-center bg-blue-50/50 p-3 rounded-lg border border-blue-100">
-              <span className="text-slate-600 text-sm">
-                Normalised Load (z<sub>L</sub>)
-              </span>
-              <span className="font-mono text-blue-600 font-medium">
-                {formatComplex(results.r, results.x, true)}
-              </span>
-            </div>
+            {chartMode === "impedance" ? (
+              <>
+                <div className="flex justify-between items-center bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                  <span className="text-slate-600 text-sm">
+                    Normalised Load (z<sub>L</sub>)
+                  </span>
+                  <span className="font-mono text-blue-600 font-medium">
+                    {formatComplex(results.r, results.x, "norm")}
+                  </span>
+                </div>
 
-            <div className="flex justify-between items-center bg-red-50/50 p-3 rounded-lg border border-red-100">
-              <span className="text-slate-600 text-sm">
-                Input (Z<sub>in</sub>)
-              </span>
-              <span className="font-mono text-red-600 font-bold">
-                {formatComplex(results.zinAbsR, results.zinAbsX, false)} Ω
-              </span>
-            </div>
+                <div className="flex justify-between items-center bg-red-50/50 p-3 rounded-lg border border-red-100">
+                  <span className="text-slate-600 text-sm">
+                    Input (Z<sub>in</sub>)
+                  </span>
+                  <span className="font-mono text-red-600 font-bold">
+                    {formatComplex(results.zinAbsR, results.zinAbsX, "absZ")} Ω
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between items-center bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                  <span className="text-slate-600 text-sm">
+                    Normalised Load (y<sub>L</sub>)
+                  </span>
+                  <span className="font-mono text-blue-600 font-medium">
+                    {formatComplex(results.g, results.b, "norm")}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center bg-red-50/50 p-3 rounded-lg border border-red-100">
+                  <span className="text-slate-600 text-sm">
+                    Input (Y<sub>in</sub>)
+                  </span>
+                  <span className="font-mono text-red-600 font-bold">
+                    {formatComplex(results.yinAbsG, results.yinAbsB, "absY")} S
+                  </span>
+                </div>
+              </>
+            )}
 
             <div className="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-100">
               <span className="text-slate-600 text-sm">Refl. Coeff. (Γ)</span>
@@ -425,9 +633,10 @@ export default function SmithChartCalculator() {
       </div>
 
       {/* Smith Chart */}
-      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center min-h-[600px]">
+      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center min-h-[600px] relative">
         {!plotlyLoaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-10">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-10 rounded-2xl">
+            
             <Cpu className="w-10 h-10 text-blue-500 animate-pulse mb-4" />
             <p className="text-slate-500 font-medium">
               Loading Chart Engine...
@@ -436,6 +645,11 @@ export default function SmithChartCalculator() {
         )}
 
         <div className="flex flex-col items-center gap-3 mb-4">
+          <h2 className="text-lg font-semibold text-slate-700 text-center mt-2">
+  {chartMode === "impedance"
+    ? "Impedance Smith Chart (Z)"
+    : "Admittance Smith Chart (Y)"}
+</h2>
           <div
             ref={plotRef}
             className="w-[650px] h-[650px] max-w-full"
@@ -451,7 +665,10 @@ export default function SmithChartCalculator() {
               if (plotRef.current && window.Plotly) {
                 window.Plotly.downloadImage(plotRef.current, {
                   format: "png",
-                  filename: "smith_chart",
+                  filename:
+                    chartMode === "impedance"
+                      ? "impedance_smith_chart"
+                      : "admittance_smith_chart",
                   height: 800,
                   width: 800,
                 });

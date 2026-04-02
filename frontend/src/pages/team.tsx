@@ -70,6 +70,30 @@ const Team = () => {
             <p>IIIT Sri City</p>
             <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
           </div>
+          {/* Contributor 7 */}
+          <div className="bg-gray-50 rounded-2xl shadow-md p-6 text-gray-800">
+            <p className="font-bold">Naman Goyal</p>
+            <p>B.Tech</p>
+            <p>Dept. of Electronics and Communication Engineering</p>
+            <p>IIIT Sri City</p>
+            <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
+          </div>
+          {/* Contributor 8 */}
+          <div className="bg-gray-50 rounded-2xl shadow-md p-6 text-gray-800">
+            <p className="font-bold">Ayushman Mahananda</p>
+            <p>B.Tech</p>
+            <p>Dept. of Electronics and Communication Engineering</p>
+            <p>IIIT Sri City</p>
+            <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
+          </div>
+          {/* Contributor 9 */}
+          <div className="bg-gray-50 rounded-2xl shadow-md p-6 text-gray-800">
+            <p className="font-bold">Yashwanth S</p>
+            <p>B.Tech</p>
+            <p>Dept. of Electronics and Communication Engineering</p>
+            <p>IIIT Sri City</p>
+            <p>Chittoor, Andhra Pradesh 517646, INDIA</p>
+          </div>
         </div>
       </section>
     </main>

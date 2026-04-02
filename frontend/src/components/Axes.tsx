@@ -9,10 +9,11 @@ type AxisProps = {
 
 function AxisTicks({ axis, length, interval, color }: AxisProps) {
   const ticks = [];
+
   for (let i = -length; i <= length; i += interval) {
     if (i === 0) continue;
 
-    let pos = [0, 0, 0];
+    let pos: [number, number, number] = [0, 0, 0];
     let tickStart: [number, number, number] = [0, 0, 0];
     let tickEnd: [number, number, number] = [0, 0, 0];
 
@@ -24,17 +25,24 @@ function AxisTicks({ axis, length, interval, color }: AxisProps) {
       pos = [-0.2, i, 0];
       tickStart = [-0.1, i, 0];
       tickEnd = [0.1, i, 0];
-    } else if (axis === 'z') {
+    } else {
       pos = [0, 0.2, i];
       tickStart = [0, -0.1, i];
-      tickEnd = [0, +0.1, i];
+      tickEnd = [0, 0.1, i];
     }
 
     ticks.push(
       <group key={`${axis}-${i}`}>
         <Line points={[tickStart, tickEnd]} color={color} lineWidth={1} />
-        <Html position={pos as [number, number, number]} center distanceFactor={8}>
-          <div style={{ color, fontSize: '20px', userSelect: 'none', whiteSpace: 'nowrap' }}>{i}</div>
+        <Html position={pos} center distanceFactor={8}>
+          <div style={{
+            color,
+            fontSize: '18px',
+            userSelect: 'none',
+            whiteSpace: 'nowrap'
+          }}>
+            {i}
+          </div>
         </Html>
       </group>
     );
@@ -43,6 +51,7 @@ function AxisTicks({ axis, length, interval, color }: AxisProps) {
   return <>{ticks}</>;
 }
 
+// ✅ UPDATED PROPS
 type AxesProps = {
   length?: number;
   width?: number;
@@ -51,9 +60,20 @@ type AxesProps = {
   xcolor?: string;
   ycolor?: string;
   zcolor?: string;
+  labels?: [string, string, string]; // ✅ dynamic labels
 };
 
-function Axes({ length=20, width=3, fontPosition=5.5, interval=1, xcolor="black", ycolor="black", zcolor="black" }: AxesProps) {
+function Axes({
+  length = 20,
+  width = 3,
+  fontPosition = 5.5,
+  interval = 1,
+  xcolor = "black",
+  ycolor = "black",
+  zcolor = "black",
+  labels = ["X", "Y", "Z"] // ✅ default
+}: AxesProps) {
+
   return (
     <>
       {/* Axis lines */}
@@ -66,24 +86,30 @@ function Axes({ length=20, width=3, fontPosition=5.5, interval=1, xcolor="black"
       <AxisTicks axis='y' length={length} interval={interval} color={ycolor} />
       <AxisTicks axis='z' length={length} interval={interval} color={zcolor} />
 
-      {/* Labels */}
+      {/* Positive Labels */}
       <Html position={[fontPosition, 0.3, 0]} center distanceFactor={8}>
-        <div style={{ color: xcolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>X</div>
+        <div style={{ color: xcolor, fontSize: '28px' }}>{labels[0]}</div>
       </Html>
-      <Html position={[-fontPosition, 0.3, 0]} center distanceFactor={8}>
-        <div style={{ color: xcolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>-X</div>
-      </Html>
+
       <Html position={[0.3, fontPosition, 0]} center distanceFactor={8}>
-        <div style={{ color: ycolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>Y</div>
+        <div style={{ color: ycolor, fontSize: '28px' }}>{labels[1]}</div>
       </Html>
-      <Html position={[0.3, -fontPosition, 0]} center distanceFactor={8}>
-        <div style={{ color: ycolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>-Y</div>
-      </Html>
+
       <Html position={[0, 0.3, fontPosition]} center distanceFactor={8}>
-        <div style={{ color: zcolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>Z</div>
+        <div style={{ color: zcolor, fontSize: '28px' }}>{labels[2]}</div>
       </Html>
+
+      {/* Negative Labels */}
+      <Html position={[-fontPosition, 0.3, 0]} center distanceFactor={8}>
+        <div style={{ color: xcolor, fontSize: '28px' }}>-{labels[0]}</div>
+      </Html>
+
+      <Html position={[0.3, -fontPosition, 0]} center distanceFactor={8}>
+        <div style={{ color: ycolor, fontSize: '28px' }}>-{labels[1]}</div>
+      </Html>
+
       <Html position={[0, 0.3, -fontPosition]} center distanceFactor={8}>
-        <div style={{ color: zcolor, fontSize: '30px', userSelect: 'none', whiteSpace: 'nowrap' }}>-Z</div>
+        <div style={{ color: zcolor, fontSize: '28px' }}>-{labels[2]}</div>
       </Html>
     </>
   );
