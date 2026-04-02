@@ -33,11 +33,19 @@ const questionSchema = new mongoose.Schema({
     required: true,
     min: 1
   },
+  // ── Timer: how many seconds this question contributes to the total quiz time ──
+  // Default: 120s (2 min). Admin sets this per question in the Add/Edit form.
+  timeLimitSeconds: {
+    type: Number,
+    required: false,
+    default: 120,
+    min: 10
+  },
   imageUrl: {
     type: String,
     required: false
   },
-  solutionImageUrl: {           
+  solutionImageUrl: {
     type: String,
     required: false
   }
@@ -51,7 +59,7 @@ const quizSchema = new mongoose.Schema({
   chapter: {
     type: String,
     required: false,
-    default:''
+    default: ''
   },
   questions: [questionSchema],
   createdAt: {
@@ -78,4 +86,4 @@ quizSchema.index({ 'questions.difficulty': 1 });
 
 const Quiz = mongoose.model('Quiz', quizSchema);
 
-module.exports = Quiz; 
+module.exports = Quiz;

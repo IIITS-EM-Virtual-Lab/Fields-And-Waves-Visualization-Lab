@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
@@ -16,6 +16,7 @@ interface Question {
   explanation: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   points: number;
+  timeLimitSeconds?: number;   // ← NEW: per-question time contribution
   imageUrl?: string;
   solutionImageUrl?: string;
 }
@@ -52,37 +53,50 @@ function selectQuizQuestions(allQuestions: Question[]): Question[] {
     ...pickRandom(hard,   Math.min(3, hard.length)),
   ];
 
-  // Shuffle the final set so difficulty order isn't always the same
   return selected.sort(() => Math.random() - 0.5);
+}
+
+// ─── Calculate total quiz time from all selected questions ──
+function calcTotalSeconds(questions: Question[]): number {
+  return questions.reduce((sum, q) => sum + (q.timeLimitSeconds ?? 120), 0);
+}
+
+// ─── Format seconds → mm:ss string ─────────────────────────
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 const ChapterQuiz = () => {
   const navigate = useNavigate();
   const { moduleName = '', chapterName = '' } = useParams<{ moduleName: string; chapterName: string }>();
 
-  // Raw quiz from API (full pool)
-  const [rawQuiz, setRawQuiz] = useState<Quiz | null>(null);
-  // Selected subset of questions shown to the student
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
-
-  const [loading, setLoading] = useState(true);
-  const [intro, setIntro] = useState(true);
+  const [rawQuiz, setRawQuiz]           = useState<Quiz | null>(null);
+  const [quiz, setQuiz]                 = useState<Quiz | null>(null);
+  const [loading, setLoading]           = useState(true);
+  const [intro, setIntro]               = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [answered, setAnswered] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [skipped, setSkipped] = useState(false);
-  const [score, setScore] = useState(0);
+  const [answered, setAnswered]         = useState(false);
+  const [isCorrect, setIsCorrect]       = useState(false);
+  const [skipped, setSkipped]           = useState(false);
+  const [score, setScore]               = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
-  const [showResults, setShowResults] = useState(false);
-  const [showReview, setShowReview] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<UserAnswer[]>([]);
-  const [submitted, setSubmitted] = useState(false);
+  const [showResults, setShowResults]   = useState(false);
+  const [showReview, setShowReview]     = useState(false);
+  const [userAnswers, setUserAnswers]   = useState<UserAnswer[]>([]);
+  const [submitted, setSubmitted]       = useState(false);
+
+  // ── Timer state ─────────────────────────────────────────────
+  const [timeLeft, setTimeLeft]         = useState<number>(0);
+  const [timerActive, setTimerActive]   = useState(false);
+  const timerRef                        = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const currentUser = useSelector(selectCurrentUser);
-  const token = useSelector(selectCurrentToken);
+  const token       = useSelector(selectCurrentToken);
 
-  // ── Fetch full question pool then select random subset ──
+  // ── Fetch quiz ───────────────────────────────────────────────
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
@@ -93,15 +107,13 @@ const ChapterQuiz = () => {
 
         const res = await axios.get(url);
         const fullQuiz: Quiz = {
-          _id: res.data.data._id,
-          module: res.data.data.module,
-          chapter: res.data.data.chapter,
+          _id:       res.data.data._id,
+          module:    res.data.data.module,
+          chapter:   res.data.data.chapter,
           questions: res.data.data.questions,
         };
 
         setRawQuiz(fullQuiz);
-
-        // Select the random subset for this attempt
         const selectedQuestions = selectQuizQuestions(fullQuiz.questions);
         setQuiz({ ...fullQuiz, questions: selectedQuestions });
       } catch (err) {
@@ -112,6 +124,87 @@ const ChapterQuiz = () => {
     };
     fetchQuiz();
   }, [moduleName, chapterName]);
+
+  // ── submitQuizResult (stable ref via useCallback) ────────────
+  const submitQuizResult = useCallback(async (
+    finalScore: number,
+    finalCorrectCount: number,
+    finalUserAnswers: UserAnswer[]
+  ) => {
+    if (submitted || !currentUser?._id || !quiz?._id) return;
+    try {
+      await axios.post(
+        `${API}/api/quizresult/save`,
+        {
+          userId:         currentUser._id,
+          quizId:         quiz._id,
+          score:          finalScore,
+          correctAnswers: finalCorrectCount,
+          totalQuestions: quiz.questions.length,
+          accuracy:       Math.round((finalCorrectCount / quiz.questions.length) * 100),
+          module:         quiz.module,
+          chapter:        quiz.chapter,
+          userAnswers:    finalUserAnswers,
+        },
+        {
+          headers: {
+            Authorization:  `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      setSubmitted(true);
+    } catch (err) {
+      console.error('❌ Error submitting quiz result:', err);
+    }
+  }, [submitted, currentUser, quiz, token]);
+
+  // ── Auto-submit when timer hits 0 ────────────────────────────
+  // We need refs to the latest score/correctCount/userAnswers values
+  // so the timer callback (which closes over stale state) can read them.
+  const scoreRef         = useRef(score);
+  const correctCountRef  = useRef(correctCount);
+  const userAnswersRef   = useRef(userAnswers);
+
+  useEffect(() => { scoreRef.current        = score;        }, [score]);
+  useEffect(() => { correctCountRef.current = correctCount; }, [correctCount]);
+  useEffect(() => { userAnswersRef.current  = userAnswers;  }, [userAnswers]);
+
+  // Start / stop countdown
+  useEffect(() => {
+    if (!timerActive) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          // Time's up → auto-submit with whatever we have right now
+          clearInterval(timerRef.current!);
+          setTimerActive(false);
+          submitQuizResult(
+            scoreRef.current,
+            correctCountRef.current,
+            userAnswersRef.current
+          ).then(() => setShowResults(true));
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [timerActive, submitQuizResult]);
+
+  // ── Start quiz (called from intro screen) ────────────────────
+  const startQuiz = () => {
+    if (!quiz) return;
+    const total = calcTotalSeconds(quiz.questions);
+    setTimeLeft(total);
+    setTimerActive(true);
+    setIntro(false);
+  };
 
   const currentQuestion = quiz?.questions[currentIndex];
 
@@ -134,10 +227,10 @@ const ChapterQuiz = () => {
     if (isAnswerCorrect) setCorrectCount(prev => prev + 1);
 
     setUserAnswers(prev => [...prev, {
-      questionId: currentQuestion._id,
+      questionId:     currentQuestion._id,
       selectedAnswer: selectedOption,
-      isCorrect: isAnswerCorrect,
-      points: pts,
+      isCorrect:      isAnswerCorrect,
+      points:         pts,
     }]);
   };
 
@@ -147,46 +240,11 @@ const ChapterQuiz = () => {
     setAnswered(true);
     setIsCorrect(false);
     setUserAnswers(prev => [...prev, {
-      questionId: currentQuestion._id,
+      questionId:     currentQuestion._id,
       selectedAnswer: 'SKIPPED',
-      isCorrect: false,
-      points: 0,
+      isCorrect:      false,
+      points:         0,
     }]);
-  };
-
-  // ── Submit with explicit final values to avoid stale state ──
-  const submitQuizResult = async (
-    finalScore: number,
-    finalCorrectCount: number,
-    finalUserAnswers: UserAnswer[]
-  ) => {
-    if (submitted || !currentUser?._id || !quiz?._id) return;
-
-    try {
-      await axios.post(
-        `${API}/api/quizresult/save`,
-        {
-          userId: currentUser._id,
-          quizId: quiz._id,
-          score: finalScore,
-          correctAnswers: finalCorrectCount,
-          totalQuestions: quiz.questions.length,
-          accuracy: Math.round((finalCorrectCount / quiz.questions.length) * 100),
-          module: quiz.module,
-          chapter: quiz.chapter,
-          userAnswers: finalUserAnswers,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      setSubmitted(true);
-    } catch (err) {
-      console.error('❌ Error submitting quiz result:', err);
-    }
   };
 
   const handleNext = async () => {
@@ -194,12 +252,7 @@ const ChapterQuiz = () => {
     const nextIndex = currentIndex + 1;
 
     if (nextIndex >= quiz.questions.length) {
-      // Build final values synchronously before state updates settle
-      const lastAnswer = userAnswers[userAnswers.length - 1];
-      // If the last question was just answered via handleCheck it's already in userAnswers
-      // but if handleNext is called right after handleCheck in the same tick, we need
-      // to use the latest accumulated state — which is correct here since handleCheck
-      // already pushed to userAnswers before handleNext is possible (button swap)
+      setTimerActive(false);
       await submitQuizResult(score, correctCount, userAnswers);
       setShowResults(true);
       return;
@@ -217,7 +270,6 @@ const ChapterQuiz = () => {
       ? question.correctAnswer[0]
       : question.correctAnswer;
 
-  // ── Difficulty counts shown on intro screen ──
   const getDifficultyCounts = () => {
     if (!quiz) return { easy: 0, medium: 0, hard: 0 };
     return {
@@ -227,120 +279,94 @@ const ChapterQuiz = () => {
     };
   };
 
-  // ── Review ──────────────────────────────────────────────
+  // ── Timer colour: green → yellow → red ──────────────────────
+  const getTimerClass = (): string => {
+    if (!quiz) return '';
+    const total = calcTotalSeconds(quiz.questions);
+    const pct   = timeLeft / total;
+    if (pct > 0.5)  return 'timer-green';
+    if (pct > 0.25) return 'timer-yellow';
+    return 'timer-red';
+  };
+
+  // ── Review screen ────────────────────────────────────────────
   const renderReview = () => {
-    if (!quiz || !showReview) return null;
+    if (!quiz) return null;
+    const totalPoints = quiz.questions.reduce((s, q) => s + q.points, 0);
+    const skippedCount = userAnswers.filter(a => a.selectedAnswer === 'SKIPPED').length;
 
     return (
       <div className="quiz-review">
-        <h2>Quiz Review</h2>
+        <h2>Review Answers</h2>
         <div className="review-summary">
-          <p>Total Points: <strong>{score}</strong></p>
-          <p>Correct Answers: <strong>{correctCount} / {quiz.questions.length}</strong></p>
+          <p><strong>Score:</strong> {score} / {totalPoints} points</p>
+          <p><strong>Correct:</strong> {correctCount} &nbsp;|&nbsp; <strong>Incorrect:</strong> {userAnswers.filter(a => !a.isCorrect && a.selectedAnswer !== 'SKIPPED').length} &nbsp;|&nbsp; <strong>Skipped:</strong> {skippedCount}</p>
         </div>
 
-        <div className="review-questions">
-          {quiz.questions.map((question, index) => {
-            // Match by string comparison — _id may come as ObjectId or string
-            const userAnswer = userAnswers.find(
-              ua => ua.questionId.toString() === question._id.toString()
-            );
-            const correctAnswer = getCorrectAnswer(question);
+        {quiz.questions.map((question, i) => {
+          const userAnswer  = userAnswers[i];
+          const correctAnswer = getCorrectAnswer(question);
 
-            // If somehow no answer recorded (shouldn't happen), skip gracefully
-            if (!userAnswer) return null;
-
-            return (
-              <div key={question._id} className="review-question">
-                <h4>Question {index + 1}
-                  <span className={`review-q-badge ${
-                    userAnswer.selectedAnswer === 'SKIPPED'
-                      ? 'badge-skipped'
-                      : userAnswer.isCorrect
-                      ? 'badge-correct'
-                      : 'badge-incorrect'
-                  }`}>
-                    {userAnswer.selectedAnswer === 'SKIPPED'
-                      ? 'Skipped'
-                      : userAnswer.isCorrect
-                      ? 'Correct'
-                      : 'Incorrect'}
-                  </span>
-                </h4>
-
-                <span className={`review-diff-tag diff-${question.difficulty.toLowerCase()}`}>
-                  {question.difficulty}
+          return (
+            <div key={question._id} className="review-question">
+              <h4>
+                Question {i + 1}
+                <span className={`review-q-badge ${!userAnswer ? 'badge-skipped' : userAnswer.selectedAnswer === 'SKIPPED' ? 'badge-skipped' : userAnswer.isCorrect ? 'badge-correct' : 'badge-incorrect'}`}>
+                  {!userAnswer ? 'Skipped' : userAnswer.selectedAnswer === 'SKIPPED' ? 'Skipped' : userAnswer.isCorrect ? 'Correct' : 'Incorrect'}
                 </span>
+                <span className={`review-diff-tag diff-${question.difficulty.toLowerCase()}`}>{question.difficulty}</span>
+              </h4>
 
-                <p className="question-text">{question.question}</p>
+              <p>{question.question}</p>
+              {question.imageUrl && <div className="question-image"><img src={question.imageUrl} alt="Question" /></div>}
 
-                {question.imageUrl && (
-                  <div className="question-image">
-                    <img src={question.imageUrl} alt="Question" />
-                  </div>
-                )}
-
-                {question.type === 'MCQ' && question.options && (
-                  <div className="review-answers">
-                    {question.options.map((option, optIndex) => {
-                      const isUserAnswer = userAnswer.selectedAnswer === option;
-                      const isCorrectOption = correctAnswer === option;
-
-                      let className = 'review-option';
-                      if (isCorrectOption) className += ' correct-answer';
-                      if (isUserAnswer && !isCorrectOption) className += ' user-incorrect';
-                      if (isUserAnswer && isCorrectOption) className += ' user-correct';
-
-                      return (
-                        <div key={optIndex} className={className}>
-                          <span className="option-label">{String.fromCharCode(65 + optIndex)}.</span>
-                          {option}
-                          {isUserAnswer && (
-                            <span className="user-choice-indicator"> (Your choice)</span>
-                          )}
-                          {isCorrectOption && (
-                            <span className="correct-indicator"> ✓</span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {userAnswer.selectedAnswer === 'SKIPPED' && (
-                  <div className="skipped-indicator">
-                    <strong>You skipped this question</strong>
-                    <div className="review-option correct-answer" style={{ marginTop: 8 }}>
-                      <span className="option-label">✓</span> Correct answer: {correctAnswer}
-                    </div>
-                  </div>
-                )}
-
-                <div className={`review-result ${userAnswer.isCorrect ? 'correct' : 'incorrect'}`}>
-                  <strong>
-                    {userAnswer.selectedAnswer === 'SKIPPED'
-                      ? 'Skipped — 0 points'
-                      : userAnswer.isCorrect
-                      ? `Correct — +${userAnswer.points} points`
-                      : `Incorrect — 0 / ${question.points} points`}
-                  </strong>
+              {question.type === 'MCQ' && question.options && (
+                <div className="review-options">
+                  {question.options.map((opt, j) => {
+                    const isCorrectOpt  = opt === correctAnswer;
+                    const isUserAnswer  = userAnswer?.selectedAnswer === opt;
+                    let cls = 'review-option';
+                    if (isCorrectOpt)                           cls += ' correct-answer';
+                    else if (isUserAnswer && !userAnswer.isCorrect) cls += ' user-incorrect';
+                    return (
+                      <div key={j} className={cls}>
+                        <span className="option-label">{String.fromCharCode(65 + j)}.</span> {opt}
+                      </div>
+                    );
+                  })}
                 </div>
+              )}
 
-                {question.explanation && (
-                  <div className="review-explanation">
-                    <strong>Explanation:</strong> {question.explanation}
+              {userAnswer?.selectedAnswer === 'SKIPPED' && (
+                <div className="skipped-indicator">
+                  <strong>You skipped this question</strong>
+                  <div className="review-option correct-answer" style={{ marginTop: 8 }}>
+                    <span className="option-label">✓</span> Correct answer: {correctAnswer}
                   </div>
-                )}
+                </div>
+              )}
 
-                {question.solutionImageUrl && (
-                  <div className="solution-image">
-                    <img src={question.solutionImageUrl} alt="Solution" />
-                  </div>
-                )}
+              <div className={`review-result ${userAnswer?.isCorrect ? 'correct' : 'incorrect'}`}>
+                <strong>
+                  {!userAnswer || userAnswer.selectedAnswer === 'SKIPPED'
+                    ? 'Skipped — 0 points'
+                    : userAnswer.isCorrect
+                    ? `Correct — +${userAnswer.points} points`
+                    : `Incorrect — 0 / ${question.points} points`}
+                </strong>
               </div>
-            );
-          })}
-        </div>
+
+              {question.explanation && (
+                <div className="review-explanation">
+                  <strong>Explanation:</strong> {question.explanation}
+                </div>
+              )}
+              {question.solutionImageUrl && (
+                <div className="solution-image"><img src={question.solutionImageUrl} alt="Solution" /></div>
+              )}
+            </div>
+          );
+        })}
 
         <div className="review-buttons">
           <button onClick={() => window.location.reload()}>Reattempt Quiz</button>
@@ -350,7 +376,7 @@ const ChapterQuiz = () => {
     );
   };
 
-  // ── Guards ───────────────────────────────────────────────
+  // ── Guards ───────────────────────────────────────────────────
   if (loading || !quiz) return <div className="quiz-loading">Loading quiz...</div>;
 
   if (quiz.questions.length === 0) {
@@ -365,9 +391,12 @@ const ChapterQuiz = () => {
     );
   }
 
-  // ── Intro screen ─────────────────────────────────────────
+  // ── Intro screen ─────────────────────────────────────────────
   if (intro) {
-    const counts = getDifficultyCounts();
+    const counts     = getDifficultyCounts();
+    const totalSecs  = calcTotalSeconds(quiz.questions);
+    const totalMins  = Math.ceil(totalSecs / 60);
+
     return (
       <div className="quiz-intro-page">
         <div className="quiz-intro">
@@ -379,13 +408,23 @@ const ChapterQuiz = () => {
           <p className="intro-subtitle">Ready for a challenge?</p>
           <p>Test your knowledge and earn points for what you already know!</p>
           <p>
-            <strong>{quiz.questions.length} questions</strong> —
-            {counts.easy > 0 && <span className="intro-diff easy"> {counts.easy} Easy</span>}
-            {counts.medium > 0 && <span className="intro-diff medium"> · {counts.medium} Medium</span>}
-            {counts.hard > 0 && <span className="intro-diff hard"> · {counts.hard} Hard</span>}
+            <strong>{quiz.questions.length} questions</strong> —{' '}
+            {counts.easy   > 0 && <span className="intro-diff easy">{counts.easy} Easy</span>}
+            {counts.medium > 0 && <><span style={{ color: '#718096' }}> · </span><span className="intro-diff medium">{counts.medium} Medium</span></>}
+            {counts.hard   > 0 && <><span style={{ color: '#718096' }}> · </span><span className="intro-diff hard">{counts.hard} Hard</span></>}
           </p>
-          <p><em>Note: You get only one attempt per question.</em></p>
-          <button className="start-btn" onClick={() => setIntro(false)}>Let's go</button>
+
+          {/* ── Total time display ── */}
+          <p className="intro-timer-info">
+            ⏱ <strong>Total time:</strong>{' '}
+            {totalMins < 60
+              ? `${totalMins} minute${totalMins !== 1 ? 's' : ''}`
+              : `${Math.floor(totalMins / 60)}h ${totalMins % 60}m`}
+            {' '}({formatTime(totalSecs)})
+          </p>
+
+          <p><em>Note: You get only one attempt per question. The timer starts when you click Let's go.</em></p>
+          <button className="start-btn" onClick={startQuiz}>Let's go</button>
         </div>
       </div>
     );
@@ -393,7 +432,7 @@ const ChapterQuiz = () => {
 
   if (showReview) return renderReview();
 
-  // ── Results screen ───────────────────────────────────────
+  // ── Results screen ───────────────────────────────────────────
   if (showResults) {
     const accuracy = Math.round((correctCount / quiz.questions.length) * 100);
     return (
@@ -422,14 +461,20 @@ const ChapterQuiz = () => {
     );
   }
 
-  // ── Quiz question screen ─────────────────────────────────
+  // ── Quiz question screen ─────────────────────────────────────
   const correctAnswer = getCorrectAnswer(currentQuestion!);
 
   return (
     <div className="quiz-page">
       <div className="quiz-container">
+
+        {/* ── Sticky timer bar ── */}
+        <div className={`quiz-timer-bar ${getTimerClass()}`}>
+          <span className="quiz-timer-label">⏱ Time Remaining</span>
+          <span className="quiz-timer-value">{formatTime(timeLeft)}</span>
+        </div>
+
         <div className="quiz-card">
-          {/* Difficulty tag */}
           <span className={`q-diff-tag diff-${currentQuestion!.difficulty.toLowerCase()}`}>
             {currentQuestion!.difficulty}
           </span>
@@ -446,14 +491,14 @@ const ChapterQuiz = () => {
 
           <div className="options-list">
             {currentQuestion?.options?.map((opt, i) => {
-              const isSelected = selectedOption === opt;
+              const isSelected      = selectedOption === opt;
               const isCorrectOption = correctAnswer === opt;
 
               let className = 'option-item';
               if (answered && isSelected) {
                 className += isCorrectOption ? ' correct selected' : ' incorrect selected';
               } else if (answered && isCorrectOption) {
-                className += ' correct'; // highlight correct even if student chose wrong
+                className += ' correct';
               } else if (isSelected) {
                 className += ' selected';
               }

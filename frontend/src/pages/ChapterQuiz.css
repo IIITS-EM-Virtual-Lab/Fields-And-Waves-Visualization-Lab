@@ -624,3 +624,81 @@
   margin-bottom: 12px;
   color: #92400e;
 }
+
+/* ══════════════════════════════════════════════════════════
+   TIMER — append these rules to the bottom of ChapterQuiz.css
+   ══════════════════════════════════════════════════════════ */
+
+/* Intro screen: total-time info line */
+.intro-timer-info {
+  font-size: 1rem;
+  color: #4a5568;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+/* Sticky timer bar that sits above the quiz card */
+.quiz-timer-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto 1rem auto;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+
+/* Colour states */
+.quiz-timer-bar.timer-green {
+  background: #f0fff4;
+  border-color: #68d391;
+  color: #276749;
+}
+
+.quiz-timer-bar.timer-yellow {
+  background: #fffff0;
+  border-color: #f6e05e;
+  color: #744210;
+}
+
+.quiz-timer-bar.timer-red {
+  background: #fff5f5;
+  border-color: #fc8181;
+  color: #c53030;
+  /* gentle pulse to draw attention */
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+.quiz-timer-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+}
+
+.quiz-timer-value {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .quiz-timer-bar {
+    font-size: 0.9rem;
+  }
+  .quiz-timer-value {
+    font-size: 1.15rem;
+  }
+}
