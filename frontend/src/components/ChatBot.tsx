@@ -103,11 +103,12 @@ export default function ChatBot() {
 
     try {
       const response = await fetch(
-        "https://fwvlab-fwv-ai-service.hf.space/ask",
+        "https://obeliskoid-elwanda-covetously.ngrok-free.dev/ask",
         {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "69420" 
           },
           body: JSON.stringify({ 
             query: userMessage,
@@ -340,7 +341,14 @@ export default function ChatBot() {
                       <span className="message-name">Fieldora</span>
                     </div>
                   )}
-                  <div className="message-text">{msg.text}</div>
+                  {msg.role === "bot" ? (
+                    <div
+                      className="message-text"
+                      dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, "<br />") }}
+                    />
+                  ) : (
+                    <div className="message-text">{msg.text}</div>
+                  )}
                   {msg.role === "bot" && (
                     <svg className="message-wave" viewBox="0 0 100 10">
                       <path
@@ -838,9 +846,9 @@ export default function ChatBot() {
           right: 80px;
           top: 50%;
           transform: translateY(-50%);
-          width: 420px;
+          width: 360px;
           max-width: 90vw;
-          height: 550px;
+          height: 500px;
           background: linear-gradient(135deg, #faf5ff 0%, #fdf4ff 100%);
           border-radius: 30px;
           box-shadow: 
@@ -885,7 +893,7 @@ export default function ChatBot() {
         .wave-header {
           position: relative;
           background: linear-gradient(135deg, #ec4899, #a855f7, #3b82f6);
-          padding: 16px;
+          padding: 12px;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -937,7 +945,7 @@ export default function ChatBot() {
 
         .header-title {
           color: white;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: bold;
         }
 
@@ -984,7 +992,7 @@ export default function ChatBot() {
         /* Messages */
         .messages-container {
           flex: 1;
-          padding: 16px;
+          padding: 12px;
           overflow-y: auto;
           position: relative;
           z-index: 1;
@@ -1005,7 +1013,7 @@ export default function ChatBot() {
 
         .welcome-screen {
           text-align: center;
-          padding: 40px 20px;
+          padding: 30px 16px;
         }
 
         .welcome-wave-icon {
@@ -1083,8 +1091,8 @@ export default function ChatBot() {
         }
 
         .message-bubble {
-          max-width: 80%;
-          padding: 12px 16px;
+          max-width: 85%;
+          padding: 10px 14px;
           border-radius: 20px;
           position: relative;
         }
@@ -1229,8 +1237,8 @@ export default function ChatBot() {
           flex: 1;
           border: 2px solid #e9d5ff;
           border-radius: 20px;
-          padding: 12px 16px;
-          font-size: 14px;
+          padding: 10px 14px;
+          font-size: 13px;
           resize: none;
           outline: none;
           background: linear-gradient(135deg, #faf5ff, #ffffff);
@@ -1251,8 +1259,8 @@ export default function ChatBot() {
           background: linear-gradient(135deg, #a855f7, #ec4899);
           border: none;
           color: white;
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          hheight: 40px;
           border-radius: 50%;
           display: flex;
           align-items: center;
