@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Send, Sparkles, Zap, Hand, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 export default function ChatBot() {
   const location = useLocation();
+  const user = useSelector((state: RootState) => state.auth.client);
 
   // 🚫 Hide chatbot completely on quiz page
   if (location.pathname.includes("quiz")) {
@@ -24,6 +27,19 @@ export default function ChatBot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const waveIdRef = useRef(0);
   const peekTimeoutRef = useRef<NodeJS.Timeout>();
+
+  const getChatSessionId = () => {
+    if (user?._id) {
+      return `user-${user._id}`;
+    }
+
+    const existing = localStorage.getItem("fwv_chat_session_id");
+    if (existing) return existing;
+
+    const newId = `anon-${window.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2, 12)}`;
+    localStorage.setItem("fwv_chat_session_id", newId);
+    return newId;
+  };
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -94,7 +110,11 @@ export default function ChatBot() {
             "Content-Type": "application/json",
             "ngrok-skip-browser-warning": "69420" 
           },
-          body: JSON.stringify({ query: userMessage }),
+          body: JSON.stringify({ 
+            query: userMessage,
+            session_id: getChatSessionId(),
+            user_id: user?._id,
+          }),
         }
       );
 
