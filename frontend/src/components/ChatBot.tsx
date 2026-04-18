@@ -4,8 +4,9 @@ import { useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 
-// ✅ Set your HuggingFace backend URL here (no trailing slash)
-const API_BASE_URL = "https://fwvlab-fwv-ai-service.hf.space/ask";
+const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? "http://127.0.0.1:8000"       // local dev
+  : "https://fwvlab-fwv-ai-service.hf.space";  // production\
 
 export default function ChatBot() {
   const location = useLocation();
