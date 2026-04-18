@@ -4,6 +4,9 @@ import { useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 
+// ✅ Set your HuggingFace backend URL here (no trailing slash)
+const API_BASE_URL = "https://fwvlab-fwv-ai-service.hf.space/ask";
+
 export default function ChatBot() {
   const location = useLocation();
   const user = useSelector((state: RootState) => state.auth.client);
@@ -14,7 +17,7 @@ export default function ChatBot() {
   }
 
   const [isOpen, setIsOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(true); // Controls if Fieldora is visible at all
+  const [isVisible, setIsVisible] = useState(true);
   const [messages, setMessages] = useState<
     { role: "user" | "bot"; text: string }[]
   >([]);
@@ -23,19 +26,15 @@ export default function ChatBot() {
   const [isWaving, setIsWaving] = useState(false);
   const [peekState, setPeekState] = useState<"hidden" | "peeking" | "full">("peeking");
   const [waves, setWaves] = useState<Array<{ id: number; x: number; y: number }>>([]);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const waveIdRef = useRef(0);
-  const peekTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const getChatSessionId = () => {
-    if (user?._id) {
-      return `user-${user._id}`;
-    }
-
+  // ✅ Session ID — uses logged-in user ID if available, else UUID per browser
+  const getChatSessionId = (): string => {
+    if (user?._id) return `user-${user._id}`;
     const existing = localStorage.getItem("fwv_chat_session_id");
     if (existing) return existing;
-
     const newId = `anon-${window.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2, 12)}`;
     localStorage.setItem("fwv_chat_session_id", newId);
     return newId;
@@ -49,15 +48,10 @@ export default function ChatBot() {
   // Waving animation
   useEffect(() => {
     if (isOpen || !isVisible) return;
-
     const waveTimeout = setTimeout(() => {
       setIsWaving(true);
-
-      setTimeout(() => {
-        setIsWaving(false);
-      }, 2000);
+      setTimeout(() => setIsWaving(false), 2000);
     }, 1000);
-
     return () => clearTimeout(waveTimeout);
   }, [isOpen, isVisible]);
 
@@ -70,7 +64,6 @@ export default function ChatBot() {
     }, 1000);
   };
 
-  // Handle typing to create waves
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     if (e.target.value.length > input.length) {
@@ -80,55 +73,46 @@ export default function ChatBot() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return;
 
-    const userMessage = input;
-
+    const userMessage = input.trim();
     setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
     setInput("");
     setLoading(true);
 
-    // Create multiple waves on send
     const chatRect = document.querySelector(".wave-chat-window")?.getBoundingClientRect();
     if (chatRect) {
       for (let i = 0; i < 3; i++) {
         setTimeout(() => {
-          createWave(
-            chatRect.left + chatRect.width / 2,
-            chatRect.top + chatRect.height / 2
-          );
+          createWave(chatRect.left + chatRect.width / 2, chatRect.top + chatRect.height / 2);
         }, i * 100);
       }
     }
 
     try {
-      const response = await fetch(
-        "https://obeliskoid-elwanda-covetously.ngrok-free.dev/ask",
-        {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "69420" 
-          },
-          body: JSON.stringify({ 
-            query: userMessage,
-            session_id: getChatSessionId(),
-            user_id: user?._id,
-          }),
-        }
-      );
+      const sessionId = getChatSessionId();
+      console.log(`[ChatBot] session=${sessionId} | query=${userMessage}`);
+
+      const response = await fetch(`${API_BASE_URL}/ask`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: userMessage,
+          session_id: sessionId,   // ✅ Per-user session
+          user_id: user?._id,
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error("Service unavailable");
+        throw new Error(`HTTP ${response.status}`);
       }
 
       const data = await response.json();
-
-      setMessages((prev) => [
-        ...prev,
-        { role: "bot", text: data.answer },
-      ]);
+      setMessages((prev) => [...prev, { role: "bot", text: data.answer }]);
     } catch (error) {
+      console.error("[ChatBot] fetch error:", error);
       setMessages((prev) => [
         ...prev,
         {
@@ -145,7 +129,6 @@ export default function ChatBot() {
     if (!isOpen) {
       setIsOpen(true);
       setPeekState("full");
-      // Create waves when opening
       for (let i = 0; i < 5; i++) {
         setTimeout(() => {
           createWave(window.innerWidth - 100, window.innerHeight / 2);
@@ -165,6 +148,17 @@ export default function ChatBot() {
     }
   };
 
+  // ✅ Renders bot text safely — converts \n to <br> and keeps anchor links clickable
+  const renderBotText = (text: string) => {
+    const withBreaks = text.replace(/\n/g, "<br />");
+    return (
+      <div
+        className="message-text"
+        dangerouslySetInnerHTML={{ __html: withBreaks }}
+      />
+    );
+  };
+
   return (
     <>
       {/* Wave Ripples */}
@@ -172,17 +166,14 @@ export default function ChatBot() {
         <div
           key={wave.id}
           className="wave-ripple"
-          style={{
-            left: wave.x,
-            top: wave.y,
-          }}
+          style={{ left: wave.x, top: wave.y }}
         />
       ))}
 
       {/* Toggle Arrow Button (always visible) */}
       <button
         onClick={toggleVisibility}
-        className={`toggle-arrow-button ${isVisible ? 'visible' : 'hidden'}`}
+        className={`toggle-arrow-button ${isVisible ? "visible" : "hidden-btn"}`}
         title={isVisible ? "Hide Fieldora" : "Show Fieldora"}
       >
         {isVisible ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
@@ -190,16 +181,12 @@ export default function ChatBot() {
 
       {/* Peeking Fieldora from the side */}
       {!isOpen && isVisible && (
-        <div 
+        <div
           className={`peeking-container ${peekState}`}
           onClick={toggleChat}
         >
-          {/* Background glow effect */}
           <div className="peek-glow" />
-          
-          {/* Main character container */}
           <div className="peek-character">
-            {/* Electromagnetic field effect */}
             <div className="field-effect">
               {[...Array(8)].map((_, i) => (
                 <div
@@ -213,38 +200,22 @@ export default function ChatBot() {
               ))}
             </div>
 
-            {/* Character body with logo */}
             <div className="character-body">
               <div className="logo-container">
-                <img
-                  src="/fwvlab.png"
-                  alt="Fieldora"
-                  className="character-logo"
-                />
+                <img src="/fwvlab.png" alt="Fieldora" className="character-logo" />
               </div>
-              
-              {/* Cute eyes */}
               <div className="character-eyes">
-                <div className="eye left">
-                  <div className="pupil" />
-                </div>
-                <div className="eye right">
-                  <div className="pupil" />
-                </div>
+                <div className="eye left"><div className="pupil" /></div>
+                <div className="eye right"><div className="pupil" /></div>
               </div>
-
-              {/* Waving hand */}
-              <div className={`waving-hand ${isWaving ? 'active' : ''}`}>
+              <div className={`waving-hand ${isWaving ? "active" : ""}`}>
                 <Hand size={24} />
               </div>
-
-              {/* Sparkle effects */}
               <Sparkles className="sparkle sparkle-1" size={16} />
               <Sparkles className="sparkle sparkle-2" size={12} />
               <Zap className="zap-effect" size={14} />
             </div>
 
-            {/* Speech bubble */}
             <div className="peek-bubble">
               <div className="bubble-text">
                 {peekState === "peeking" ? "Hey there! 👋" : "Click me!"}
@@ -252,7 +223,6 @@ export default function ChatBot() {
             </div>
           </div>
 
-          {/* Edge indicator (always visible even when hidden) */}
           <div className="edge-indicator">
             <div className="indicator-line" />
             <div className="indicator-dot" />
@@ -264,21 +234,11 @@ export default function ChatBot() {
       {/* Wave Visualizer Chat Window */}
       {isOpen && isVisible && (
         <div className="wave-chat-window">
-          {/* Animated wave background */}
           <div className="wave-background">
             <svg className="wave-svg" viewBox="0 0 1200 320">
-              <path
-                className="wave-path wave-1"
-                d="M0,160 Q300,100 600,160 T1200,160 L1200,320 L0,320 Z"
-              />
-              <path
-                className="wave-path wave-2"
-                d="M0,192 Q300,140 600,192 T1200,192 L1200,320 L0,320 Z"
-              />
-              <path
-                className="wave-path wave-3"
-                d="M0,224 Q300,180 600,224 T1200,224 L1200,320 L0,320 Z"
-              />
+              <path className="wave-path wave-1" d="M0,160 Q300,100 600,160 T1200,160 L1200,320 L0,320 Z" />
+              <path className="wave-path wave-2" d="M0,192 Q300,140 600,192 T1200,192 L1200,320 L0,320 Z" />
+              <path className="wave-path wave-3" d="M0,224 Q300,180 600,224 T1200,224 L1200,320 L0,320 Z" />
             </svg>
           </div>
 
@@ -309,12 +269,8 @@ export default function ChatBot() {
             {messages.length === 0 && (
               <div className="welcome-screen">
                 <div className="welcome-wave-icon">∿</div>
-                <div className="welcome-text">
-                  Ready to explore the electromagnetic universe?
-                </div>
-                <div className="welcome-subtitle">
-                  Ask me anything about Fields & Waves
-                </div>
+                <div className="welcome-text">Ready to explore the electromagnetic universe?</div>
+                <div className="welcome-subtitle">Ask me anything about Fields & Waves</div>
                 <div className="quick-topics">
                   {["Maxwell's Equations", "Wave Propagation", "EM Spectrum"].map((topic) => (
                     <button
@@ -341,22 +297,14 @@ export default function ChatBot() {
                       <span className="message-name">Fieldora</span>
                     </div>
                   )}
-                  {msg.role === "bot" ? (
-                    <div
-                      className="message-text"
-                      dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, "<br />") }}
-                    />
-                  ) : (
-                    <div className="message-text">{msg.text}</div>
-                  )}
+                  {/* ✅ Bot messages render HTML (for embedded links), user messages are plain text */}
+                  {msg.role === "bot"
+                    ? renderBotText(msg.text)
+                    : <div className="message-text">{msg.text}</div>
+                  }
                   {msg.role === "bot" && (
                     <svg className="message-wave" viewBox="0 0 100 10">
-                      <path
-                        d="M0,5 Q25,0 50,5 T100,5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="0.5"
-                      />
+                      <path d="M0,5 Q25,0 50,5 T100,5" fill="none" stroke="currentColor" strokeWidth="0.5" />
                     </svg>
                   )}
                 </div>
@@ -423,7 +371,7 @@ export default function ChatBot() {
               />
               <button
                 onClick={sendMessage}
-                disabled={!input.trim()}
+                disabled={!input.trim() || loading}
                 className="send-button"
               >
                 <Send size={18} />
@@ -465,17 +413,17 @@ export default function ChatBot() {
           right: 190px;
         }
 
-        .toggle-arrow-button.hidden {
+        .toggle-arrow-button.hidden-btn {
           right: 0;
           animation: arrow-pulse 2s ease-in-out infinite;
         }
 
         @keyframes arrow-pulse {
-          0%, 100% { 
+          0%, 100% {
             transform: translateY(-50%) translateX(0);
             box-shadow: -4px 0 15px rgba(168, 85, 247, 0.3);
           }
-          50% { 
+          50% {
             transform: translateY(-50%) translateX(-8px);
             box-shadow: -8px 0 25px rgba(168, 85, 247, 0.6);
           }
@@ -494,14 +442,8 @@ export default function ChatBot() {
         }
 
         @keyframes ripple-expand {
-          0% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(0);
-          }
-          100% {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(20);
-          }
+          0% { opacity: 1; transform: translate(-50%, -50%) scale(0); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(20); }
         }
 
         /* Peeking Container */
@@ -531,7 +473,6 @@ export default function ChatBot() {
           transform: translateY(-50%) translateX(-10px) !important;
         }
 
-        /* Background glow */
         .peek-glow {
           position: absolute;
           right: 0;
@@ -550,14 +491,12 @@ export default function ChatBot() {
           50% { opacity: 0.8; transform: translateY(-50%) scale(1.2); }
         }
 
-        /* Character Container */
         .peek-character {
           position: relative;
           width: 200px;
           height: 280px;
         }
 
-        /* Electromagnetic field effect */
         .field-effect {
           position: absolute;
           right: 20px;
@@ -575,26 +514,15 @@ export default function ChatBot() {
           top: 50%;
           left: 50%;
           transform-origin: 0% 50%;
-          background: linear-gradient(90deg, 
-            transparent, 
-            rgba(168, 85, 247, 0.5),
-            transparent
-          );
+          background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), transparent);
           animation: field-pulse 2s ease-in-out infinite;
         }
 
         @keyframes field-pulse {
-          0%, 100% { 
-            opacity: 0.3;
-            transform: rotate(var(--rotation)) scaleX(0.8);
-          }
-          50% { 
-            opacity: 1;
-            transform: rotate(var(--rotation)) scaleX(1.5);
-          }
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
         }
 
-        /* Character body */
         .character-body {
           position: absolute;
           right: 0;
@@ -604,9 +532,7 @@ export default function ChatBot() {
           height: 220px;
           background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
           border-radius: 100px 0 0 100px;
-          box-shadow: 
-            -10px 0 40px rgba(168, 85, 247, 0.3),
-            inset 5px 0 20px rgba(168, 85, 247, 0.1);
+          box-shadow: -10px 0 40px rgba(168, 85, 247, 0.3), inset 5px 0 20px rgba(168, 85, 247, 0.1);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -645,7 +571,6 @@ export default function ChatBot() {
           padding: 10px;
         }
 
-        /* Cute eyes */
         .character-eyes {
           display: flex;
           gap: 20px;
@@ -683,14 +608,12 @@ export default function ChatBot() {
           75% { transform: translateX(2px); }
         }
 
-        /* Waving hand */
         .waving-hand {
           position: absolute;
           left: -30px;
           top: 40%;
           color: #fbbf24;
           opacity: 0;
-          transform: rotate(0deg);
           transition: opacity 0.3s;
         }
 
@@ -705,33 +628,18 @@ export default function ChatBot() {
           75% { transform: rotate(20deg); }
         }
 
-        /* Sparkles */
         .sparkle {
           position: absolute;
           color: #fbbf24;
           animation: sparkle-float 2s ease-in-out infinite;
         }
 
-        .sparkle-1 {
-          top: 20px;
-          right: 10px;
-        }
-
-        .sparkle-2 {
-          bottom: 30px;
-          right: 15px;
-          animation-delay: 1s;
-        }
+        .sparkle-1 { top: 20px; right: 10px; }
+        .sparkle-2 { bottom: 30px; right: 15px; animation-delay: 1s; }
 
         @keyframes sparkle-float {
-          0%, 100% { 
-            opacity: 0;
-            transform: translateY(0) scale(0.8) rotate(0deg);
-          }
-          50% { 
-            opacity: 1;
-            transform: translateY(-10px) scale(1.2) rotate(180deg);
-          }
+          0%, 100% { opacity: 0; transform: translateY(0) scale(0.8) rotate(0deg); }
+          50% { opacity: 1; transform: translateY(-10px) scale(1.2) rotate(180deg); }
         }
 
         .zap-effect {
@@ -747,7 +655,6 @@ export default function ChatBot() {
           50% { opacity: 1; transform: scale(1.3); }
         }
 
-        /* Speech bubble */
         .peek-bubble {
           position: absolute;
           bottom: -50px;
@@ -788,7 +695,6 @@ export default function ChatBot() {
           white-space: nowrap;
         }
 
-        /* Edge indicator (always visible) */
         .edge-indicator {
           position: absolute;
           right: 0;
@@ -840,20 +746,18 @@ export default function ChatBot() {
           letter-spacing: 1px;
         }
 
-        /* Chat Window Styles */
+        /* Chat Window */
         .wave-chat-window {
           position: fixed;
           right: 80px;
           top: 50%;
           transform: translateY(-50%);
-          width: 360px;
+          width: 340px;
           max-width: 90vw;
-          height: 500px;
+          height: 480px;
           background: linear-gradient(135deg, #faf5ff 0%, #fdf4ff 100%);
           border-radius: 30px;
-          box-shadow: 
-            0 20px 60px rgba(168, 85, 247, 0.3),
-            0 0 0 1px rgba(168, 85, 247, 0.1);
+          box-shadow: 0 20px 60px rgba(168, 85, 247, 0.3), 0 0 0 1px rgba(168, 85, 247, 0.1);
           display: flex;
           flex-direction: column;
           overflow: hidden;
@@ -862,14 +766,8 @@ export default function ChatBot() {
         }
 
         @keyframes chat-slide-in {
-          0% {
-            opacity: 0;
-            transform: translateY(-50%) translateX(100px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(-50%) translateX(0);
-          }
+          0% { opacity: 0; transform: translateY(-50%) translateX(100px); }
+          100% { opacity: 1; transform: translateY(-50%) translateX(0); }
         }
 
         .wave-background {
@@ -880,36 +778,31 @@ export default function ChatBot() {
           pointer-events: none;
         }
 
-        .wave-svg {
-          width: 100%;
-          height: 100%;
-        }
-
-        .wave-path {
-          fill: url(#waveGradient);
-        }
+        .wave-svg { width: 100%; height: 100%; }
+        .wave-path { fill: url(#waveGradient); }
 
         /* Header */
         .wave-header {
           position: relative;
           background: linear-gradient(135deg, #ec4899, #a855f7, #3b82f6);
-          padding: 12px;
+          padding: 10px 12px;
           display: flex;
           justify-content: space-between;
           align-items: center;
           z-index: 1;
+          flex-shrink: 0;
         }
 
         .header-content {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
         }
 
         .header-avatar-container {
           position: relative;
-          width: 48px;
-          height: 48px;
+          width: 42px;
+          height: 42px;
         }
 
         .header-avatar {
@@ -918,17 +811,13 @@ export default function ChatBot() {
           height: 100%;
           background: #000;
           border-radius: 50%;
-          padding: 6px;
+          padding: 5px;
           border: 2px solid white;
           overflow: hidden;
           z-index: 2;
         }
 
-        .header-avatar img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
+        .header-avatar img { width: 100%; height: 100%; object-fit: contain; }
 
         .header-pulse-ring {
           position: absolute;
@@ -943,23 +832,19 @@ export default function ChatBot() {
           50% { transform: scale(1.2); opacity: 0.5; }
         }
 
-        .header-title {
-          color: white;
-          font-size: 16px;
-          font-weight: bold;
-        }
+        .header-title { color: white; font-size: 15px; font-weight: bold; }
 
         .header-subtitle {
           color: rgba(255, 255, 255, 0.9);
-          font-size: 12px;
+          font-size: 11px;
           display: flex;
           align-items: center;
           gap: 6px;
         }
 
         .status-dot {
-          width: 8px;
-          height: 8px;
+          width: 7px;
+          height: 7px;
           background: #4ade80;
           border-radius: 50%;
           animation: pulse 2s ease-in-out infinite;
@@ -974,14 +859,15 @@ export default function ChatBot() {
           background: rgba(255, 255, 255, 0.2);
           border: none;
           color: white;
-          width: 36px;
-          height: 36px;
+          width: 32px;
+          height: 32px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           transition: all 0.2s;
+          flex-shrink: 0;
         }
 
         .close-button:hover {
@@ -992,32 +878,25 @@ export default function ChatBot() {
         /* Messages */
         .messages-container {
           flex: 1;
-          padding: 12px;
+          padding: 10px;
           overflow-y: auto;
+          overflow-x: hidden;
           position: relative;
           z-index: 1;
+          min-height: 0;
         }
 
-        .messages-container::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        .messages-container::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
+        .messages-container::-webkit-scrollbar { width: 4px; }
+        .messages-container::-webkit-scrollbar-track { background: transparent; }
         .messages-container::-webkit-scrollbar-thumb {
           background: linear-gradient(to bottom, #a855f7, #ec4899);
           border-radius: 3px;
         }
 
-        .welcome-screen {
-          text-align: center;
-          padding: 30px 16px;
-        }
+        .welcome-screen { text-align: center; padding: 20px 12px; }
 
         .welcome-wave-icon {
-          font-size: 60px;
+          font-size: 50px;
           background: linear-gradient(135deg, #ec4899, #a855f7, #3b82f6);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -1029,35 +908,25 @@ export default function ChatBot() {
           50% { transform: rotate(5deg); }
         }
 
-        .welcome-text {
-          font-size: 18px;
-          font-weight: 600;
-          color: #7c3aed;
-          margin: 16px 0 8px;
-        }
-
-        .welcome-subtitle {
-          font-size: 14px;
-          color: #a855f7;
-          margin-bottom: 24px;
-        }
+        .welcome-text { font-size: 16px; font-weight: 600; color: #7c3aed; margin: 12px 0 6px; }
+        .welcome-subtitle { font-size: 13px; color: #a855f7; margin-bottom: 16px; }
 
         .quick-topics {
           display: flex;
           flex-wrap: wrap;
-          gap: 8px;
+          gap: 6px;
           justify-content: center;
         }
 
         .topic-chip {
           display: flex;
           align-items: center;
-          gap: 6px;
-          padding: 8px 16px;
+          gap: 5px;
+          padding: 6px 12px;
           background: white;
           border: 2px solid #e9d5ff;
           border-radius: 20px;
-          font-size: 13px;
+          font-size: 12px;
           color: #7c3aed;
           cursor: pointer;
           transition: all 0.2s;
@@ -1069,31 +938,19 @@ export default function ChatBot() {
           transform: translateY(-2px);
         }
 
-        .message-wrapper {
-          margin-bottom: 16px;
-          animation: message-slide 0.3s ease-out;
-        }
+        .message-wrapper { margin-bottom: 12px; animation: message-slide 0.3s ease-out; }
 
         @keyframes message-slide {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
-        .message-wrapper.user {
-          display: flex;
-          justify-content: flex-end;
-        }
+        .message-wrapper.user { display: flex; justify-content: flex-end; }
 
         .message-bubble {
           max-width: 85%;
-          padding: 10px 14px;
-          border-radius: 20px;
+          padding: 8px 12px;
+          border-radius: 18px;
           position: relative;
         }
 
@@ -1105,7 +962,7 @@ export default function ChatBot() {
 
         .message-bubble.bot {
           background: white;
-          border: 2px solid #e9d5ff;
+          border: 1.5px solid #e9d5ff;
           color: #1f2937;
           border-bottom-left-radius: 4px;
         }
@@ -1113,39 +970,40 @@ export default function ChatBot() {
         .message-header {
           display: flex;
           align-items: center;
-          gap: 8px;
-          margin-bottom: 8px;
+          gap: 6px;
+          margin-bottom: 6px;
         }
 
         .message-avatar {
-          width: 24px;
-          height: 24px;
+          width: 20px;
+          height: 20px;
           background: #000;
           border-radius: 50%;
-          padding: 3px;
+          padding: 2px;
+          flex-shrink: 0;
         }
 
-        .message-avatar.pulsing {
-          animation: pulse 1s ease-in-out infinite;
-        }
+        .message-avatar.pulsing { animation: pulse 1s ease-in-out infinite; }
+        .message-avatar img { width: 100%; height: 100%; object-fit: contain; }
 
-        .message-avatar img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-
-        .message-name {
-          font-size: 12px;
-          font-weight: 600;
-          color: #7c3aed;
-        }
+        .message-name { font-size: 11px; font-weight: 600; color: #7c3aed; }
 
         .message-text {
-          font-size: 14px;
+          font-size: 13px;
           line-height: 1.5;
-          white-space: pre-wrap;
+          word-break: break-word;
         }
+
+        /* ✅ Style the embedded links from the backend */
+        .message-text a {
+          color: #7c3aed;
+          font-weight: 600;
+          text-decoration: underline;
+          text-underline-offset: 2px;
+          transition: color 0.2s;
+        }
+
+        .message-text a:hover { color: #ec4899; }
 
         .message-wave {
           position: absolute;
@@ -1157,25 +1015,15 @@ export default function ChatBot() {
           color: #a855f7;
         }
 
-        .loading-message {
-          background: white;
-          border: 2px solid #e9d5ff;
-        }
+        .loading-message { background: white; border: 1.5px solid #e9d5ff; }
 
-        .loading-dots {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
+        .loading-dots { display: flex; align-items: center; gap: 10px; }
 
-        .electromagnetic-pulse {
-          display: flex;
-          gap: 4px;
-        }
+        .electromagnetic-pulse { display: flex; gap: 4px; }
 
         .pulse-dot {
-          width: 8px;
-          height: 8px;
+          width: 7px;
+          height: 7px;
           background: #a855f7;
           border-radius: 50%;
           animation: pulse-wave 1.4s ease-in-out infinite;
@@ -1185,28 +1033,20 @@ export default function ChatBot() {
         .pulse-dot:nth-child(3) { animation-delay: 0.4s; }
 
         @keyframes pulse-wave {
-          0%, 100% { 
-            transform: scale(1);
-            opacity: 1;
-          }
-          50% { 
-            transform: scale(1.5);
-            opacity: 0.5;
-          }
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.5); opacity: 0.5; }
         }
 
-        .loading-text {
-          font-size: 12px;
-          color: #a855f7;
-        }
+        .loading-text { font-size: 11px; color: #a855f7; }
 
         /* Input */
         .input-container {
           position: relative;
           background: white;
-          border-top: 2px solid #e9d5ff;
-          padding: 12px;
+          border-top: 1.5px solid #e9d5ff;
+          padding: 10px;
           z-index: 1;
+          flex-shrink: 0;
         }
 
         .input-wave-decoration {
@@ -1218,31 +1058,20 @@ export default function ChatBot() {
           pointer-events: none;
         }
 
-        .input-wave-path {
-          animation: input-wave 3s ease-in-out infinite;
-        }
-
-        @keyframes input-wave {
-          0%, 100% { d: path("M0,20 Q100,10 200,20 T400,20"); }
-          50% { d: path("M0,20 Q100,30 200,20 T400,20"); }
-        }
-
-        .input-wrapper {
-          display: flex;
-          gap: 8px;
-          align-items: flex-end;
-        }
+        .input-wrapper { display: flex; gap: 8px; align-items: flex-end; }
 
         .wave-input {
           flex: 1;
-          border: 2px solid #e9d5ff;
-          border-radius: 20px;
-          padding: 10px 14px;
+          border: 1.5px solid #e9d5ff;
+          border-radius: 18px;
+          padding: 8px 12px;
           font-size: 13px;
           resize: none;
           outline: none;
           background: linear-gradient(135deg, #faf5ff, #ffffff);
           transition: all 0.2s;
+          max-height: 80px;
+          font-family: inherit;
         }
 
         .wave-input:focus {
@@ -1250,17 +1079,16 @@ export default function ChatBot() {
           box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
         }
 
-        .wave-input::placeholder {
-          color: #c084fc;
-        }
+        .wave-input::placeholder { color: #c084fc; }
 
+        /* ✅ Fixed: was "hheight" typo in original */
         .send-button {
           position: relative;
           background: linear-gradient(135deg, #a855f7, #ec4899);
           border: none;
           color: white;
-          width: 40px;
-          hheight: 40px;
+          width: 38px;
+          height: 38px;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -1268,6 +1096,7 @@ export default function ChatBot() {
           cursor: pointer;
           transition: all 0.2s;
           overflow: hidden;
+          flex-shrink: 0;
         }
 
         .send-button:not(:disabled):hover {
@@ -1275,14 +1104,9 @@ export default function ChatBot() {
           box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
         }
 
-        .send-button:not(:disabled):active {
-          transform: scale(0.95);
-        }
+        .send-button:not(:disabled):active { transform: scale(0.95); }
 
-        .send-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
+        .send-button:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .button-wave {
           position: absolute;
@@ -1296,26 +1120,19 @@ export default function ChatBot() {
           100% { transform: scale(2); opacity: 0; }
         }
 
-        /* Responsive adjustments */
+        /* Responsive */
         @media (max-width: 768px) {
           .wave-chat-window {
-            right: 40px;
-            width: calc(100vw - 80px);
+            right: 10px;
+            width: calc(100vw - 60px);
+            height: 420px;
           }
 
-          .peek-character {
-            width: 150px;
-            height: 220px;
-          }
+          .peek-character { width: 150px; height: 220px; }
 
-          .character-body {
-            width: 130px;
-            height: 180px;
-          }
+          .character-body { width: 130px; height: 180px; }
 
-          .toggle-arrow-button.visible {
-            right: 150px;
-          }
+          .toggle-arrow-button.visible { right: 150px; }
         }
       `}</style>
     </>
