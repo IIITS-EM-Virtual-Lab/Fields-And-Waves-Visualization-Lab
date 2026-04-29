@@ -33,6 +33,7 @@ import TypesOfTransmissionLines from './pages/transmission-line/types_of_transmi
 import CharacteristicImpedancePage from "./pages/transmission-line/CharacteristicImpedancePage.tsx";
 import SmithChart from './pages/transmission-line/smith_chart';
 import QuarterWaveTransformer from './pages/transmission-line/quarter_wave_transformer.tsx';
+import SingleStubTuner from './pages/transmission-line/single_stub_tuner';
 
 import Footer from "./components/Footer";
 import Settings from "./pages/settings";
@@ -143,6 +144,7 @@ const AppRoutes = () => {
             <Route path="/types-of-transmission-line" element={<TypesOfTransmissionLines />} />
             <Route path="/smith-chart" element={<SmithChart />} />
             <Route path="/quarter-wave-transformer" element={<QuarterWaveTransformer />} />
+            <Route path="/single-stub-tuner" element={<SingleStubTuner />} />
 
             <Route path="/module/:moduleSlug" element={<ModulePage />} />
           </Route>

@@ -68,6 +68,7 @@ const sidebarData = [
     { name: "Characteristic Impedance", path: "/characteristic-impedance" },
     { name: "Smith Chart", path: "/smith-chart" },
     { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer" },
+    { name: "Single Stub Tuner", path: "/single-stub-tuner" },
   ],
 },
 
