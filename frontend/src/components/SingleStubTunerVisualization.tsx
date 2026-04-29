@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Settings2, Cpu, Activity } from "lucide-react";
+import type * as PlotlyType from "plotly.js";
+
+declare global {
+  interface Window {
+    Plotly: typeof PlotlyType;
+  }
+}
 
 export default function App() {
   const [z0, setZ0] = useState("50");
@@ -47,7 +54,7 @@ export default function App() {
     const rho = Math.sqrt(GammaL_r ** 2 + GammaL_i ** 2);
     const vswr = rho < 1 - EPS ? (1 + rho) / (1 - rho) : Infinity;
 
-    const calcL = (b) => {
+    const calcL = (b: number): number => {
       if (Math.abs(b) < EPS) return 0;
       let bl = Math.atan(stubType === "short" ? -1 / b : b);
       if (bl < 0) bl += Math.PI;
@@ -106,7 +113,7 @@ export default function App() {
   useEffect(() => {
     if (!plotlyLoaded || !plotRef.current || !window.Plotly) return;
 
-    const plotData = [];
+    const plotData: PlotlyType.Data[] = [];
 
     // 1. VSWR Circle
     if (results.rho > 0.001 && results.rho < 0.999) {
@@ -127,7 +134,7 @@ export default function App() {
         imag: swrX,
         line: { color: "#94a3b8", width: 1.5, dash: "dash" },
         hoverinfo: "skip",
-      });
+      } as unknown as PlotlyType.Data);
     }
 
     // 2. g = 1 Circle
@@ -143,7 +150,7 @@ export default function App() {
       }
     }
     
-    const toImpedance = (yr, yi) => {
+    const toImpedance = (yr: number, yi: number): { r: number; x: number } => {
       const den = yr * yr + yi * yi;
       return { r: yr / den, x: -yi / den };
     };
@@ -156,7 +163,7 @@ export default function App() {
       imag: g1X,
       line: { color: "#fca5a5", width: 2 },
       hoverinfo: "skip",
-    });
+    } as unknown as PlotlyType.Data);
 
     // 3. Load Admittance
     const zL = toImpedance(results.yL_r, results.yL_i);
@@ -169,7 +176,7 @@ export default function App() {
       text: ["y_L"],
       textposition: "bottom center",
       marker: { color: "#ef4444", size: 10, symbol: "circle", line: { color: "white", width: 1 } },
-    });
+    } as unknown as PlotlyType.Data);
 
     // 4. Stub Attachment Point 1 (Solution 1)
     const z_d1 = toImpedance(1, results.sol1.y_d_i);
@@ -182,7 +189,7 @@ export default function App() {
       text: ["y(d1)"],
       textposition: "top right",
       marker: { color: "#eab308", size: 10, symbol: "diamond", line: { color: "white", width: 1 } },
-    });
+    } as unknown as PlotlyType.Data);
 
     // 5. Stub Attachment Point 2 (Solution 2)
     const z_d2 = toImpedance(1, results.sol2.y_d_i);
@@ -195,7 +202,7 @@ export default function App() {
       text: ["y(d2)"],
       textposition: "bottom left",
       marker: { color: "#a855f7", size: 10, symbol: "diamond", line: { color: "white", width: 1 } },
-    });
+    } as unknown as PlotlyType.Data);
 
     // 6. Center (Matched)
     plotData.push({
@@ -207,7 +214,7 @@ export default function App() {
       text: ["1 + j0"],
       textposition: "middle right",
       marker: { color: "#22c55e", size: 12, symbol: "star", line: { color: "white", width: 1 } },
-    });
+    } as unknown as PlotlyType.Data);
 
     const layout = {
       paper_bgcolor: "#ffffff",
@@ -234,11 +241,19 @@ export default function App() {
         },
     };
 
-    const config = { responsive: true, displayModeBar: false };
-    window.Plotly.newPlot(plotRef.current, plotData, layout, config);
+  const config = { responsive: true, displayModeBar: false };
+    window.Plotly.newPlot(
+      plotRef.current,
+      plotData as unknown as PlotlyType.Data[],
+      layout as unknown as PlotlyType.Layout,
+      config
+    );
   }, [results, plotlyLoaded]);
 
-  const handleInputChange = (setter) => (e) => setter(e.target.value);
+  const handleInputChange =
+    (setter: React.Dispatch<React.SetStateAction<string>>) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setter(e.target.value);
 
   // Schematic scaling calculations (Using Sol 1 for drawing)
   const schematicD = (results.sol1.d / 0.5) * 160; 
