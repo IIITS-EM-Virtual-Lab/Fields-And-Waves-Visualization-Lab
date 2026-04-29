@@ -1,5 +1,6 @@
 import SmithChartCalculator from "@/components/SmithChartCalculator.tsx";
 import { BlockMath, InlineMath } from "react-katex";
+import { Link } from "react-router-dom";
 import "katex/dist/katex.min.css";
 
 const SmithChart = () => {
@@ -272,7 +273,7 @@ const SmithChart = () => {
       </div>
 
       {/* 12 Admittance Chart Geometry */}
-      <div className="bg-white border border-slate-200 rounded-xl p-8 mb-12">
+      <div className="bg-white border border-slate-200 rounded-xl p-8 mb-10">
         <h2 className="text-lg sm:text-xl font-black mb-4">
           Admittance Chart Geometry
         </h2>
@@ -292,6 +293,45 @@ const SmithChart = () => {
             <strong>Graphical Conversion:</strong> Converting <InlineMath math="z_L" /> to <InlineMath math="y_L" /> graphically simply requires drawing a line through the origin (center) to the diametrically opposite point on the constant VSWR circle.
           </li>
         </ul>
+      </div>
+
+      {/* 13 Applications of Smith Chart */}
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 mb-12">
+        <h2 className="text-lg sm:text-xl font-black mb-4">
+          Applications of Smith Chart
+        </h2>
+        
+        <p className="mb-6">
+          The Smith Chart is widely used in solving various transmission line problems and designing matching networks. Explore these common applications:
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Quarter Wave Transformer Card */}
+          <Link 
+            to="/quarter-wave-transformer" 
+            className="flex-1 bg-white border border-slate-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-md transition-all group cursor-pointer"
+          >
+            <h3 className="text-lg font-bold text-slate-800 group-hover:text-blue-600 mb-2 transition-colors">
+              Quarter Wave Transformer
+            </h3>
+            <p className="text-sm text-slate-600">
+              Match a real load to a transmission line using a <InlineMath math="\lambda/4" /> section.
+            </p>
+          </Link>
+
+          {/* Single Stub Tuner Card */}
+          <Link 
+            to="/single-stub-tuner" 
+            className="flex-1 bg-white border border-slate-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-md transition-all group cursor-pointer"
+          >
+            <h3 className="text-lg font-bold text-slate-800 group-hover:text-blue-600 mb-2 transition-colors">
+              Single Stub Tuner
+            </h3>
+            <p className="text-sm text-slate-600">
+              Use an open or shorted parallel stub to match complex impedances to a feedline.
+            </p>
+          </Link>
+        </div>
       </div>
 
     </div>
