@@ -32,6 +32,7 @@ import WaveReflection from "./pages/wave-propagation/wave_reflection";
 import TypesOfTransmissionLines from './pages/transmission-line/types_of_transmission_line';
 import CharacteristicImpedancePage from "./pages/transmission-line/CharacteristicImpedancePage.tsx";
 import SmithChart from './pages/transmission-line/smith_chart';
+import QuarterWaveTransformer from './pages/transmission-line/quarter_wave_transformer.tsx';
 
 import Footer from "./components/Footer";
 import Settings from "./pages/settings";
@@ -141,6 +142,7 @@ const AppRoutes = () => {
             />
             <Route path="/types-of-transmission-line" element={<TypesOfTransmissionLines />} />
             <Route path="/smith-chart" element={<SmithChart />} />
+            <Route path="/quarter-wave-transformer" element={<QuarterWaveTransformer />} />
 
             <Route path="/module/:moduleSlug" element={<ModulePage />} />
           </Route>
