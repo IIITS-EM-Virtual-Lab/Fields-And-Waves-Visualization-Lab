@@ -11,19 +11,20 @@ declare global {
 
 export default function SmithChartCalculator() {
   // Chart Mode State
-  const [chartMode, setChartMode] = useState<"impedance" | "admittance">(
-    "impedance",
-  );
+  const [chartMode, setChartMode] = useState<"impedance" | "admittance">("impedance");
 
-  // Impedance States
+  // Impedance States (Ohms)
   const [z0, setZ0] = useState<string>("50");
   const [rL, setRL] = useState<string>("50");
   const [xL, setXL] = useState<string>("25");
 
+  // Admittance States (Siemens)
+  const [y0, setY0] = useState<string>("0.02");
+  const [gL, setGL] = useState<string>("0.02");
+  const [bL, setBL] = useState<string>("-0.01");
+
   // Length States
-  const [lengthMode, setLengthMode] = useState<"electrical" | "physical">(
-    "electrical",
-  );
+  const [lengthMode, setLengthMode] = useState<"electrical" | "physical">("electrical");
   const [lengthWL, setLengthWL] = useState<string>("0.125");
 
   // Physical Parameter States
@@ -50,14 +51,18 @@ export default function SmithChartCalculator() {
 
   // Calculations
   const results = useMemo(() => {
-    const numZ0 = parseFloat(z0);
-    const safeZ0 = isNaN(numZ0) || numZ0 <= 0 ? 1 : numZ0;
+    let safeZ0 = 50;
+    let safeY0 = 0.02;
 
-    const numRL = parseFloat(rL);
-    const safeRL = isNaN(numRL) ? 0 : numRL;
-
-    const numXL = parseFloat(xL);
-    const safeXL = isNaN(numXL) ? 0 : numXL;
+    if (chartMode === "impedance") {
+      const numZ0 = parseFloat(z0);
+      safeZ0 = isNaN(numZ0) || numZ0 <= 0 ? 1 : numZ0;
+      safeY0 = 1 / safeZ0;
+    } else {
+      const numY0 = parseFloat(y0);
+      safeY0 = isNaN(numY0) || numY0 <= 0 ? 1e-6 : numY0;
+      safeZ0 = 1 / safeY0;
+    }
 
     // Calculate effective line length (in wavelengths) based on mode
     let safeLen = 0;
@@ -79,28 +84,67 @@ export default function SmithChartCalculator() {
       safeLen = safePVel > 0 ? (safePLen * safeFreq) / safePVel : 0;
     }
 
-    // 1. Normalized Load Impedance
-    const r = safeRL / safeZ0;
-    const x = safeXL / safeZ0;
+    let r = 0, x = 0, g = 0, b = 0;
+    let gammaNumR = 0, gammaNumI = 0, gammaDenR = 0, gammaDenI = 0;
 
-    // 1b. Normalized Load Admittance (yL = g + jb)
-    const zDenom = r * r + x * x;
-    let g = Infinity;
-    let b = Infinity;
-    if (zDenom > 1e-10) {
-      g = r / zDenom;
-      b = -x / zDenom;
+    if (chartMode === "impedance") {
+      // --- IMPEDANCE MODE ---
+      const numRL = parseFloat(rL);
+      const safeRL = isNaN(numRL) ? 0 : numRL;
+      const numXL = parseFloat(xL);
+      const safeXL = isNaN(numXL) ? 0 : numXL;
+
+      r = safeRL / safeZ0;
+      x = safeXL / safeZ0;
+
+      const zDenom = r * r + x * x;
+      if (zDenom > 1e-10) {
+        g = r / zDenom;
+        b = -x / zDenom;
+      } else {
+        g = Infinity;
+        b = Infinity;
+      }
+
+      // Γ_V = (zL - 1) / (zL + 1)
+      gammaNumR = r - 1; gammaNumI = x;
+      gammaDenR = r + 1; gammaDenI = x;
+    } else {
+      // --- ADMITTANCE MODE ---
+      const numGL = parseFloat(gL);
+      const safeGL = isNaN(numGL) ? 0 : numGL;
+      const numBL = parseFloat(bL);
+      const safeBL = isNaN(numBL) ? 0 : numBL;
+
+      g = safeGL / safeY0;
+      b = safeBL / safeY0;
+
+      const yDenom = g * g + b * b;
+      if (yDenom > 1e-10) {
+        r = g / yDenom;
+        x = -b / yDenom;
+      } else {
+        r = Infinity;
+        x = Infinity;
+      }
+
+      // Γ_V = (1 - yL) / (1 + yL)
+      gammaNumR = 1 - g; gammaNumI = -b;
+      gammaDenR = 1 + g; gammaDenI = b;
     }
 
-    // 2. Reflection Coefficient (Gamma) at Load
-    const numReal = r - 1;
-    const numImag = x;
-    const denReal = r + 1;
-    const denImag = x;
+    // 2. Reflection Coefficient (Gamma_V) at Load
+    const gammaDenMagSq = gammaDenR * gammaDenR + gammaDenI * gammaDenI;
+    let gammaReal = 0, gammaImag = 0;
 
-    const denMagSq = denReal * denReal + denImag * denImag;
-    const gammaReal = (numReal * denReal + numImag * denImag) / denMagSq;
-    const gammaImag = (numImag * denReal - numReal * denImag) / denMagSq;
+    if (gammaDenMagSq > 1e-10) {
+      gammaReal = (gammaNumR * gammaDenR + gammaNumI * gammaDenI) / gammaDenMagSq;
+      gammaImag = (gammaNumI * gammaDenR - gammaNumR * gammaDenI) / gammaDenMagSq;
+    } else {
+      // Extreme Edge Cases (Short/Open circuits causing Infinity issues safely defaulted)
+      gammaReal = chartMode === "impedance" ? 1 : -1;
+      gammaImag = 0;
+    }
 
     const gammaMag = Math.sqrt(gammaReal * gammaReal + gammaImag * gammaImag);
     const gammaPhaseRad = Math.atan2(gammaImag, gammaReal);
@@ -113,68 +157,60 @@ export default function SmithChartCalculator() {
     let returnLoss = -20 * Math.log10(gammaMag);
     if (gammaMag === 0) returnLoss = Infinity;
 
-    // 4. Input Impedance (Z_in)
+    // 4. Input Reflection Coefficient translated by line length
     const phaseShift = -4 * Math.PI * safeLen;
     const gammaInPhaseRad = gammaPhaseRad + phaseShift;
 
     const gammaInReal = gammaMag * Math.cos(gammaInPhaseRad);
     const gammaInImag = gammaMag * Math.sin(gammaInPhaseRad);
 
-    const zInNumReal = 1 + gammaInReal;
-    const zInNumImag = gammaInImag;
-    const zInDenReal = 1 - gammaInReal;
-    const zInDenImag = -gammaInImag;
+    // 5a. Input Impedance (Z_in) = (1 + Γ_in) / (1 - Γ_in)
+    const zInNumR = 1 + gammaInReal;
+    const zInNumI = gammaInImag;
+    const zInDenR = 1 - gammaInReal;
+    const zInDenI = -gammaInImag;
 
-    const zInDenMagSq = zInDenReal * zInDenReal + zInDenImag * zInDenImag;
-    let zinNormR = Infinity;
-    let zinNormX = Infinity;
+    const zInDenMagSq = zInDenR * zInDenR + zInDenI * zInDenI;
+    let zinNormR = Infinity, zinNormX = Infinity;
 
     if (zInDenMagSq > 1e-10) {
-      zinNormR =
-        (zInNumReal * zInDenReal + zInNumImag * zInDenImag) / zInDenMagSq;
-      zinNormX =
-        (zInNumImag * zInDenReal - zInNumReal * zInDenImag) / zInDenMagSq;
+      zinNormR = (zInNumR * zInDenR + zInNumI * zInDenI) / zInDenMagSq;
+      zinNormX = (zInNumI * zInDenR - zInNumR * zInDenI) / zInDenMagSq;
     }
 
     const zinAbsR = zinNormR === Infinity ? Infinity : zinNormR * safeZ0;
     const zinAbsX = zinNormX === Infinity ? Infinity : zinNormX * safeZ0;
 
-    // 4b. Input Admittance (Y_in)
-    const zinDenMagSq2 = zinNormR * zinNormR + zinNormX * zinNormX;
-    let gin = Infinity;
-    let bin = Infinity;
-    if (zinDenMagSq2 > 1e-10) {
-      gin = zinNormR / zinDenMagSq2;
-      bin = -zinNormX / zinDenMagSq2;
+    // 5b. Input Admittance (Y_in) = (1 - Γ_in) / (1 + Γ_in)
+    const yInNumR = 1 - gammaInReal;
+    const yInNumI = -gammaInImag;
+    const yInDenR = 1 + gammaInReal;
+    const yInDenI = gammaInImag;
+
+    const yInDenMagSq = yInDenR * yInDenR + yInDenI * yInDenI;
+    let gin = Infinity, bin = Infinity;
+
+    if (yInDenMagSq > 1e-10) {
+      gin = (yInNumR * yInDenR + yInNumI * yInDenI) / yInDenMagSq;
+      bin = (yInNumI * yInDenR - yInNumR * yInDenI) / yInDenMagSq;
     }
 
-    const y0 = 1 / safeZ0;
-    const yinAbsG = gin === Infinity ? Infinity : gin * y0;
-    const yinAbsB = bin === Infinity ? Infinity : bin * y0;
+    const yinAbsG = gin === Infinity ? Infinity : gin * safeY0;
+    const yinAbsB = bin === Infinity ? Infinity : bin * safeY0;
 
     return {
-      r,
-      x,
-      g,
-      b,
-      gammaMag,
-      gammaPhaseDeg,
-      gammaPhaseRad,
-      vswr,
-      returnLoss,
-      safeLen,
-      safeZ0,
-      y0,
-      zinNormR,
-      zinNormX,
-      zinAbsR,
-      zinAbsX,
-      gin,
-      bin,
-      yinAbsG,
-      yinAbsB,
+      r, x, g, b,
+      gammaMag, gammaPhaseDeg, gammaPhaseRad,
+      vswr, returnLoss,
+      safeLen, safeZ0, safeY0,
+      zinNormR, zinNormX, zinAbsR, zinAbsX,
+      gin, bin, yinAbsG, yinAbsB,
     };
-  }, [z0, rL, xL, lengthMode, lengthWL, physLength, frequency, velocityFactor]);
+  }, [
+    chartMode, z0, y0,
+    rL, xL, gL, bL,
+    lengthMode, lengthWL, physLength, frequency, velocityFactor
+  ]);
 
   // Generate Chart Data
   const chartData = useMemo(() => {
@@ -405,57 +441,116 @@ export default function SmithChartCalculator() {
           </div>
 
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">
-                Characteristic Impedance (Z₀)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={z0}
-                  onChange={handleInputChange(setZ0)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
-                />
-                <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
-                  Ω
-                </span>
+            {chartMode === "impedance" ? (
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">
+                  Characteristic Impedance (Z₀)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={z0}
+                    onChange={handleInputChange(setZ0)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+                  />
+                  <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
+                    Ω
+                  </span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">
+                  Characteristic Admittance (Y₀)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={y0}
+                    onChange={handleInputChange(setY0)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+                  />
+                  <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
+                    S
+                  </span>
+                </div>
+              </div>
+            )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">
-                  Load Res. (R<sub>L</sub>)
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={rL}
-                    onChange={handleInputChange(setRL)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
-                  />
-                  <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
-                    Ω
-                  </span>
+            {chartMode === "impedance" ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">
+                    Load Res. (R<sub>L</sub>)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={rL}
+                      onChange={handleInputChange(setRL)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                    />
+                    <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
+                      Ω
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">
+                    Load React. (X<sub>L</sub>)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={xL}
+                      onChange={handleInputChange(setXL)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                    />
+                    <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
+                      Ω
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">
-                  Load React. (X<sub>L</sub>)
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={xL}
-                    onChange={handleInputChange(setXL)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
-                  />
-                  <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
-                    Ω
-                  </span>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">
+                    Load Cond. (G<sub>L</sub>)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={gL}
+                      onChange={handleInputChange(setGL)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                    />
+                    <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
+                      S
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">
+                    Load Susc. (B<sub>L</sub>)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={bL}
+                      onChange={handleInputChange(setBL)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+                    />
+                    <span className="absolute right-4 top-2 text-slate-400 pointer-events-none">
+                      S
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="pt-4 border-t border-slate-100">
               <div className="flex items-center justify-between mb-3">
@@ -636,7 +731,6 @@ export default function SmithChartCalculator() {
       <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center min-h-[600px] relative">
         {!plotlyLoaded && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-10 rounded-2xl">
-            
             <Cpu className="w-10 h-10 text-blue-500 animate-pulse mb-4" />
             <p className="text-slate-500 font-medium">
               Loading Chart Engine...
@@ -646,10 +740,10 @@ export default function SmithChartCalculator() {
 
         <div className="flex flex-col items-center gap-3 mb-4">
           <h2 className="text-lg font-semibold text-slate-700 text-center mt-2">
-  {chartMode === "impedance"
-    ? "Impedance Smith Chart (Z)"
-    : "Admittance Smith Chart (Y)"}
-</h2>
+            {chartMode === "impedance"
+              ? "Impedance Smith Chart (Z)"
+              : "Admittance Smith Chart (Y)"}
+          </h2>
           <div
             ref={plotRef}
             className="w-[650px] h-[650px] max-w-full"
