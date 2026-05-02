@@ -9,13 +9,13 @@ const ContentLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-[calc(100vh-5rem)]">
       <div className="flex flex-col md:flex-row flex-1">
 
         {/* Sidebar (Desktop) */}
         {showSidebar && (
           <aside
-            className={`fixed left-0 top-20 bottom-0 z-40 hidden md:block bg-white border-r overflow-y-auto transition-all duration-300 ${
+            className={`sticky top-20 self-start hidden md:block bg-white border-r h-[calc(100vh-5rem)] overflow-y-auto transition-all duration-300 ${
               sidebarOpen ? "md:w-80" : "md:w-0"
             }`}
           >
@@ -35,11 +35,7 @@ const ContentLayout = () => {
         )}
 
         {/* Main content */}
-        <div
-          className={`flex-1 min-w-0 bg-white transition-all duration-300 ${
-            showSidebar && sidebarOpen ? "md:ml-80" : "md:ml-0"
-          }`}
-        >
+        <div className="flex-1 min-w-0 bg-white transition-all duration-300">
           
           {/* Show button when sidebar is closed */}
           {showSidebar && !sidebarOpen && (
