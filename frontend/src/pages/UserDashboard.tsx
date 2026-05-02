@@ -191,7 +191,6 @@ const UserDashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-blue-600">By module</p>
               <h2 className="text-2xl lg:text-3xl font-bold text-slate-950 tracking-tight">
                 Topic Performance
               </h2>
@@ -745,7 +744,6 @@ const UserDashboard = () => {
           <div className="max-w-[1280px] mx-auto">
             <div className="bg-white rounded-3xl shadow-[0_20px_60px_-34px_rgba(15,23,42,0.55)] p-4 lg:p-8 border border-slate-200 relative overflow-hidden">
               <div className="flex flex-col gap-1 mb-6 lg:mb-8">
-                <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Attempts</p>
                 <h2 className="text-2xl lg:text-3xl font-bold text-slate-950">Learning History</h2>
               </div>
               {renderHistoryFilters()}
