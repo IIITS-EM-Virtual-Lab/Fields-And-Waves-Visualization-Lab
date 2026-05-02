@@ -391,7 +391,28 @@ body {
 
 /* OTP Styles */
 .otp-container {
-  margin: 2rem 0;
+  margin: 1.25rem 0;
+}
+
+.auth-info-box {
+  background: #ebf8ff;
+  border: 1px solid #bee3f8;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.info-text {
+  color: #2c5282;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.otp-code-input {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.25rem;
 }
 
 .otp-inputs {
@@ -421,8 +442,10 @@ body {
 
 .otp-buttons {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 0.75rem;
 }
 
 .auth-btn.secondary {

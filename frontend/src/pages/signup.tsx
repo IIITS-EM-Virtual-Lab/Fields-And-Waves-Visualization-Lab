@@ -18,9 +18,12 @@ const Signup = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    otp: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
 
   // Validation function
   const validateForm = () => {
@@ -28,7 +31,7 @@ const Signup = () => {
     const email = emailRef.current?.value || '';
     const password = passwordRef.current?.value || '';
     const confirmPassword = confirmRef.current?.value || '';
-    const newErrors = { name: '', email: '', password: '', confirmPassword: '' };
+    const newErrors = { name: '', email: '', password: '', confirmPassword: '', otp: '' };
 
     if (!name.trim()) {
       newErrors.name = 'Name is required';
@@ -60,6 +63,15 @@ const Signup = () => {
 
   const handleSignup = async () => {
     if (!validateForm()) return;
+    if (!otpSent) {
+      await handleSendOtp();
+      return;
+    }
+
+    if (!/^\d{6}$/.test(otp.trim())) {
+      setErrors((prev) => ({ ...prev, otp: 'Enter the 6-digit code sent to your email' }));
+      return;
+    }
 
     setIsLoading(true);
     const name = nameRef.current?.value || '';
@@ -69,7 +81,7 @@ const Signup = () => {
     try {
       const response = await axios.post(
         'https://fields-and-waves-visualization-lab.onrender.com/api/auth/signup',
-        { name, email, password },
+        { name, email, password, otp },
         { validateStatus: status => status >= 200 && status < 500 }
       );
 
@@ -82,6 +94,35 @@ const Signup = () => {
     } catch (error: any) {
       console.error('Signup error:', error);
       alert(error.response?.data?.message || 'Signup error. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    setIsLoading(true);
+    const name = nameRef.current?.value || '';
+    const email = emailRef.current?.value || '';
+    const password = passwordRef.current?.value || '';
+
+    try {
+      const response = await axios.post(
+        'https://fields-and-waves-visualization-lab.onrender.com/api/auth/signup/send-otp',
+        { name, email, password },
+        { validateStatus: status => status >= 200 && status < 500 }
+      );
+
+      if (response.data.success) {
+        setOtpSent(true);
+        setOtp('');
+        setErrors((prev) => ({ ...prev, otp: '' }));
+        alert('Verification code sent to your email.');
+      } else {
+        alert(response.data.message || 'Failed to send verification code');
+      }
+    } catch (error: any) {
+      console.error('Signup OTP error:', error);
+      alert(error.response?.data?.message || 'Could not send verification code. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -106,6 +147,12 @@ const Signup = () => {
     const confirmPassword = confirmRef.current?.value?.trim();
     return name && email && password && confirmPassword && 
            name.length > 0 && email.length > 0 && password.length > 0 && confirmPassword.length > 0;
+  };
+
+  const handleEditEmail = () => {
+    setOtpSent(false);
+    setOtp('');
+    setErrors((prev) => ({ ...prev, otp: '' }));
   };
 
   return (
@@ -141,6 +188,7 @@ const Signup = () => {
                   ref={nameRef}
                   className={`auth-input ${errors.name ? 'error' : ''}`}
                   onChange={() => setErrors({ ...errors, name: '' })}
+                  disabled={otpSent || isLoading}
                 />
                 {errors.name && <span className="error-message">{errors.name}</span>}
               </div>
@@ -156,6 +204,7 @@ const Signup = () => {
                   ref={emailRef}
                   className={`auth-input ${errors.email ? 'error' : ''}`}
                   onChange={() => setErrors({ ...errors, email: '' })}
+                  disabled={otpSent || isLoading}
                 />
                 {errors.email && <span className="error-message">{errors.email}</span>}
               </div>
@@ -172,6 +221,7 @@ const Signup = () => {
                     ref={passwordRef}
                     className={`auth-input ${errors.password ? 'error' : ''}`}
                     onChange={() => setErrors({ ...errors, password: '' })}
+                    disabled={otpSent || isLoading}
                   />
                   <button
                     type="button"
@@ -196,6 +246,7 @@ const Signup = () => {
                     ref={confirmRef}
                     className={`auth-input ${errors.confirmPassword ? 'error' : ''}`}
                     onChange={() => setErrors({ ...errors, confirmPassword: '' })}
+                    disabled={otpSent || isLoading}
                   />
                   <button
                     type="button"
@@ -208,13 +259,64 @@ const Signup = () => {
                 {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
               </div>
 
+              {otpSent && (
+                <div className="otp-container">
+                  <div className="auth-info-box">
+                    <p className="info-text">
+                      We sent a 6-digit verification code to {emailRef.current?.value}.
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="signupOtp" className="form-label">
+                      Verification Code <span className="required">*</span>
+                    </label>
+                    <input
+                      id="signupOtp"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={otp}
+                      onChange={(e) => {
+                        setOtp(e.target.value.replace(/\D/g, '').slice(0, 6));
+                        setErrors({ ...errors, otp: '' });
+                      }}
+                      placeholder="Enter 6-digit code"
+                      className={`auth-input otp-code-input ${errors.otp ? 'error' : ''}`}
+                      disabled={isLoading}
+                      autoFocus
+                    />
+                    {errors.otp && <span className="error-message">{errors.otp}</span>}
+                  </div>
+
+                  <div className="otp-buttons">
+                    <button
+                      type="button"
+                      className="link-btn primary"
+                      onClick={handleSendOtp}
+                      disabled={isLoading}
+                    >
+                      Resend code
+                    </button>
+                    <button
+                      type="button"
+                      className="link-btn"
+                      onClick={handleEditEmail}
+                      disabled={isLoading}
+                    >
+                      Edit details
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="auth-actions">
                 <button
-                  className={`auth-btn primary ${(!isFormValid() || isLoading) ? 'disabled' : ''}`}
+                  className={`auth-btn primary ${(!isFormValid() || isLoading || (otpSent && otp.length !== 6)) ? 'disabled' : ''}`}
                   onClick={handleSignup}
-                  disabled={!isFormValid() || isLoading}
+                  disabled={!isFormValid() || isLoading || (otpSent && otp.length !== 6)}
                 >
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
+                  {isLoading ? (otpSent ? 'Verifying...' : 'Sending Code...') : (otpSent ? 'Verify & Create Account' : 'Send Verification Code')}
                 </button>
               </div>
 

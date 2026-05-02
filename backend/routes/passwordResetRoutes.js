@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const User = require('../models/User');
-const { sendResetPasswordEmail } = require('../utils/emailService');
+const { getFrontendUrl, sendResetPasswordEmail } = require('../utils/emailService');
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // @desc    Request password reset
 // @route   POST /api/password-reset/request
@@ -19,8 +21,12 @@ router.post('/request', async (req, res) => {
       });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      email: new RegExp(`^${escapeRegex(normalizedEmail)}$`, 'i')
+    });
 
     if (!user) {
       // Don't reveal if user exists or not (security)
@@ -53,7 +59,7 @@ router.post('/request', async (req, res) => {
     await user.save();
 
     // Create reset URL
-    const resetUrl = `${process.env.FRONTEND_URL || 'https://www.fwvlab.com'}/reset-password?token=${resetToken}`;
+    const resetUrl = `${getFrontendUrl()}/reset-password?token=${resetToken}`;
 
     // Send email
     try {
