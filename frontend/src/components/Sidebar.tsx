@@ -7,10 +7,10 @@ const sidebarData = [
     topic: "Vector Algebra",
     icon: "/assets/vector-algebra.png",
     subtopics: [
-      { name: "Scalars and Vectors", path: "/scalars-and-vectors" },
-      { name: "Addition", path: "/vector-addition" },
-      { name: "Multiplication", path: "/vector-multiplication" },
-      { name: "Triple Product", path: "/triple-product" },
+      { name: "Scalars and Vectors", path: "/scalars-and-vectors", quizPath: "/quiz/vector-algebra/scalars" },
+      { name: "Addition", path: "/vector-addition", quizPath: "/quiz/vector-algebra/addition" },
+      { name: "Multiplication", path: "/vector-multiplication", quizPath: "/quiz/vector-algebra/multiplication" },
+      { name: "Triple Product", path: "/triple-product", quizPath: "/quiz/vector-algebra/triple-product" },
     ],
   },
   {
@@ -29,12 +29,12 @@ const sidebarData = [
     topic: "Electrostatics",
     icon: "/assets/vector-calculus.png",
     subtopics: [
-      { name: "Intro", path: "/electrostatics-intro" },
-      { name: "Electric Field & Flux", path: "/electric-field-and-flux-density" },
-      // { name: "Field Operations", path: "/field-operations" },
-      { name: "Electric Potential", path: "/electric-potential" },
+      { name: "Intro", path: "/electrostatics-intro", quizPath: "/quiz/electrostatics/coulombs-law" },
+      { name: "Electric Field & Flux", path: "/electric-field-and-flux-density", quizPath: "/quiz/electrostatics/electric-flux" },
+      { name: "Field Operations", path: "/field-operations", quizPath: "/quiz/electrostatics/gradient" },
+      { name: "Electric Potential", path: "/electric-potential", quizPath: "/quiz/electrostatics/electric-potential" },
       // { name: "Gauss Law", path: "/gauss-law" },
-      { name: "Electric Dipole", path: "/electric-dipole" },
+      { name: "Electric Dipole", path: "/electric-dipole", quizPath: "/quiz/electrostatics/electric-dipole" },
     ],
   },
   {
@@ -64,11 +64,11 @@ const sidebarData = [
   topic: "Transmission Lines",
   icon: "/assets/transmission-lines.png",
   subtopics: [
-    { name: "Types of Transmission Line", path: "/types-of-transmission-line" },
+    { name: "Types of Transmission Line", path: "/types-of-transmission-line", quizPath: "/quiz/transmission-lines/types-of-transmission-line" },
     { name: "Characteristic Impedance", path: "/characteristic-impedance" },
     { name: "Smith Chart", path: "/smith-chart" },
-    { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer" },
-    { name: "Single Stub Tuner", path: "/single-stub-tuner" },
+    { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer", quizPath: "/quiz/transmission-lines/types-of-transmission-line" },
+    { name: "Single Stub Tuner", path: "/single-stub-tuner", quizPath: "/quiz/transmission-lines/single-stub-tuner" },
   ],
 },
 
@@ -133,6 +133,22 @@ const sectionToRender = matchedSection || sidebarData[0];
                 </span>
                 {sub.name}
               </Link>
+              {sub.quizPath && (
+                <div className="px-5 pb-3">
+                  {isAuthenticated ? (
+                    <Link
+                      to={sub.quizPath}
+                      className="inline-flex rounded-md border border-blue-200 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
+                    >
+                      Take Test
+                    </Link>
+                  ) : (
+                    <p className="text-xs font-medium text-[#a00032]">
+                      Login to take the test
+                    </p>
+                  )}
+                </div>
+              )}
             </li>
           );
         })}

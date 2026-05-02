@@ -1,14 +1,7 @@
-import { Button } from "@/components/ui/button";
 import VectorVisualizer from "@/components/VectorVisualizer";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { selectIsAuthenticated } from "../../store/slices/authSlice";
 import { BlockMath, InlineMath } from "react-katex";
 
 const Scalars = () => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const navigate = useNavigate();
-
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col border-t border-slate-300">
       <div className="text-xl sm:text-2xl lg:text-3xl font-black uppercase text-center py-8">
@@ -144,18 +137,6 @@ const Scalars = () => {
         </div>
       </div>
 
-      {/* Button or Login Notice */}
-      {isAuthenticated ? (
-        <div className="flex justify-center mt-6">
-          <Button onClick={() => navigate("/quiz/vector-algebra/scalars")}>
-            Take Test
-          </Button>
-        </div>
-      ) : (
-        <div className="text-center text-sm sm:text-base text-[#a00032] mt-6">
-          Please log in to take the test.
-        </div>
-      )}
     </div>
   );
 };

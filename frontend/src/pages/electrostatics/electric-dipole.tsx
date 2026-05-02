@@ -1,15 +1,9 @@
-import { Button } from "@/components/ui/button";
 import "katex/dist/katex.min.css";
 import { BlockMath } from "react-katex";
-import { useNavigate } from "react-router-dom";
 import ElectricDipoleVisualizer from "@/components/ElectricDipoleVisualizer";
-import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '../../store/slices/authSlice';
 
 
 const ElectricDipolePage = () => {
-    const isAuthenticated = useSelector(selectIsAuthenticated);
-    const navigate = useNavigate();
     return (
         <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
             <div className="text-xl font-black uppercase text-center py-10">
@@ -74,17 +68,6 @@ const ElectricDipolePage = () => {
                 Electric flux lines, also known as electric field lines, visually
                 represent the direction and strength of an electric field in space.
             </div>
-              {isAuthenticated ? (
-                <div className="flex justify-center mt-4 pr-20">
-                    <Button onClick={() => navigate('/quiz/electrostatics/electric-dipole')}>
-                    Take Test
-                    </Button>
-                </div>
-                ) : (
-                <div className="text-center text-medium text-[#a00032] mt-4">
-                    Please log in to take the test.
-                </div>
-                )}
         </div>
     );
 };

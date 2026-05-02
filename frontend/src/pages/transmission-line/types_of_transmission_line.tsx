@@ -1,15 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import TransmissionLineTypesVisualizer from "@/components/TransmissionLineTypesVisualizer.tsx"
-import { useSelector } from "react-redux";
-import { selectIsAuthenticated } from "../../store/slices/authSlice";
 import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 
 const TypesOfTransmissionLine = () => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const navigate = useNavigate();
-
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col border-t border-slate-300">
 
@@ -130,20 +123,6 @@ const TypesOfTransmissionLine = () => {
         </div>
       </div>
 
-      {isAuthenticated ? (
-        <div className="flex justify-center mt-6 pb-10">
-          <Button
-            onClick={() => navigate("/quiz/transmission-lines/types-of-transmission-line")}
-            className="px-8 py-5 text-base"
-          >
-            Take Test
-          </Button>
-        </div>
-      ) : (
-        <div className="text-center text-sm sm:text-base text-[#a00032] mt-6 pb-10">
-          Please log in to take the test.
-        </div>
-      )}
     </div>
   );
 };
