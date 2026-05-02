@@ -272,18 +272,6 @@ const ResetPassword: React.FC = () => {
                 {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
               </div>
 
-              <div className="password-requirements">
-                <p className="requirements-title">Password Requirements:</p>
-                <ul className="requirements-list">
-                  <li className={password.length >= 6 ? 'valid' : ''}>
-                    At least 6 characters
-                  </li>
-                  <li className={password === confirmPassword && password ? 'valid' : ''}>
-                    Passwords match
-                  </li>
-                </ul>
-              </div>
-
               <div className="auth-actions">
                 <button
                   className={`auth-btn primary ${(!isFormValid() || isLoading) ? 'disabled' : ''}`}
