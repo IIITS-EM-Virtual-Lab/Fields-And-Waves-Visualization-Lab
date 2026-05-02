@@ -10,12 +10,12 @@ const ContentLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+      <div className="flex flex-col md:flex-row flex-1">
 
         {/* Sidebar (Desktop) */}
         {showSidebar && (
           <aside
-            className={`relative hidden md:block bg-white border-r h-screen overflow-y-auto transition-all duration-300 ${
+            className={`fixed left-0 top-20 bottom-0 z-40 hidden md:block bg-white border-r overflow-y-auto transition-all duration-300 ${
               sidebarOpen ? "md:w-80" : "md:w-0"
             }`}
           >
@@ -35,7 +35,11 @@ const ContentLayout = () => {
         )}
 
         {/* Main content */}
-        <div className="flex-1 overflow-y-auto bg-white">
+        <div
+          className={`flex-1 min-w-0 bg-white transition-all duration-300 ${
+            showSidebar && sidebarOpen ? "md:ml-80" : "md:ml-0"
+          }`}
+        >
           
           {/* Show button when sidebar is closed */}
           {showSidebar && !sidebarOpen && (
