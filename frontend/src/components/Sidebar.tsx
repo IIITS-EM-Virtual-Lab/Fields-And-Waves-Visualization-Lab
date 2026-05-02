@@ -122,11 +122,11 @@ const sectionToRender = matchedSection || sidebarData[0];
             <li key={sub.name}>
               <Link
                 to={sub.path}
-                className={`block px-5 py-4 text-base font-medium transition ${
+                className={`block px-5 pt-4 text-base font-medium transition ${
                   isActive
                     ? "bg-blue-100 text-blue-800 font-semibold border-l-4 border-blue-600"
                     : "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
-                }`}
+                } ${sub.quizPath ? "pb-2" : "pb-4"}`}
               >
                 <span className="block text-sm uppercase text-gray-500 mb-1">
                   Topic {index + 1}
@@ -134,7 +134,13 @@ const sectionToRender = matchedSection || sidebarData[0];
                 {sub.name}
               </Link>
               {sub.quizPath && (
-                <div className="px-5 pb-3">
+                <div
+                  className={`px-5 pb-4 ${
+                    isActive
+                      ? "bg-blue-100 border-l-4 border-blue-600"
+                      : "hover:bg-blue-50"
+                  }`}
+                >
                   {isAuthenticated ? (
                     <Link
                       to={sub.quizPath}
