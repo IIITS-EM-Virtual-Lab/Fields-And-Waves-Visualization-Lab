@@ -98,7 +98,8 @@ const ProfilePage = () => {
     'maxwell-equations',
     'vector-algebra',
     'vector-calculus',
-    'wave-propagation'
+    'wave-propagation',
+    'transmission-lines'
   ];
 
   const moduleChapters: { [key: string]: string[] } = {
@@ -106,7 +107,8 @@ const ProfilePage = () => {
     'maxwell-equations': ['amperes-law', 'displacement-current', 'emfs', 'faradays-law', 'gauss-law-contd', 'gauss-law-magnetism', 'time-varying-potential'],
     'vector-algebra': ['addition', 'multiplication', 'scalars', 'triple-product'],
     'vector-calculus': ['cylindrical-coordinates', 'del-operator', 'spherical-coordinates', 'vector-calculus-intro'],
-    'wave-propagation': ['pow_vector', 'wave_analysis', 'wave_reflection', 'waves_in_general']
+    'wave-propagation': ['pow_vector', 'wave_analysis', 'wave_reflection', 'waves_in_general'],
+    'transmission-lines': ['types-of-transmission-line', 'characteristic-impedance', 'terminated-transmission-line', 'smith-chart', 'quarter-wave-transformer','single-stub-tuner']
   };
 
   const sidebarItems = [

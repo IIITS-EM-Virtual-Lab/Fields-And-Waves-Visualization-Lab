@@ -33,10 +33,13 @@ const modules: Record<string, { name: string; path: string; topics: string[] }[]
     { name: "Time Varying Potential", path: "/time-varying-potential", topics: ["Time-Dependent Fields"] },
     { name: "EMF", path: "/transformer-motional-emf", topics: ["Motional EMF"] },
   ], 
-   "Transmission Lines":[  
-    
-      { name: "Characteristic Impedance", path: "/characteristic-impedance",topics:["Characteristic Impedance"] },
-    
+   "transmission-lines":[  
+    { name: "Types of Transmission Line", path: "/types-of-transmission-line", topics:["Types of Transmission Line"] },
+    { name: "Characteristic Impedance", path: "/characteristic-impedance",topics:["Characteristic Impedance"] },
+    { name: "Terminated Transmission Line", path: "/terminated-transmission-line", topics:["Terminated Transmission Line"] },
+    { name: "Smith Chart", path: "/smith-chart", topics:["Smith Chart"] },
+    { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer", topics:["Quarter Wave Transformer"]},
+    { name: "Single Stub Tuner", path: "/single-stub-tuner", topics:["Single Stub Tuner"]}
   ],
 };
 
@@ -45,6 +48,7 @@ const moduleIcons: Record<string, string> = {
   "vector-calculus": "/assets/vector-calculus.png",
   "electrostatics": "/assets/vector-calculus.png",
   "maxwell-equations": "/assets/maxwell.png",
+  "transmission-lines": "/assets/transmission-lines.png"
 };
 
 const ModulePage = () => {
