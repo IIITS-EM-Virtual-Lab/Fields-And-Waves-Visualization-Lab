@@ -132,13 +132,13 @@ const sectionToRender = matchedSection || sidebarData[0];
         {sectionToRender.subtopics.map((sub, index) => {
           const isActive = location.pathname === sub.path;
           return (
-            <li key={sub.name}>
+            <li key={sub.name} className="group">
               <Link
                 to={sub.path}
                 className={`block px-5 pt-4 text-base font-medium transition ${
                   isActive
                     ? "bg-blue-100 text-blue-800 font-semibold border-l-4 border-blue-600"
-                    : "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
+                    : "text-gray-700 group-hover:bg-blue-50 group-hover:text-blue-700"
                 } ${sub.quizPath ? "pb-2" : "pb-4"}`}
               >
                 <span className="block text-sm uppercase text-gray-500 mb-1">
@@ -151,7 +151,7 @@ const sectionToRender = matchedSection || sidebarData[0];
                   className={`px-5 pb-4 ${
                     isActive
                       ? "bg-blue-100 border-l-4 border-blue-600"
-                      : "hover:bg-blue-50"
+                      : "group-hover:bg-blue-50"
                   }`}
                 >
                   {isAuthenticated ? (

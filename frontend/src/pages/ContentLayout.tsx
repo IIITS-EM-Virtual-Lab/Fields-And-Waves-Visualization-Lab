@@ -99,7 +99,7 @@ Tell the student what controls or parameters to try changing, what visual change
             </div>
           )}
 
-          <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
+          <main className="px-4 sm:px-6 lg:px-8 pt-2 pb-6 max-w-7xl mx-auto">
             {showSidebar && (
               <div className="sticky top-[72px] z-30 mb-5 flex flex-wrap justify-center gap-3 border-b border-slate-200 bg-white/95 py-3 backdrop-blur">
                 <button

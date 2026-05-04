@@ -3,7 +3,7 @@ import VectorSubtraction from "@/components/VectorSubtraction";
 
 const VectorAdditionPage = () => {
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col border-t border-slate-300">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col">
       <div className="text-xl sm:text-2xl lg:text-3xl font-black uppercase text-center py-8">
         Vector Addition
       </div>
