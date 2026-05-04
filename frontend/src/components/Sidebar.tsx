@@ -2,7 +2,19 @@ import { useLocation, Link } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '../store/slices/authSlice';
 
-const sidebarData = [
+type Subtopic = {
+  name: string;
+  path: string;
+  quizPath?: string;
+};
+
+type SidebarSection = {
+  topic: string;
+  icon: string;
+  subtopics: Subtopic[];
+};
+
+const sidebarData: SidebarSection[] = [
   {
     topic: "Vector Algebra",
     icon: "/assets/vector-algebra.png",
