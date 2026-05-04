@@ -51,6 +51,7 @@ import UserDashboard from "./pages/UserDashboard";
 import ModulePage from "./pages/ModulePage";
 import ResetPassword from "./pages/reset-password";
 import ChatBot from "./components/ChatBot";
+import TerminatedTransmissionLine from "./pages/transmission-line/TerminatedTransmissionLine.tsx";
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -142,6 +143,7 @@ const AppRoutes = () => {
               element={<CharacteristicImpedancePage />}
             />
             <Route path="/types-of-transmission-line" element={<TypesOfTransmissionLines />} />
+            <Route path="/terminated-transmission-line" element={<TerminatedTransmissionLine />} />
             <Route path="/smith-chart" element={<SmithChart />} />
             <Route path="/quarter-wave-transformer" element={<QuarterWaveTransformer />} />
             <Route path="/single-stub-tuner" element={<SingleStubTuner />} />

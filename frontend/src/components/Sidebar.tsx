@@ -65,8 +65,9 @@ const sidebarData = [
   icon: "/assets/transmission-lines.png",
   subtopics: [
     { name: "Types of Transmission Line", path: "/types-of-transmission-line", quizPath: "/quiz/transmission-lines/types-of-transmission-line" },
-    { name: "Characteristic Impedance", path: "/characteristic-impedance" },
-    { name: "Smith Chart", path: "/smith-chart" },
+    { name: "Characteristic Impedance", path: "/characteristic-impedance", quizPath: "/quiz/transmission-lines/characteristic-impedance" },
+    { name: "Terminated Transmission Line", path: "/terminated-transmission-line", quizPath: "/quiz/transmission-lines/terminated-transmission-line" },
+    { name: "Smith Chart", path: "/smith-chart", quizPath: "/quiz/transmission-lines/smith-chart" },
     { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer", quizPath: "/quiz/transmission-lines/types-of-transmission-line" },
     { name: "Single Stub Tuner", path: "/single-stub-tuner", quizPath: "/quiz/transmission-lines/single-stub-tuner" },
   ],

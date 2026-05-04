@@ -81,6 +81,7 @@ const exploreModules = [
     items: [
       { name: "Types of Transmission Lines", path: "/types-of-transmission-line" },
       { name: "Characteristic Impedance", path: "/characteristic-impedance" },
+      { name: "Terminated Transmission Line", path: "/terminated-transmission-line" },
       { name: "Smith Chart", path: "/smith-chart" },
       { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer" },
       { name: "Single Stub Tuner", path: "/single-stub-tuner" },
