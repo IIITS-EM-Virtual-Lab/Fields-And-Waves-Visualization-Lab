@@ -12,6 +12,7 @@ const quizRoutes = require('./routes/quiz');
 const quizResultRoutes = require('./routes/quizResultRoutes');
 const passwordResetRoutes = require('./routes/passwordResetRoutes');
 const feedbackRoutes = require("./routes/feedbackRoutes");
+const chatRoutes = require('./routes/chatRoutes');
 
 dotenv.config();
 
@@ -26,8 +27,9 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ Mongo Error:', err));
 
-// ✅ AUTH ROUTES (Updated - No OTP)
-app.post('/api/auth/signup', authController.signup);           // NEW: Direct signup
+// Auth Routes
+app.post('/api/auth/signup/send-otp', authController.sendSignupOtp);
+app.post('/api/auth/signup', authController.signup);
 app.post('/api/auth/login', authController.login);              // Login
 app.get('/api/auth/me', auth, authController.getCurrentUser);   // Get current user
 app.get('/api/auth/google', authController.getGoogleAuthURL);   // Google OAuth URL
@@ -39,6 +41,7 @@ app.use("/api/feedback", feedbackRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/quizresult', quizResultRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

@@ -23,6 +23,7 @@ interface Question {
   explanation: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   points: number;
+  timeLimitSeconds?: number;
   imageUrl?: string;
   solutionImageUrl?: string;
 }
@@ -36,6 +37,7 @@ interface AIQuestion {
   explanation: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   points: number;
+  timeLimitSeconds?: number;
 }
 
 interface Quiz {
@@ -344,6 +346,7 @@ const ProfilePage = () => {
       formData.append('explanation', card.question.explanation);
       formData.append('difficulty', card.question.difficulty);
       formData.append('points', String(card.question.points));
+      formData.append('timeLimitSeconds', String(card.question.timeLimitSeconds ?? 120));
 
       await axios.post(
         `${API}/api/quizzes/${currentQuiz._id}/questions`,
@@ -709,6 +712,7 @@ const ProfilePage = () => {
                         <span className="question-type">{question.type}</span>
                         <span className="question-difficulty">{question.difficulty}</span>
                         <span className="question-points">{question.points} points</span>
+                        <span className="question-timer">⏱ {question.timeLimitSeconds ?? 120}s</span>
                       </div>
                       <p className="question-text">{question.question}</p>
                       {question.imageUrl && (
@@ -790,9 +794,10 @@ const ProfilePage = () => {
                       (editingQuestion?.type || newQuestionType) === 'MCQ'
                         ? (formData.get('correctAnswer') as string)
                         : ((formData.get('correctAnswer') as string) || '').split('\n').map(s => s.trim()).filter(Boolean),
-                    explanation: ((formData.get('explanation') as string) || '').trim(),
-                    difficulty: formData.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD',
-                    points: Number(formData.get('points') || 1),
+                    explanation:       ((formData.get('explanation') as string) || '').trim(),
+                    difficulty:        formData.get('difficulty') as 'EASY' | 'MEDIUM' | 'HARD',
+                    points:            Number(formData.get('points') || 1),
+                    timeLimitSeconds:  Number(formData.get('timeLimitSeconds') || 120),
                   };
 
                   const apiFormData = new FormData();
@@ -855,6 +860,25 @@ const ProfilePage = () => {
                 </select>
 
                 <input type="number" name="points" placeholder="Points" defaultValue={editingQuestion?.points || 1} min="1" required />
+
+                <div className="form-field-group">
+                  <label htmlFor="timeLimitSeconds" className="form-field-label">
+                    ⏱ Time for this question (seconds)
+                    <span className="form-field-hint">
+                      Adds to the student's total quiz time. e.g. 120 = 2 min, 300 = 5 min
+                    </span>
+                  </label>
+                  <input
+                    id="timeLimitSeconds"
+                    type="number"
+                    name="timeLimitSeconds"
+                    placeholder="e.g. 120"
+                    defaultValue={editingQuestion?.timeLimitSeconds ?? 120}
+                    min="10"
+                    step="10"
+                    required
+                  />
+                </div>
 
                 <label>
                   Upload Question Image:

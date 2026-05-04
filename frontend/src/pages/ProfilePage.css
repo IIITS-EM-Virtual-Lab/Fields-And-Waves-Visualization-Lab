@@ -340,7 +340,8 @@
 
 .question-type,
 .question-difficulty,
-.question-points {
+.question-points,
+.question-timer {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -360,6 +361,14 @@
 .question-points {
   background: #e8f5e9;
   color: #388e3c;
+}
+
+.question-timer {
+  background: #ebf8ff;
+  color: #2b6cb0;
+  border: 1px solid #bee3f8;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .question-text {
@@ -504,6 +513,28 @@
 .modal-content textarea {
   min-height: 100px;
   resize: vertical;
+}
+
+.form-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.form-field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2d3748;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.form-field-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #718096;
 }
 
 .modal-actions {

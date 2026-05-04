@@ -433,6 +433,43 @@
   border-left: 4px solid #3182ce;
 }
 
+.ai-tutor-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  background: #eff6ff;
+}
+
+.ai-tutor-btn {
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.65rem 1rem;
+  transition: background 0.2s ease;
+}
+
+.ai-tutor-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.ai-tutor-btn:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.ai-tutor-answer {
+  margin-top: 0.85rem;
+  color: #1e3a8a;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
 .review-buttons {
   display: flex;
   gap: 0.75rem;
@@ -623,4 +660,79 @@
   border-radius: 0 6px 6px 0;
   margin-bottom: 12px;
   color: #92400e;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TIMER — append these rules to the bottom of ChapterQuiz.css
+   ══════════════════════════════════════════════════════════ */
+
+/* Intro screen: total-time info line */
+.intro-timer-info {
+  font-size: 1rem;
+  color: #4a5568;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+/* Small fixed badge — top-right corner, never disrupts layout */
+.quiz-timer-badge {
+  position: fixed;
+  top: 80px;          /* sits just below the site navbar */
+  right: 20px;
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+  pointer-events: none;
+  user-select: none;
+}
+
+.quiz-timer-badge.timer-green {
+  background: #f0fff4;
+  border-color: #68d391;
+  color: #276749;
+}
+
+.quiz-timer-badge.timer-yellow {
+  background: #fffff0;
+  border-color: #d69e2e;
+  color: #744210;
+}
+
+.quiz-timer-badge.timer-red {
+  background: #fff5f5;
+  border-color: #fc8181;
+  color: #c53030;
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
+
+.quiz-timer-icon {
+  font-size: 0.85rem;
+}
+
+.quiz-timer-value {
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 768px) {
+  .quiz-timer-badge {
+    top: 70px;
+    right: 12px;
+    font-size: 0.85rem;
+    padding: 5px 11px;
+  }
 }

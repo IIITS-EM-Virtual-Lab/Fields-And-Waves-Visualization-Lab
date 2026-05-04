@@ -1,12 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { BlockMath } from "react-katex";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '../../store/slices/authSlice';
 
 const FieldOperations = () => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const navigate = useNavigate();
   return (
     <div className="max-w-4xl mx-auto px-6 flex flex-col border-t border-slate-300">
       <div className="text-xl font-black uppercase text-center py-10">
@@ -121,18 +115,6 @@ const FieldOperations = () => {
         <BlockMath math="\bigtriangledown \times A = \frac{1}{r^{2}\sin\theta} \begin{vmatrix} a_{r} & ra_{\theta} & r\sin\theta a_{\phi} \\ \frac{\partial}{\partial r} & \frac{\partial}{\partial \theta} & \frac{\partial}{\partial \phi} \\ A_{r} & rA_{\theta} & r\sin A_{\phi} \\ \end{vmatrix}" />
         <BlockMath math="\bigtriangledown \times A = \frac{1}{r \sin \theta} \begin{bmatrix} \frac{\partial(A_{\phi} \sin \theta)}{\partial \theta} - \frac{\partial A_{\theta}}{\partial \phi} \end{bmatrix} a_{r} + \frac{1}{r} \begin{bmatrix} \frac{1}{\sin \theta} \frac{\partial A_{r}}{\partial \phi} - \frac{\partial (r A_{\phi})}{\partial r} \end{bmatrix} a_{\theta} + \frac{1}{r} \begin{bmatrix} \frac{\partial (r A_{\theta})}{\partial r} - \frac{\partial A_{r}}{\partial \theta} \end{bmatrix} a_{\phi}" />
       </div>
- {isAuthenticated ? (
-  <div className="flex justify-center mt-4 pr-20">
-    <Button onClick={() => navigate('/quiz/electrostatics/gradient')}>
-      Take Test
-    </Button>
-  </div>
-) : (
-  <div className="text-center text-medium text-[#a00032] mt-4">
-    Please log in to take the test.
-  </div>
-)}
-
     </div>
     
   );

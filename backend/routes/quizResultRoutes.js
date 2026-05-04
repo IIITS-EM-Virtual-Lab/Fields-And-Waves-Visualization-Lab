@@ -95,12 +95,42 @@ router.get('/stats/:userId', auth, async (req, res) => {
       }
     ]);
 
+    const quizTotals = await Quiz.aggregate([
+      {
+        $project: {
+          questionPoints: { $sum: '$questions.points' }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalAvailableQuizzes: { $sum: 1 },
+          totalAvailablePoints: { $sum: '$questionPoints' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          totalAvailableQuizzes: 1,
+          totalAvailablePoints: 1
+        }
+      }
+    ]);
+
+    const totals = quizTotals[0] || {
+      totalAvailableQuizzes: 0,
+      totalAvailablePoints: 0
+    };
+
     const overall = bestAttempts[0] || {
       totalPoints: 0,
       totalQuizzes: 0,
       averageScore: 0,
       accuracy: 0
     };
+
+    overall.totalAvailableQuizzes = totals.totalAvailableQuizzes;
+    overall.totalAvailablePoints = totals.totalAvailablePoints;
 
     res.json({ success: true, data: { overall } });
   } catch (err) {
@@ -217,11 +247,26 @@ router.get('/stats-by-topic/:userId', auth, async (req, res) => {
     ]);
 
     const allQuizzes = await Quiz.aggregate([
-      { $group: { _id: '$module', totalQuizzes: { $sum: 1 } } }
+      {
+        $project: {
+          module: 1,
+          questionPoints: { $sum: '$questions.points' }
+        }
+      },
+      {
+        $group: {
+          _id: '$module',
+          totalQuizzes: { $sum: 1 },
+          totalAvailablePoints: { $sum: '$questionPoints' }
+        }
+      }
     ]);
 
     const totalsMap = allQuizzes.reduce((acc, cur) => {
-      acc[cur._id] = cur.totalQuizzes;
+      acc[cur._id] = {
+        totalQuizzes: cur.totalQuizzes,
+        totalAvailablePoints: cur.totalAvailablePoints
+      };
       return acc;
     }, {});
 
@@ -230,7 +275,8 @@ router.get('/stats-by-topic/:userId', auth, async (req, res) => {
       result[stat.module] = {
         accuracy: stat.accuracy,
         completedQuizzes: stat.completedQuizzes,
-        totalQuizzes: totalsMap[stat.module] || 0,
+        totalQuizzes: totalsMap[stat.module]?.totalQuizzes || 0,
+        totalAvailablePoints: totalsMap[stat.module]?.totalAvailablePoints || 0,
         averageScore: stat.averageScore,
         overallAccuracy: stat.overallAccuracy
       };

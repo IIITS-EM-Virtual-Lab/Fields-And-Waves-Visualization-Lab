@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import Navbar from "../components/Navbar";
 import { useSelector } from "react-redux";
 import { selectCurrentUser, selectCurrentToken } from "../store/slices/authSlice";
 import axios from "axios";
@@ -48,6 +47,7 @@ interface TopicStats {
   accuracy: number;
   completedQuizzes: number;
   totalQuizzes: number;
+  totalAvailablePoints?: number;
   averageScore: number;
 }
 
@@ -59,7 +59,13 @@ const UserDashboard = () => {
   const user = useSelector(selectCurrentUser);
   const token = useSelector(selectCurrentToken);
 
-  const [stats, setStats] = useState({ totalPoints: 0, totalQuizzes: 0, accuracy: 0 });
+  const [stats, setStats] = useState({
+    totalPoints: 0,
+    totalAvailablePoints: 0,
+    totalQuizzes: 0,
+    totalAvailableQuizzes: 0,
+    accuracy: 0
+  });
   const [topicStats, setTopicStats] = useState<TopicStatsMap>({});
   const [history, setHistory] = useState<QuizHistoryItem[]>([]);
   const [filteredHistory, setFilteredHistory] = useState<QuizHistoryItem[]>([]);
@@ -91,6 +97,7 @@ const UserDashboard = () => {
     electrostatics: "Electrostatics",
     "maxwell-equations": "Maxwell Equations",
     "wave-propagation": "Wave Propagation",
+    "transmission-lines": "Transmission Lines",
   };
 
   useEffect(() => {
@@ -180,12 +187,15 @@ const UserDashboard = () => {
     if (topicKeys.length === 0) return null;
 
     return (
-      <div className="mb-8 lg:mb-12 px-4">
+      <section className="mb-8 lg:mb-12">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center mb-6">
-            <h2 className="text-xl lg:text-2xl font-bold text-gray-800 tracking-tight">
-              Topic Performance
-            </h2>
+          <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-2xl lg:text-3xl font-bold text-slate-950 tracking-tight">
+                Topic Performance
+              </h2>
+            </div>
+            <p className="text-sm text-slate-500">Best attempt is counted for each quiz.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
             {topicKeys.map((topic) => {
@@ -194,46 +204,66 @@ const UserDashboard = () => {
                 topicDisplayNames[topic] ||
                 topic.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
               const accuracy = Math.round(tStats.accuracy);
+              const attemptedPercent = tStats.totalQuizzes
+                ? Math.round((tStats.completedQuizzes / tStats.totalQuizzes) * 100)
+                : 0;
               let progressColor = "#ef4444";
               if (accuracy >= 80) progressColor = "#10b981";
               else if (accuracy >= 60) progressColor = "#f59e0b";
 
               return (
-                <div
+                <article
                   key={topic}
-                  className="bg-white border border-gray-200 rounded-xl lg:rounded-2xl p-4 lg:p-6 shadow-md hover:shadow-lg transition-shadow"
+                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.35)] transition hover:-translate-y-1 hover:shadow-[0_22px_50px_-24px_rgba(15,23,42,0.45)]"
                 >
-                  <div className="flex flex-col items-center space-y-3 lg:space-y-4">
-                    <div className="w-16 h-16 lg:w-24 lg:h-24">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="font-bold text-slate-950 leading-tight">
+                        {displayName}
+                      </h3>
+                      <p className="mt-1 text-xs font-medium text-slate-500">
+                        {tStats.completedQuizzes} of {tStats.totalQuizzes || 0} quizzes attempted
+                      </p>
+                    </div>
+                    <div className="h-16 w-16 shrink-0">
                       <CircularProgressbar
                         value={accuracy}
                         text={`${accuracy}%`}
                         styles={buildStyles({
-                          textSize: "16px",
+                          textSize: "20px",
                           pathColor: progressColor,
-                          textColor: "#111827",
-                          trailColor: "#e5e7eb",
+                          textColor: "#0f172a",
+                          trailColor: "#e2e8f0",
                         })}
                       />
                     </div>
-                    <div className="text-center space-y-1">
-                      <h3 className="font-bold text-blue-700 text-sm lg:text-base leading-tight">
-                        {displayName}
-                      </h3>
-                      <p className="text-xs lg:text-sm text-gray-600">
-                        Avg Score: {Math.round(tStats.averageScore)}
-                      </p>
+                  </div>
+
+                  <div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-full rounded-full bg-blue-600"
+                      style={{ width: `${Math.min(attemptedPercent, 100)}%` }}
+                    />
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                    <div className="rounded-xl bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">Avg Score</p>
+                      <p className="mt-1 font-bold text-slate-950">{Math.round(tStats.averageScore)}</p>
+                    </div>
+                    <div className="rounded-xl bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">Points Pool</p>
+                      <p className="mt-1 font-bold text-slate-950">{tStats.totalAvailablePoints || 0}</p>
                     </div>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
         </div>
-      </div>
+      </section>
     );
   };
-
   const uniqueTopics = useMemo(
     () => [...new Set(history.map((item) => item.quizId?.module).filter(Boolean))],
     [history]
@@ -617,42 +647,92 @@ const UserDashboard = () => {
   };
 
   // ── Root render ────────────────────────────────────────
-  return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <Navbar />
+  const quizzesAttemptedText = `${stats.totalQuizzes} / ${stats.totalAvailableQuizzes || 0}`;
+  const pointsText = stats.totalAvailablePoints
+    ? `${stats.totalPoints} / ${stats.totalAvailablePoints}`
+    : `${stats.totalPoints}`;
+  const quizCompletion = stats.totalAvailableQuizzes
+    ? Math.round((stats.totalQuizzes / stats.totalAvailableQuizzes) * 100)
+    : 0;
+  const pointsCompletion = stats.totalAvailablePoints
+    ? Math.round((stats.totalPoints / stats.totalAvailablePoints) * 100)
+    : 0;
 
-      <main className="flex-grow px-4 lg:px-8 py-6 lg:py-12">
+  return (
+    <div className="min-h-screen flex flex-col bg-[#f6f8fb]">
+      <main className="flex-grow px-4 lg:px-8 py-8 lg:py-12">
         <div className="max-w-7xl mx-auto">
+          <section className="mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 px-5 py-7 text-white shadow-[0_24px_70px_-36px_rgba(15,23,42,0.7)] sm:px-8 lg:px-10">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-blue-300">Analytics Dashboard</p>
+                <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+                  Welcome back, {user?.name?.split(" ")[0] || "Student"}
+                </h1>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
+                  Track your quiz progress, accuracy, and topic strengths across the lab.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur">
+                <p className="text-sm text-slate-300">Overall progress</p>
+                <p className="mt-1 text-2xl font-bold">{quizCompletion}%</p>
+              </div>
+            </div>
+          </section>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8 mb-8 lg:mb-10">
-            <div className="flex items-center bg-white border rounded-xl p-4 lg:p-8 shadow-md hover:shadow-lg transition-shadow">
-              <div className="flex-shrink-0 w-12 h-12 lg:w-14 lg:h-14 bg-[#38bdf8] rounded-full flex items-center justify-center mr-4 lg:mr-6">
-                <FaChartBar className="text-white text-lg lg:text-xl" />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6 mb-8 lg:mb-10">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.35)]">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                  <FaChartBar className="text-lg" />
+                </div>
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                  {pointsCompletion}%
+                </span>
               </div>
-              <div>
-                <p className="text-2xl lg:text-3xl font-extrabold text-gray-900 leading-tight">{stats.totalPoints}</p>
-                <p className="text-sm lg:text-base text-gray-600 mt-1">Total Points</p>
+              <div className="mt-5">
+                <p className="text-3xl font-extrabold text-slate-950 leading-tight">{pointsText}</p>
+                <p className="mt-1 text-sm font-medium text-slate-500">Total Points</p>
               </div>
-            </div>
-
-            <div className="flex items-center bg-white border rounded-xl p-4 lg:p-6 shadow-md hover:shadow-lg transition-shadow">
-              <div className="flex-shrink-0 w-12 h-12 lg:w-14 lg:h-14 bg-[#38bdf8] rounded-full flex items-center justify-center mr-4 lg:mr-6">
-                <FaBullseye className="text-white text-lg lg:text-xl" />
-              </div>
-              <div>
-                <p className="text-2xl lg:text-3xl font-extrabold text-gray-900 leading-tight">{stats.totalQuizzes}</p>
-                <p className="text-sm lg:text-base text-gray-600 mt-1">Quizzes Attempted</p>
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-full rounded-full bg-blue-600" style={{ width: `${Math.min(pointsCompletion, 100)}%` }} />
               </div>
             </div>
 
-            <div className="flex items-center bg-white border rounded-xl p-4 lg:p-6 shadow-md hover:shadow-lg transition-shadow sm:col-span-2 lg:col-span-1">
-              <div className="flex-shrink-0 w-12 h-12 lg:w-14 lg:h-14 bg-[#38bdf8] rounded-full flex items-center justify-center mr-4 lg:mr-6">
-                <FaMedal className="text-white text-lg lg:text-xl" />
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.35)]">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                  <FaBullseye className="text-lg" />
+                </div>
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                  {quizCompletion}%
+                </span>
               </div>
-              <div>
-                <p className="text-2xl lg:text-3xl font-extrabold text-gray-900 leading-tight">{stats.accuracy}%</p>
-                <p className="text-sm lg:text-base text-gray-600 mt-1">Overall Accuracy</p>
+              <div className="mt-5">
+                <p className="text-3xl font-extrabold text-slate-950 leading-tight">{quizzesAttemptedText}</p>
+                <p className="mt-1 text-sm font-medium text-slate-500">Quizzes Attempted</p>
+              </div>
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-full rounded-full bg-indigo-600" style={{ width: `${Math.min(quizCompletion, 100)}%` }} />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.35)] sm:col-span-2 lg:col-span-1">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                  <FaMedal className="text-lg" />
+                </div>
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                  Accuracy
+                </span>
+              </div>
+              <div className="mt-5">
+                <p className="text-3xl font-extrabold text-slate-950 leading-tight">{Math.round(stats.accuracy)}%</p>
+                <p className="mt-1 text-sm font-medium text-slate-500">Overall Accuracy</p>
+              </div>
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(Math.round(stats.accuracy), 100)}%` }} />
               </div>
             </div>
           </div>
@@ -661,10 +741,10 @@ const UserDashboard = () => {
           {renderTopicPerformance()}
 
           {/* Learning History */}
-          <div className="max-w-[1280px] mx-auto px-0 lg:px-2">
-            <div className="bg-white rounded-xl shadow-xl p-4 lg:p-8 border border-gray-100 backdrop-blur-sm relative overflow-hidden">
-              <div className="flex items-center mb-6 lg:mb-8">
-                <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Learning History</h2>
+          <div className="max-w-[1280px] mx-auto">
+            <div className="bg-white rounded-3xl shadow-[0_20px_60px_-34px_rgba(15,23,42,0.55)] p-4 lg:p-8 border border-slate-200 relative overflow-hidden">
+              <div className="flex flex-col gap-1 mb-6 lg:mb-8">
+                <h2 className="text-2xl lg:text-3xl font-bold text-slate-950">Learning History</h2>
               </div>
               {renderHistoryFilters()}
               {renderHistoryTable()}

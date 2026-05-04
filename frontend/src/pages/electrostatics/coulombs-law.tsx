@@ -1,13 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import CoulombVisualizer from "@/components/CoulombVisualizer";
-import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '../../store/slices/authSlice';
 
 
 const CoulombsLawPage = () => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const navigate = useNavigate();
   return (
       <div className="min-h-screen bg-white py-12 px-6">
       <div className="max-w-5xl mx-auto">
@@ -863,32 +857,6 @@ const CoulombsLawPage = () => {
           />
         </svg>
       </div>
-
-      <div className="bg-white rounded-xl shadow p-6 text-center mb-6 max-w-3xl mx-auto mt-9">
-  <h2 className="text-2xl font-semibold mb-2 text-gray-800">Test Your Understanding of Electric Fields!</h2>
-  <p className="text-gray-700 mb-4">
-    Explore how point charges influence electric fields and apply the core principles of Coulomb’s Law with our interactive quiz. Whether you're brushing up for exams or testing your conceptual clarity, this quick assessment will help solidify your grasp of:
-  </p>
-  <ul className="list-disc list-inside text-left text-gray-700 mb-4">
-    <li>Electric field intensity due to multiple point charges</li>
-    <li>Vector summation and field direction</li>
-    <li>Conceptual and numerical applications</li>
-  </ul>
-  <p className="text-gray-700 font-medium mb-6">💡 <span className="italic">Challenge yourself and see how well you understand the fundamentals!</span></p>
-
- {isAuthenticated ? (
-  <div className="flex justify-center mt-4 pr-20">
-    <Button onClick={() => navigate('/quiz/electrostatics/coulombs-law')}>
-      Take Test
-    </Button>
-  </div>
-) : (
-  <div className="text-center text-medium text-[#a00032] mt-4">
-    Please log in to take the test.
-  </div>
-)}
-
-</div>
     </div>
   );
 };
