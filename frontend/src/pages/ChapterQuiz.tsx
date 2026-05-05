@@ -211,60 +211,71 @@ const ChapterQuiz = () => {
   const currentQuestion = quiz?.questions[currentIndex];
 
   const handleOptionSelect = (opt: string) => {
-    if (!answered) setSelectedOption(opt);
+    setSelectedOption(opt);
   };
 
-  const handleCheck = () => {
-    if (!selectedOption || !currentQuestion || answered) return;
-
-    const isAnswerCorrect = Array.isArray(currentQuestion.correctAnswer)
-      ? currentQuestion.correctAnswer.includes(selectedOption)
-      : currentQuestion.correctAnswer === selectedOption;
-
-    setIsCorrect(isAnswerCorrect);
-    setAnswered(true);
-
-    const pts = isAnswerCorrect ? currentQuestion.points : 0;
-    setScore(prev => prev + pts);
-    if (isAnswerCorrect) setCorrectCount(prev => prev + 1);
-
-    setUserAnswers(prev => [...prev, {
-      questionId:     currentQuestion._id,
-      selectedAnswer: selectedOption,
-      isCorrect:      isAnswerCorrect,
-      points:         pts,
-    }]);
-  };
-
-  const handleSkip = () => {
-    if (!currentQuestion || answered) return;
-    setSkipped(true);
-    setAnswered(true);
-    setIsCorrect(false);
-    setUserAnswers(prev => [...prev, {
-      questionId:     currentQuestion._id,
-      selectedAnswer: 'SKIPPED',
-      isCorrect:      false,
-      points:         0,
-    }]);
-  };
-
-  const handleNext = async () => {
-    if (!quiz) return;
-    const nextIndex = currentIndex + 1;
-
-    if (nextIndex >= quiz.questions.length) {
-      setTimerActive(false);
-      await submitQuizResult(score, correctCount, userAnswers);
-      setShowResults(true);
-      return;
+  const buildUserAnswer = (question: Question, selectedAnswer: string): UserAnswer => {
+    if (selectedAnswer === 'SKIPPED') {
+      return {
+        questionId: question._id,
+        selectedAnswer,
+        isCorrect: false,
+        points: 0,
+      };
     }
 
-    setCurrentIndex(nextIndex);
+    const isAnswerCorrect = Array.isArray(question.correctAnswer)
+      ? question.correctAnswer.includes(selectedAnswer)
+      : question.correctAnswer === selectedAnswer;
+
+    const pts = isAnswerCorrect ? question.points : 0;
+
+    return {
+      questionId: question._id,
+      selectedAnswer,
+      isCorrect: isAnswerCorrect,
+      points: pts,
+    };
+  };
+
+  const moveToNextQuestion = () => {
+    setCurrentIndex(prev => prev + 1);
     setSelectedOption(null);
     setAnswered(false);
     setIsCorrect(false);
     setSkipped(false);
+  };
+
+  const submitCurrentAnswer = async (selectedAnswer: string) => {
+    if (!quiz || !currentQuestion) return;
+
+    const answer = buildUserAnswer(currentQuestion, selectedAnswer);
+    const nextAnswers = [...userAnswers, answer];
+    const nextScore = score + answer.points;
+    const nextCorrectCount = correctCount + (answer.isCorrect ? 1 : 0);
+    const isLastQuestion = currentIndex + 1 >= quiz.questions.length;
+
+    setUserAnswers(nextAnswers);
+    setScore(nextScore);
+    setCorrectCount(nextCorrectCount);
+
+    if (isLastQuestion) {
+      setTimerActive(false);
+      await submitQuizResult(nextScore, nextCorrectCount, nextAnswers);
+      setShowResults(true);
+      return;
+    }
+
+    moveToNextQuestion();
+  };
+
+  const handleSkip = () => {
+    submitCurrentAnswer('SKIPPED');
+  };
+
+  const handleNext = async () => {
+    if (!selectedOption) return;
+    await submitCurrentAnswer(selectedOption);
   };
 
   const getCorrectAnswer = (question: Question): string =>
@@ -539,8 +550,6 @@ Explain why the student's answer is wrong or incomplete, why the correct answer 
   }
 
   // ── Quiz question screen ─────────────────────────────────────
-  const correctAnswer = getCorrectAnswer(currentQuestion!);
-
   return (
     <div className="quiz-page">
       {/* ── Small fixed timer badge — top right corner ── */}
@@ -568,15 +577,10 @@ Explain why the student's answer is wrong or incomplete, why the correct answer 
 
           <div className="options-list">
             {currentQuestion?.options?.map((opt, i) => {
-              const isSelected      = selectedOption === opt;
-              const isCorrectOption = correctAnswer === opt;
+              const isSelected = selectedOption === opt;
 
               let className = 'option-item';
-              if (answered && isSelected) {
-                className += isCorrectOption ? ' correct selected' : ' incorrect selected';
-              } else if (answered && isCorrectOption) {
-                className += ' correct';
-              } else if (isSelected) {
+              if (isSelected) {
                 className += ' selected';
               }
 
@@ -589,54 +593,27 @@ Explain why the student's answer is wrong or incomplete, why the correct answer 
                       value={opt}
                       checked={isSelected}
                       onChange={() => handleOptionSelect(opt)}
-                      disabled={answered}
                     />
                     <span className="option-label">{String.fromCharCode(65 + i)}.</span> {opt}
                   </label>
-                  {answered && isSelected && (
-                    <div className={`explanation ${isCorrectOption ? 'correct' : 'incorrect'}`}>
-                      <strong>{isCorrectOption ? 'Correct!' : 'Incorrect.'}</strong>
-                      {!isCorrectOption && currentQuestion.explanation && (
-                        <span> {currentQuestion.explanation}</span>
-                      )}
-                    </div>
-                  )}
-                  {answered && !isSelected && isCorrectOption && (
-                    <div className="explanation correct">
-                      <strong>This was the correct answer.</strong>
-                    </div>
-                  )}
                 </div>
               );
             })}
           </div>
-
-          {answered && !isCorrect && currentQuestion && (
-            renderAiTutorPanel(currentQuestion, skipped ? 'SKIPPED' : selectedOption || 'Not answered')
-          )}
 
           <div className="quiz-footer">
             <div className="progress">
               {currentIndex + 1} of {quiz.questions.length}
             </div>
             <div className="quiz-actions">
-              {!answered && (
-                <>
-                  <button onClick={handleSkip} className="skip-btn">Skip</button>
-                  <button
-                    onClick={handleCheck}
-                    className="check-btn"
-                    disabled={!selectedOption}
-                  >
-                    Check
-                  </button>
-                </>
-              )}
-              {answered && (
-                <button onClick={handleNext} className="check-btn">
-                  {currentIndex + 1 === quiz.questions.length ? 'Finish' : 'Next'}
-                </button>
-              )}
+              <button onClick={handleSkip} className="skip-btn">Skip</button>
+              <button
+                onClick={handleNext}
+                className="check-btn"
+                disabled={!selectedOption}
+              >
+                {currentIndex + 1 === quiz.questions.length ? 'Finish' : 'Next'}
+              </button>
             </div>
           </div>
         </div>
