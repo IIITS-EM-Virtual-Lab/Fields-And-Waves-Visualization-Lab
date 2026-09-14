@@ -436,7 +436,7 @@ export default function ElectricFluxDensityVisualizer() {
         <ambientLight intensity={0.8} />
         <pointLight position={[10, 10, 10]} />
 
-        <Axes labels={axisLabels} length={10} width={2} fontPosition={4} interval={1} />
+        <Axes length={10} width={2} fontPosition={4} interval={1} />
 
         {/* ── Point charge ── */}
         {chargeType === "point" && (
@@ -511,7 +511,24 @@ export default function ElectricFluxDensityVisualizer() {
         ))}
 
       </Canvas>
+      <div className="flex justify-center items-center gap-8 py-3 bg-gray-50 border-t text-sm font-medium">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-red-500"></span>
+          <span>X-axis</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-green-500"></span>
+          <span>Y-axis</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+          <span>Z-axis</span>
+        </div>
+      </div>
     </div>
+    
   );
 }
 /*

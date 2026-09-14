@@ -1,39 +1,54 @@
-import { useState, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Line, Html } from '@react-three/drei';
-import Axes from './Axes';
-import VectorArrow from './VectorArrow';
+import { useState, useEffect } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Line, Html } from "@react-three/drei";
+import Axes from "./Axes";
+import VectorArrow from "./VectorArrow";
 
 function SphericalVisualizer() {
-  const [x, setX] = useState(2);
-  const [y, setY] = useState(2);
-  const [z, setZ] = useState(2);
-  const [r, setR] = useState(0);
-  const [theta, setTheta] = useState(0); // inclination
-  const [phi, setPhi] = useState(0);    // azimuth
-  const [lastChanged, setLastChanged] = useState<'cartesian' | 'spherical'>('cartesian');
+  const [xValue, setX] = useState("2");
+  const [yValue, setY] = useState("2");
+  const [zValue, setZ] = useState("2");
+  const [rValue, setR] = useState("0");
+  const [thetaValue, setTheta] = useState("0"); // inclination
+  const [phiValue, setPhi] = useState("0"); // azimuth
+  const [thetaDegrees, setThetaDegrees] = useState("0");
+  const [phiDegrees, setPhiDegrees] = useState("0");
+  const [lastChanged, setLastChanged] = useState<"cartesian" | "spherical">(
+    "cartesian",
+  );
+
+  const x = Number(xValue) || 0;
+  const y = Number(yValue) || 0;
+  const z = Number(zValue) || 0;
+  const r = Number(rValue) || 0;
+  const theta = Number(thetaValue) || 0;
+  const phi = Number(phiValue) || 0;
 
   useEffect(() => {
-    if (lastChanged === 'cartesian') {
+    if (lastChanged === "cartesian") {
       const radius = Math.sqrt(x * x + y * y + z * z);
       const inclination = radius !== 0 ? Math.acos(z / radius) : 0;
       const azimuth = Math.atan2(y, x);
-      setR(radius);
-      setTheta(inclination);
-      setPhi(azimuth);
+      setR(radius.toString());
+      setTheta(inclination.toString());
+      setPhi(azimuth.toString());
     }
-  }, [x, y, z]);
+  }, [xValue, yValue, zValue, lastChanged]);
 
   useEffect(() => {
-    if (lastChanged === 'spherical') {
-      const newX = r * Math.sin(theta) * Math.cos(phi);
-      const newY = r * Math.sin(theta) * Math.sin(phi);
-      const newZ = r * Math.cos(theta);
-      setX(newX);
-      setY(newY);
-      setZ(newZ);
+    if (lastChanged === "cartesian") {
+      const radius = Math.sqrt(x * x + y * y + z * z);
+      const inclination = radius !== 0 ? Math.acos(z / radius) : 0;
+      const azimuth = Math.atan2(y, x);
+
+      setR(radius.toString());
+      setTheta(inclination.toString());
+      setPhi(azimuth.toString());
+
+      setThetaDegrees(((inclination * 180) / Math.PI).toString());
+      setPhiDegrees(((azimuth * 180) / Math.PI).toString());
     }
-  }, [r, theta, phi]);
+  }, [xValue, yValue, zValue, lastChanged]);
 
   const segments = 32;
 
@@ -57,52 +72,202 @@ function SphericalVisualizer() {
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
-      <div className="relative overflow-hidden rounded-lg border-2 border-blue-600" style={{ height: 500, width: 800, zIndex: 0 }}>
-        <Canvas style={{ height: '100%', width: '100%' }} camera={{position: [5, 2, 5]}}>
+      <div
+        className="relative overflow-hidden rounded-lg border-2 border-blue-600"
+        style={{ height: 500, width: 800, zIndex: 0 }}
+      >
+        <Canvas
+          style={{ height: "100%", width: "100%" }}
+          camera={{ position: [5, 2, 5] }}
+        >
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
           <OrbitControls />
-          <Axes length={20} width={3} fontPosition={5.5} interval={1} xcolor="black" ycolor="black" zcolor="black" />
+          <Axes length={20} width={3} fontPosition={5.5} interval={1} />
 
           <mesh position={[0, 0, 0]}>
             <sphereGeometry args={[r, 64, 64]} />
             <meshStandardMaterial color="#60a5fa" transparent opacity={0.6} />
           </mesh>
 
-          <VectorArrow vector={[x, y, z]} color='red' label='P' />
-          <Line points={[[0, 0, 0], [x, y, 0]]} color="blue" dashed dashSize={0.2} gapSize={0.1} />
-          <Line points={[[x, y, 0], [x, y, z]]} color="blue" dashed dashSize={0.2} gapSize={0.1} />
+          <VectorArrow vector={[x, y, z]} color="red" label="P" />
+          <Line
+            points={[
+              [0, 0, 0],
+              [x, y, 0],
+            ]}
+            color="blue"
+            dashed
+            dashSize={0.2}
+            gapSize={0.1}
+          />
+          <Line
+            points={[
+              [x, y, 0],
+              [x, y, z],
+            ]}
+            color="blue"
+            dashed
+            dashSize={0.2}
+            gapSize={0.1}
+          />
           <Line points={thetaArcPoints} color="red" />
           <Line points={phiArcPoints} color="blue" />
 
           <Html position={[x / 2, y / 2, z / 2]} center distanceFactor={8}>
-            <div style={{ color: 'red', whiteSpace: 'nowrap', userSelect: 'none', fontSize: '20px' }}>r = {r.toFixed(2)}</div>
+            <div
+              style={{
+                color: "red",
+                whiteSpace: "nowrap",
+                userSelect: "none",
+                fontSize: "20px",
+              }}
+            >
+              r = {r.toFixed(2)}
+            </div>
           </Html>
-          <Html position={[0.7 * Math.sin(theta / 2), 0, 0.7 * Math.cos(theta / 2)]} center distanceFactor={8}>
-            <div style={{ color: 'red', whiteSpace: 'nowrap', userSelect: 'none', fontSize: '20px' }}>&theta; = {(theta * 180 / Math.PI).toFixed(1)}&deg;</div>
+          <Html
+            position={[0.7 * Math.sin(theta / 2), 0, 0.7 * Math.cos(theta / 2)]}
+            center
+            distanceFactor={8}
+          >
+            <div
+              style={{
+                color: "red",
+                whiteSpace: "nowrap",
+                userSelect: "none",
+                fontSize: "20px",
+              }}
+            >
+              &theta; = {((theta * 180) / Math.PI).toFixed(1)}&deg;
+            </div>
           </Html>
-          <Html position={[0.7 * Math.cos(phi / 2), 0.7 * Math.sin(phi / 2), 0]} center distanceFactor={8}>
-            <div style={{ color: 'blue', whiteSpace: 'nowrap', userSelect: 'none', fontSize: '20px' }}>&phi; = {(phi * 180 / Math.PI).toFixed(1)}&deg;</div>
+          <Html
+            position={[0.7 * Math.cos(phi / 2), 0.7 * Math.sin(phi / 2), 0]}
+            center
+            distanceFactor={8}
+          >
+            <div
+              style={{
+                color: "blue",
+                whiteSpace: "nowrap",
+                userSelect: "none",
+                fontSize: "20px",
+              }}
+            >
+              &phi; = {((phi * 180) / Math.PI).toFixed(1)}&deg;
+            </div>
           </Html>
         </Canvas>
+      </div>
+
+      <div className="flex justify-center items-center gap-8 py-3 bg-gray-50 border-t text-sm font-medium">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-red-500"></span>
+          <span>X-axis</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-green-500"></span>
+          <span>Y-axis</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+          <span>Z-axis</span>
+        </div>
       </div>
 
       <div className="flex gap-8 text-sm mt-4">
         <div>
           <h2 className="font-bold mb-2">Cartesian Coordinates:</h2>
           <div className="flex gap-4">
-            <label>X: <input type="number" value={x.toFixed(2)} onChange={(e) => { setX(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20" /></label>
-            <label>Y: <input type="number" value={y.toFixed(2)} onChange={(e) => { setY(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20" /></label>
-            <label>Z: <input type="number" value={z.toFixed(2)} onChange={(e) => { setZ(Number(e.target.value)); setLastChanged('cartesian'); }} className="border p-1 ml-1 w-20" /></label>
+            <label>
+              X:{" "}
+              <input
+                type="number"
+                value={xValue}
+                onChange={(e) => {
+                  setX(e.target.value);
+                  setLastChanged("cartesian");
+                }}
+                className="border p-1 ml-1 w-20"
+              />
+            </label>
+            <label>
+              Y:{" "}
+              <input
+                type="number"
+                value={yValue}
+                onChange={(e) => {
+                  setY(e.target.value);
+                  setLastChanged("cartesian");
+                }}
+                className="border p-1 ml-1 w-20"
+              />
+            </label>
+            <label>
+              Z:{" "}
+              <input
+                type="number"
+                value={zValue}
+                onChange={(e) => {
+                  setZ(e.target.value);
+                  setLastChanged("cartesian");
+                }}
+                className="border p-1 ml-1 w-20"
+              />
+            </label>
           </div>
         </div>
 
         <div>
           <h2 className="font-bold mb-2">Spherical Coordinates:</h2>
           <div className="flex gap-4">
-            <label>r: <input type="number" value={r.toFixed(2)} onChange={(e) => { setR(Number(e.target.value)); setLastChanged('spherical'); }} className="border p-1 ml-1 w-20" /></label>
-            <label>&theta;&deg;: <input type="number" value={(theta * 180 / Math.PI).toFixed(2)} onChange={(e) => { setTheta(Number(e.target.value) * Math.PI / 180); setLastChanged('spherical'); }} className="border p-1 ml-1 w-20" /></label>
-            <label>&phi;&deg;: <input type="number" value={(phi * 180 / Math.PI).toFixed(2)} onChange={(e) => { setPhi(Number(e.target.value) * Math.PI / 180); setLastChanged('spherical'); }} className="border p-1 ml-1 w-20" /></label>
+            <label>
+              r:{" "}
+              <input
+                type="number"
+                value={rValue}
+                onChange={(e) => {
+                  setR(e.target.value);
+                  setLastChanged("spherical");
+                }}
+                className="border p-1 ml-1 w-20"
+              />
+            </label>
+            <label>
+              &theta;&deg;:{" "}
+              <input
+                type="number"
+                value={thetaDegrees}
+                onChange={(e) => {
+                  setThetaDegrees(e.target.value);
+
+                  const degrees = Number(e.target.value) || 0;
+                  setTheta(String((degrees * Math.PI) / 180));
+
+                  setLastChanged("spherical");
+                }}
+                className="border p-1 ml-1 w-20"
+              />
+            </label>
+            <label>
+              &phi;&deg;:{" "}
+              <input
+                type="number"
+                value={phiDegrees}
+                onChange={(e) => {
+                  setPhiDegrees(e.target.value);
+
+                  const degrees = Number(e.target.value) || 0;
+                  setPhi(String((degrees * Math.PI) / 180));
+
+                  setLastChanged("spherical");
+                }}
+                className="border p-1 ml-1 w-20"
+              />
+            </label>
           </div>
         </div>
       </div>

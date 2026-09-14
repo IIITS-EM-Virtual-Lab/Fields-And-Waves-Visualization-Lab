@@ -59,9 +59,11 @@ function AxisTicks({ axis, realLength, realInterval, color, scaleFactor }: AxisP
 }
 
 type AxesProps = {
+  length?: number;
   xLength?: number;
   yLength?: number;
   zLength?: number;
+  interval?: number;
   xInterval?: number;
   yInterval?: number;
   zInterval?: number;
@@ -70,20 +72,24 @@ type AxesProps = {
   ycolor?: string;
   zcolor?: string;
   scaleFactor?: number;
+  fontPosition?: number;
 };
 
 function Axes({
-  xLength = 100,
-  yLength = 100,
-  zLength = 100,
-  xInterval = 1,
-  yInterval = 1,
-  zInterval = 1,
+  length,
+  xLength = length ?? 100,
+  yLength = length ?? 100,
+  zLength = length ?? 100,
+  interval,
+  xInterval = interval ?? 1,
+  yInterval = interval ?? 1,
+  zInterval = interval ?? 1,
   width = 1,
   xcolor = "#ef4444",
   ycolor = "#22c55e",
   zcolor = "#3b82f6",
   scaleFactor = 1,
+  fontPosition,
 }: AxesProps) {
   
   // Scale down the physical length of the axis lines
