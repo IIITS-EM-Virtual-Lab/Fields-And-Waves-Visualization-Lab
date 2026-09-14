@@ -1,13 +1,42 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import Axes from './Axes';
 import VectorArrow from './VectorArrow';
+import CanvasControlsToolbar from './CanvasControlsToolbar';
 import * as THREE from 'three';
 
 const k = 9e9; // Coulomb constant
 
 function ElectricPotentialVisualizer() {
+  const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+  const controlsRef = useRef<any>(null);
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom *= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom /= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const resetCamera = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controlsRef.current.reset();
+    }
+  };
+
   // Keep state as strings to allow typing "-" 
   const [q, setQ] = useState('1e-9'); // in Coulombs
   const [qx, setQx] = useState('0');
@@ -106,11 +135,26 @@ function ElectricPotentialVisualizer() {
       </div>
 
       <div className="relative overflow-hidden rounded-xl border border-gray-300 shadow-lg bg-white" style={{ height: 500, width: '100%', maxWidth: 800, zIndex: 0 }}>
+        <CanvasControlsToolbar
+          interactionMode={interactionMode}
+          setInteractionMode={setInteractionMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={resetCamera}
+        />
         <Canvas camera={{position: [5, 5, 8], fov: 45}}>
           <color attach="background" args={['#f8fafc']} />
           <ambientLight intensity={0.6} />
           <pointLight position={[10, 10, 10]} intensity={0.8} />
-          <OrbitControls makeDefault />
+          <OrbitControls
+            ref={controlsRef}
+            makeDefault
+            mouseButtons={{
+              LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+            }}
+          />
           
           <gridHelper args={[20, 20, '#e5e7eb', '#f3f4f6']} position={[0, -0.01, 0]} />
           

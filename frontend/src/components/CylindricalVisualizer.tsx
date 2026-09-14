@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Line, Html } from "@react-three/drei";
 import Axes from "./Axes";
 import VectorArrow from "./VectorArrow";
+import CanvasControlsToolbar from "./CanvasControlsToolbar";
+import * as THREE from "three";
 
 function CylindricalVisualizer() {
   const [x, setX] = useState("2");
@@ -11,6 +13,34 @@ function CylindricalVisualizer() {
   const [rho, setRho] = useState("0");
   const [phi, setPhi] = useState("0");
   const [phiDegrees, setPhiDegrees] = useState("0");
+
+  const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+  const controlsRef = useRef<any>(null);
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom *= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom /= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const resetCamera = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controlsRef.current.reset();
+    }
+  };
 
   const xValue = Number(x) || 0;
   const yValue = Number(y) || 0;
@@ -54,16 +84,31 @@ function CylindricalVisualizer() {
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div
-        className="relative overflow-hidden rounded-lg border-2 border-blue-600"
+        className="relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50"
         style={{ height: 500, width: 800, zIndex: 0 }}
       >
+        <CanvasControlsToolbar
+          interactionMode={interactionMode}
+          setInteractionMode={setInteractionMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={resetCamera}
+        />
         <Canvas
           style={{ height: "100%", width: "100%" }}
           camera={{ position: [4, 1, 4] }}
         >
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
-          <OrbitControls />
+          <OrbitControls
+            ref={controlsRef}
+            makeDefault
+            mouseButtons={{
+              LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+            }}
+          />
           <Axes length={20} width={3} fontPosition={5.5} interval={1} />
 
           <mesh position={[0, 0, zValue / 2]} rotation={[Math.PI / 2, 0, 0]}>

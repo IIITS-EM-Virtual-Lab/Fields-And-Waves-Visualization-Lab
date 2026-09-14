@@ -5,8 +5,7 @@ import Axes from './Axes';
 import VectorArrow from './VectorArrow';
 import * as THREE from 'three';
 import TrianglePlane from './TrianglePlane';
-// --- UPDATED: Imported Zoom and Refresh icons ---
-import { Hand, Rotate3d, RefreshCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import CanvasControlsToolbar from './CanvasControlsToolbar';
 
 const getInterval = (maxVal: number) => {
   if (maxVal > 90) return 30;
@@ -134,82 +133,13 @@ function VectorMultiplier() {
         className="relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50" 
         style={{ height: 500, width: 800, zIndex: 0 }}
       >
-        <div className="absolute top-4 right-4 z-10 flex gap-1.5 shadow-md rounded-md bg-white p-1.5 border">
-          
-          {/* Rotate Button */}
-          <div className="relative group">
-            <button
-              onClick={() => setInteractionMode('rotate')}
-              className={`p-2 rounded transition-colors ${
-                interactionMode === 'rotate' ? 'bg-blue-600 text-white' : 'hover:bg-gray-100 text-gray-600'
-              }`}
-            >
-              <Rotate3d size={18} />
-            </button>
-            <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs font-medium px-2.5 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-              Rotate
-            </span>
-          </div>
-
-          {/* Pan Button */}
-          <div className="relative group">
-            <button
-              onClick={() => setInteractionMode('pan')}
-              className={`p-2 rounded transition-colors ${
-                interactionMode === 'pan' ? 'bg-blue-600 text-white' : 'hover:bg-gray-100 text-gray-600'
-              }`}
-            >
-              <Hand size={18} />
-            </button>
-            <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs font-medium px-2.5 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-              Pan
-            </span>
-          </div>
-
-          <div className="w-px bg-gray-200 mx-1"></div>
-
-          {/* Zoom In Button */}
-          <div className="relative group">
-            <button
-              onClick={handleZoomIn}
-              className="p-2 rounded hover:bg-gray-100 text-gray-600 transition-colors"
-            >
-              <ZoomIn size={18} />
-            </button>
-            <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs font-medium px-2.5 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-              Zoom In
-            </span>
-          </div>
-
-          {/* Zoom Out Button */}
-          <div className="relative group">
-            <button
-              onClick={handleZoomOut}
-              className="p-2 rounded hover:bg-gray-100 text-gray-600 transition-colors"
-            >
-              <ZoomOut size={18} />
-            </button>
-            <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs font-medium px-2.5 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-              Zoom Out
-            </span>
-          </div>
-
-          <div className="w-px bg-gray-200 mx-1"></div>
-
-          {/* Reset Button (Updated Icon) */}
-          <div className="relative group">
-            <button
-              onClick={resetCamera}
-              className="p-2 rounded hover:bg-gray-100 text-gray-600 transition-colors"
-            >
-              <RefreshCcw size={18} />
-            </button>
-            <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs font-medium px-2.5 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-              Reset View
-            </span>
-          </div>
-
-        </div>
+        <CanvasControlsToolbar
+          interactionMode={interactionMode}
+          setInteractionMode={setInteractionMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={resetCamera}
+        />
 
         <Canvas style={{ height: '100%', width: '100%' }} camera={{ position: [1.5, 0.5, 3] }}>
           <ambientLight intensity={0.5} />

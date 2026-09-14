@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Line, Html } from "@react-three/drei";
 import Axes from "./Axes";
 import VectorArrow from "./VectorArrow";
+import CanvasControlsToolbar from "./CanvasControlsToolbar";
+import * as THREE from "three";
 
 function UnifiedVisualizer() {
   const [xValue, setX] = useState("2");
@@ -19,6 +21,34 @@ function UnifiedVisualizer() {
   >("cartesian");
   const [showSpherical, setShowSpherical] = useState(true);
   const [showCylindrical, setShowCylindrical] = useState(true);
+
+  const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+  const controlsRef = useRef<any>(null);
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom *= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom /= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const resetCamera = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controlsRef.current.reset();
+    }
+  };
 
   const x = Number(xValue) || 0;
   const y = Number(yValue) || 0;
@@ -40,7 +70,7 @@ function UnifiedVisualizer() {
       setPhi(newPhi.toString());
       setRho(newRho.toString());
     }
-  }, [xValue, yValue, zValue]);
+  }, [xValue, yValue, zValue, coordSystem, x, y, z]);
 
   useEffect(() => {
     if (coordSystem === "spherical") {
@@ -51,7 +81,7 @@ function UnifiedVisualizer() {
       setY(newY.toString());
       setZ(newZ.toString());
     }
-  }, [rValue, thetaValue, phiValue]);
+  }, [rValue, thetaValue, phiValue, coordSystem, r, theta, phi]);
 
   useEffect(() => {
     if (coordSystem === "cylindrical") {
@@ -60,7 +90,7 @@ function UnifiedVisualizer() {
       setX(newX.toString());
       setY(newY.toString());
     }
-  }, [rhoValue, phiValue, zValue]);
+  }, [rhoValue, phiValue, zValue, coordSystem, rho, phi]);
 
   const segments = 32;
   const thetaArcPoints: [number, number, number][] = [];
@@ -84,16 +114,31 @@ function UnifiedVisualizer() {
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div
-        className="relative overflow-hidden rounded-lg border-2 border-blue-600"
+        className="relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50"
         style={{ height: 500, width: 800, zIndex: 0 }}
       >
+        <CanvasControlsToolbar
+          interactionMode={interactionMode}
+          setInteractionMode={setInteractionMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={resetCamera}
+        />
         <Canvas
           style={{ height: "100%", width: "100%" }}
           camera={{ position: [5, 2, 5] }}
         >
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
-          <OrbitControls />
+          <OrbitControls
+            ref={controlsRef}
+            makeDefault
+            mouseButtons={{
+              LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+            }}
+          />
           <Axes length={20} width={3} fontPosition={5.5} interval={1} />
 
           {/* Cylinder */}

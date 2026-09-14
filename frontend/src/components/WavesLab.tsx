@@ -1,7 +1,9 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Text, Line as DreiLine, Html } from "@react-three/drei";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
+import CanvasControlsToolbar from "./CanvasControlsToolbar";
 
 
 
@@ -537,6 +539,35 @@ export default function WavesLab(): JSX.Element {
   const [Aatt, setAatt] = useState(1.0);
   const [alpha, setAlpha] = useState(0.18);
 
+  // Camera and controls handlers
+  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom *= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom /= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const resetCamera = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controlsRef.current.reset();
+    }
+  };
+
   // Spacebar toggles pause
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -708,14 +739,31 @@ export default function WavesLab(): JSX.Element {
         </button>
       </ControlsBar>
 
-      <div className="wave-visual">
+      <div className="wave-visual" style={{ position: "relative", overflow: "hidden" }}>
+        <CanvasControlsToolbar
+          interactionMode={interactionMode}
+          setInteractionMode={setInteractionMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={resetCamera}
+        />
         <Canvas
           style={{ width: "100%", height: "100%" }}
           camera={{ position: [6.6, 5.6, 12.8], fov: 52 }}
         >
           <ambientLight intensity={0.75} />
           <directionalLight position={[12, 12, 12]} intensity={0.95} />
-          <OrbitControls enablePan enableZoom enableRotate />
+          <OrbitControls
+            ref={controlsRef}
+            enablePan
+            enableZoom
+            enableRotate
+            mouseButtons={{
+              LEFT: interactionMode === "rotate" ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: interactionMode === "rotate" ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+            }}
+          />
 
           {moduleKey === "em" && (
             <EMPlaneWave

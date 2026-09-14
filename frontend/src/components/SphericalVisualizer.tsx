@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Line, Html } from "@react-three/drei";
 import Axes from "./Axes";
 import VectorArrow from "./VectorArrow";
+import CanvasControlsToolbar from "./CanvasControlsToolbar";
+import * as THREE from "three";
 
 function SphericalVisualizer() {
   const [xValue, setX] = useState("2");
@@ -17,23 +19,40 @@ function SphericalVisualizer() {
     "cartesian",
   );
 
+  const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+  const controlsRef = useRef<any>(null);
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom *= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom /= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const resetCamera = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controlsRef.current.reset();
+    }
+  };
+
   const x = Number(xValue) || 0;
   const y = Number(yValue) || 0;
   const z = Number(zValue) || 0;
   const r = Number(rValue) || 0;
   const theta = Number(thetaValue) || 0;
   const phi = Number(phiValue) || 0;
-
-  useEffect(() => {
-    if (lastChanged === "cartesian") {
-      const radius = Math.sqrt(x * x + y * y + z * z);
-      const inclination = radius !== 0 ? Math.acos(z / radius) : 0;
-      const azimuth = Math.atan2(y, x);
-      setR(radius.toString());
-      setTheta(inclination.toString());
-      setPhi(azimuth.toString());
-    }
-  }, [xValue, yValue, zValue, lastChanged]);
 
   useEffect(() => {
     if (lastChanged === "cartesian") {
@@ -48,7 +67,7 @@ function SphericalVisualizer() {
       setThetaDegrees(((inclination * 180) / Math.PI).toString());
       setPhiDegrees(((azimuth * 180) / Math.PI).toString());
     }
-  }, [xValue, yValue, zValue, lastChanged]);
+  }, [xValue, yValue, zValue, lastChanged, x, y, z]);
 
   const segments = 32;
 
@@ -73,16 +92,31 @@ function SphericalVisualizer() {
   return (
     <div className="flex flex-col items-center gap-4 p-4">
       <div
-        className="relative overflow-hidden rounded-lg border-2 border-blue-600"
+        className="relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50"
         style={{ height: 500, width: 800, zIndex: 0 }}
       >
+        <CanvasControlsToolbar
+          interactionMode={interactionMode}
+          setInteractionMode={setInteractionMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={resetCamera}
+        />
         <Canvas
           style={{ height: "100%", width: "100%" }}
           camera={{ position: [5, 2, 5] }}
         >
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
-          <OrbitControls />
+          <OrbitControls
+            ref={controlsRef}
+            makeDefault
+            mouseButtons={{
+              LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+            }}
+          />
           <Axes length={20} width={3} fontPosition={5.5} interval={1} />
 
           <mesh position={[0, 0, 0]}>

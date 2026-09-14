@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
 import * as THREE from "three";
 import Axes from "./Axes";
 import VectorArrow from "./VectorArrow";
+import CanvasControlsToolbar from "./CanvasControlsToolbar";
 
 const epsilon0 = 8.854187817e-12; // C^2 / (N·m^2)
 
@@ -11,6 +12,34 @@ function GaussLawVisualizer() {
   const [chargeValueNC, setChargeValueNC] = useState<number>(1); // in nC
   const [chargePosition, setChargePosition] = useState<[number, number, number]>([0, 0, 0]);
   const [surfaceRadius, setSurfaceRadius] = useState<number>(2);
+
+  const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+  const controlsRef = useRef<any>(null);
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom *= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom /= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const resetCamera = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controlsRef.current.reset();
+    }
+  };
 
   const chargeValue = chargeValueNC * 1e-9; // converted to Coulombs
 
@@ -201,10 +230,25 @@ function GaussLawVisualizer() {
       <div
         className="relative overflow-hidden rounded-xl border-2 border-blue-600 bg-slate-950 w-full max-w-[800px] h-[500px]"
       >
+        <CanvasControlsToolbar
+          interactionMode={interactionMode}
+          setInteractionMode={setInteractionMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={resetCamera}
+        />
         <Canvas camera={{ position: [5, 4, 6] }}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
-          <OrbitControls />
+          <OrbitControls
+            ref={controlsRef}
+            makeDefault
+            mouseButtons={{
+              LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+            }}
+          />
 
           <Axes length={20} width={2} />
 

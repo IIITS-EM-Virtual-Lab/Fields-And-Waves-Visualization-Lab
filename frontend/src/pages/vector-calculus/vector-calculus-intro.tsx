@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Html, Edges } from "@react-three/drei";
 import * as THREE from "three";
@@ -254,14 +254,40 @@ function DifferentialScene({ viewMode }: { viewMode: TabKey }) {
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Interactive Demo — mirrors VectorAddition structure
-   ═══════════════════════════════════════════════════════════════════════════ */
+import CanvasControlsToolbar from "@/components/CanvasControlsToolbar";
 
 function DifferentialElementsDemo() {
   const [viewMode, setViewMode] = useState<TabKey>("volume");
   const meta    = TABS[viewMode];
   const content = CONTENT[viewMode];
+
+  const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+  const controlsRef = useRef<any>(null);
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom *= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom /= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const resetCamera = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controlsRef.current.reset();
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0px" }}>
@@ -280,10 +306,25 @@ function DifferentialElementsDemo() {
           background: "#f1f5f9",
         }}
       >
+        <CanvasControlsToolbar
+          interactionMode={interactionMode}
+          setInteractionMode={setInteractionMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={resetCamera}
+        />
         <Canvas style={{ height: "100%", width: "100%" }} camera={{ position: [8, 6, 8], fov: 45 }}>
           <ambientLight intensity={0.55} />
           <directionalLight position={[10, 15, 10]} intensity={1.1} />
-          <OrbitControls makeDefault enablePan enableZoom />
+          <OrbitControls
+            ref={controlsRef}
+            makeDefault
+            mouseButtons={{
+              LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+            }}
+          />
           <DifferentialScene viewMode={viewMode} />
         </Canvas>
         <div style={{ position: "absolute", bottom: 14, right: 16, fontSize: "11px", fontWeight: "500", color: T.slate, background: "rgba(255,255,255,0.85)", padding: "4px 10px", borderRadius: "20px", backdropFilter: "blur(4px)", pointerEvents: "none" }}>

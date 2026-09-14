@@ -1,12 +1,43 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import Axes from './Axes';
 import VectorArrow from './VectorArrow';
+import CanvasControlsToolbar from './CanvasControlsToolbar';
+import * as THREE from 'three';
 
 function AmpereLawVisualizer() {
     const [current, setCurrent] = useState(5); // Amperes
     const [radius, setRadius] = useState(2);   // Meters
+
+    const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+    const controlsRef = useRef<any>(null);
+
+    const handleZoomIn = () => {
+        if (controlsRef.current) {
+            const camera = controlsRef.current.object;
+            camera.zoom *= 1.2;
+            camera.updateProjectionMatrix();
+        }
+    };
+
+    const handleZoomOut = () => {
+        if (controlsRef.current) {
+            const camera = controlsRef.current.object;
+            camera.zoom /= 1.2;
+            camera.updateProjectionMatrix();
+        }
+    };
+
+    const resetCamera = () => {
+        if (controlsRef.current) {
+            const camera = controlsRef.current.object;
+            camera.zoom = 1;
+            camera.updateProjectionMatrix();
+            controlsRef.current.reset();
+        }
+    };
+
     const mu0 = 4 * Math.PI * 1e-7;
 
     const Bmag = useMemo(() => (mu0 * current) / (2 * Math.PI * radius), [current, radius]);
@@ -61,11 +92,26 @@ function AmpereLawVisualizer() {
                     </div>
                 </div>
             </div>
-            <div className="mt-4 relative overflow-hidden rounded-lg border-2 border-blue-600" style={{ height: 500, width: 800, zIndex: 0 }}>
+            <div className="mt-4 relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50" style={{ height: 500, width: 800, zIndex: 0 }}>
+                <CanvasControlsToolbar
+                    interactionMode={interactionMode}
+                    setInteractionMode={setInteractionMode}
+                    onZoomIn={handleZoomIn}
+                    onZoomOut={handleZoomOut}
+                    onReset={resetCamera}
+                />
                 <Canvas camera={{ position: [5, 6, 5], fov: 50 }}>
                     <ambientLight intensity={0.6} />
                     <pointLight position={[10, 10, 10]} />
-                    <OrbitControls />
+                    <OrbitControls
+                        ref={controlsRef}
+                        makeDefault
+                        mouseButtons={{
+                            LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+                            MIDDLE: THREE.MOUSE.DOLLY,
+                            RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+                        }}
+                    />
 
                     <Axes length={20} width={3} interval={1} fontPosition={4.5} />
 

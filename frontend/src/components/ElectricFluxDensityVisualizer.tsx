@@ -1,9 +1,10 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import VectorArrow from "./VectorArrow";
 import Axes from "./Axes";
+import CanvasControlsToolbar from "./CanvasControlsToolbar";
 
 const epsilon0 = 8.854e-12;
 const k = 1 / (4 * Math.PI * epsilon0);
@@ -184,8 +185,35 @@ function cartesianToRaw(
   return converted.map((v) => v.toFixed(3)) as [string, string, string];
 }
 
-// ---------- COMPONENT ----------
 export default function ElectricFluxDensityVisualizer() {
+
+  const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+  const controlsRef = useRef<any>(null);
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom *= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom /= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const resetCamera = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controlsRef.current.reset();
+    }
+  };
 
   const [chargeType, setChargeType]   = useState<string>("point");
   const [coordSystem, setCoordSystem] = useState<string>("spherical");
@@ -431,86 +459,106 @@ export default function ElectricFluxDensityVisualizer() {
       </div>
 
       {/* ── CANVAS ── */}
-      <Canvas style={{ height: 500, width: 800 }} camera={{ position: [4, 3, 4] }}>
-        <OrbitControls />
-        <ambientLight intensity={0.8} />
-        <pointLight position={[10, 10, 10]} />
+      <div
+        className="relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50"
+        style={{ height: 500, width: 800, zIndex: 0 }}
+      >
+        <CanvasControlsToolbar
+          interactionMode={interactionMode}
+          setInteractionMode={setInteractionMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={resetCamera}
+        />
+        <Canvas style={{ height: "100%", width: "100%" }} camera={{ position: [4, 3, 4] }}>
+          <OrbitControls
+            ref={controlsRef}
+            makeDefault
+            mouseButtons={{
+              LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+            }}
+          />
+          <ambientLight intensity={0.8} />
+          <pointLight position={[10, 10, 10]} />
 
-        <Axes length={10} width={2} fontPosition={4} interval={1} />
+          <Axes length={10} width={2} fontPosition={4} interval={1} />
 
-        {/* ── Point charge ── */}
-        {chargeType === "point" && (
-          <>
-            <mesh position={chargePos}>
-              <sphereGeometry args={[surfaceSize, 32, 32]} />
-              <meshStandardMaterial color="green" transparent opacity={0.08} side={THREE.DoubleSide} />
-            </mesh>
-            <mesh position={chargePos}>
-              <sphereGeometry args={[surfaceSize, 16, 16]} />
-              <meshStandardMaterial color="lime" wireframe />
-            </mesh>
-            <mesh position={chargePos}>
-              <sphereGeometry args={[0.15, 16, 16]} />
-              <meshStandardMaterial
-                color={chargeValue >= 0 ? "red" : "blue"}
-                emissive={chargeValue >= 0 ? "red" : "blue"}
-                emissiveIntensity={0.5}
-              />
-            </mesh>
-          </>
-        )}
+          {/* ── Point charge ── */}
+          {chargeType === "point" && (
+            <>
+              <mesh position={chargePos}>
+                <sphereGeometry args={[surfaceSize, 32, 32]} />
+                <meshStandardMaterial color="green" transparent opacity={0.08} side={THREE.DoubleSide} />
+              </mesh>
+              <mesh position={chargePos}>
+                <sphereGeometry args={[surfaceSize, 16, 16]} />
+                <meshStandardMaterial color="lime" wireframe />
+              </mesh>
+              <mesh position={chargePos}>
+                <sphereGeometry args={[0.15, 16, 16]} />
+                <meshStandardMaterial
+                  color={chargeValue >= 0 ? "red" : "blue"}
+                  emissive={chargeValue >= 0 ? "red" : "blue"}
+                  emissiveIntensity={0.5}
+                />
+              </mesh>
+            </>
+          )}
 
-        {/* ── Line charge — rod + cylinder both along Y axis (Three.js default) ── */}
-        {chargeType === "line" && (
-          <>
-            {/* Rod along Y — no rotation needed, cylinder default is Y */}
-            <mesh position={chargePos}>
-              <cylinderGeometry args={[0.05, 0.05, 6, 8]} />
-              <meshStandardMaterial color="orange" />
-            </mesh>
-            {/* Gaussian cylinder along Y, open ended */}
-            <mesh position={chargePos}>
-              <cylinderGeometry args={[surfaceSize, surfaceSize, 4, 32, 1, true]} />
-              <meshStandardMaterial color="green" transparent opacity={0.08} side={THREE.DoubleSide} />
-            </mesh>
-            <mesh position={chargePos}>
-              <cylinderGeometry args={[surfaceSize, surfaceSize, 4, 24]} />
-              <meshStandardMaterial color="lime" wireframe />
-            </mesh>
-          </>
-        )}
+          {/* ── Line charge — rod + cylinder both along Y axis (Three.js default) ── */}
+          {chargeType === "line" && (
+            <>
+              {/* Rod along Y — no rotation needed, cylinder default is Y */}
+              <mesh position={chargePos}>
+                <cylinderGeometry args={[0.05, 0.05, 6, 8]} />
+                <meshStandardMaterial color="orange" />
+              </mesh>
+              {/* Gaussian cylinder along Y, open ended */}
+              <mesh position={chargePos}>
+                <cylinderGeometry args={[surfaceSize, surfaceSize, 4, 32, 1, true]} />
+                <meshStandardMaterial color="green" transparent opacity={0.08} side={THREE.DoubleSide} />
+              </mesh>
+              <mesh position={chargePos}>
+                <cylinderGeometry args={[surfaceSize, surfaceSize, 4, 24]} />
+                <meshStandardMaterial color="lime" wireframe />
+              </mesh>
+            </>
+          )}
 
-        {/* ── Sheet charge — plane at chargePos, field along Y ── */}
-        {chargeType === "sheet" && (
-          <>
-            {/* XZ plane at chargePos — rotate plane to lie flat in XZ */}
-            <mesh position={chargePos} rotation={[Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[6, 6]} />
-              <meshStandardMaterial color="orange" transparent opacity={0.3} side={THREE.DoubleSide} />
-            </mesh>
-            <mesh position={chargePos}>
-              <boxGeometry args={[surfaceSize, 0.5, surfaceSize]} />
-              <meshStandardMaterial color="green" transparent opacity={0.08} side={THREE.DoubleSide} />
-            </mesh>
-            <mesh position={chargePos}>
-              <boxGeometry args={[surfaceSize, 0.5, surfaceSize]} />
-              <meshStandardMaterial color="lime" wireframe />
-            </mesh>
-          </>
-        )}
+          {/* ── Sheet charge — plane at chargePos, field along Y ── */}
+          {chargeType === "sheet" && (
+            <>
+              {/* XZ plane at chargePos — rotate plane to lie flat in XZ */}
+              <mesh position={chargePos} rotation={[Math.PI / 2, 0, 0]}>
+                <planeGeometry args={[6, 6]} />
+                <meshStandardMaterial color="orange" transparent opacity={0.3} side={THREE.DoubleSide} />
+              </mesh>
+              <mesh position={chargePos}>
+                <boxGeometry args={[surfaceSize, 0.5, surfaceSize]} />
+                <meshStandardMaterial color="green" transparent opacity={0.08} side={THREE.DoubleSide} />
+              </mesh>
+              <mesh position={chargePos}>
+                <boxGeometry args={[surfaceSize, 0.5, surfaceSize]} />
+                <meshStandardMaterial color="lime" wireframe />
+              </mesh>
+            </>
+          )}
 
-        {/* Probe marker */}
-        <mesh position={probePoint}>
-          <sphereGeometry args={[0.1, 12, 12]} />
-          <meshStandardMaterial color="yellow" emissive="yellow" emissiveIntensity={0.6} />
-        </mesh>
+          {/* Probe marker */}
+          <mesh position={probePoint}>
+            <sphereGeometry args={[0.1, 12, 12]} />
+            <meshStandardMaterial color="yellow" emissive="yellow" emissiveIntensity={0.6} />
+          </mesh>
 
-        {/* Field vectors */}
-        {gridVectors.map((v, i) => (
-          <VectorArrow key={i} vector={v.E} color="royalblue" origin={v.origin} />
-        ))}
+          {/* Field vectors */}
+          {gridVectors.map((v, i) => (
+            <VectorArrow key={i} vector={v.E} color="royalblue" origin={v.origin} />
+          ))}
 
-      </Canvas>
+        </Canvas>
+      </div>
       <div className="flex justify-center items-center gap-8 py-3 bg-gray-50 border-t text-sm font-medium">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-red-500"></span>
