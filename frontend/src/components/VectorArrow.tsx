@@ -7,6 +7,7 @@ type Props = {
   origin?: [number, number, number];
   color?: string;
   label?: string;
+  dashed?: boolean;
 };
 
 function VectorArrow({ vector, origin = [0, 0, 0], color = 'hotpink', label }: Props) {
