@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 const modules = [
   {
@@ -8,6 +7,7 @@ const modules = [
     topics: [
       { name: "Scalars and Vectors", path: "/scalars-and-vectors" },
       { name: "Addition", path: "/vector-addition" },
+      { name: "Subtraction", path: "/vector-subtraction" },
       { name: "Multiplication", path: "/vector-multiplication" },
       { name: "Triple Product", path: "/triple-product" },
     ],

@@ -22,6 +22,7 @@ const exploreModules = [
     items: [
       { name: "Scalars and Vectors", path: "/scalars-and-vectors" },
       { name: "Addition", path: "/vector-addition" },
+      { name: "Subtraction", path: "/vector-subtraction" },
       { name: "Multiplication", path: "/vector-multiplication" },
       { name: "Triple Product", path: "/triple-product" },
     ],

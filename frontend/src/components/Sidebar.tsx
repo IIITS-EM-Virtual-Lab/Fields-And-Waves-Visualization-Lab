@@ -21,6 +21,7 @@ const sidebarData: SidebarSection[] = [
     subtopics: [
       { name: "Scalars and Vectors", path: "/scalars-and-vectors", quizPath: "/quiz/vector-algebra/scalars" },
       { name: "Addition", path: "/vector-addition", quizPath: "/quiz/vector-algebra/addition" },
+      { name: "Subtraction", path: "/vector-subtraction", quizPath: "/quiz/vector-algebra/subtraction" },
       { name: "Multiplication", path: "/vector-multiplication", quizPath: "/quiz/vector-algebra/multiplication" },
       { name: "Triple Product", path: "/triple-product", quizPath: "/quiz/vector-algebra/triple-product" },
     ],
