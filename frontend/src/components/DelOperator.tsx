@@ -1,24 +1,32 @@
 import React, { useState, useMemo, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Html } from "@react-three/drei";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
+import Axes from "./Axes";
+import VectorArrow from "./VectorArrow";
+import CanvasControlsToolbar from "./CanvasControlsToolbar";
 
-// --- CUSTOM NUMERICAL EVALUATOR ---
-// Robust parsing that handles implicit multiplication and common math functions
+// --- NUMERICAL EVALUATOR & PARTIAL DERIVATIVES ---
 function safeEval(expr: string, x: number, y: number, z: number): number {
   try {
-    let parsedExpr = String(expr).toLowerCase();
-    
+    if (!expr || typeof expr !== "string") return 0;
+    let parsedExpr = String(expr).toLowerCase().trim();
+    if (!parsedExpr) return 0;
+
     // Implicit multiplication fixes
-    parsedExpr = parsedExpr.replace(/(\d)([xyz])/g, "$1*$2"); // '2x' -> '2*x'
-    parsedExpr = parsedExpr.replace(/([xyz])(\d)/g, "$1*$2"); // 'x2' -> 'x*2'
-    parsedExpr = parsedExpr.replace(/([xyz])([xyz])/g, "$1*$2"); // 'xy' -> 'x*y'
-    parsedExpr = parsedExpr.replace(/([xyz])([xyz])/g, "$1*$2"); // run twice for 'xyz' -> 'x*y*z'
-    parsedExpr = parsedExpr.replace(/\^/g, "**"); // 'x^2' -> 'x**2'
-    
+    parsedExpr = parsedExpr.replace(/(\d)([xyz])/g, "$1*$2");
+    parsedExpr = parsedExpr.replace(/([xyz])(\d)/g, "$1*$2");
+    parsedExpr = parsedExpr.replace(/([xyz])([xyz])/g, "$1*$2");
+    parsedExpr = parsedExpr.replace(/([xyz])([xyz])/g, "$1*$2");
+    parsedExpr = parsedExpr.replace(/\^/g, "**");
+
     const mathFuncs = ["sin", "cos", "tan", "exp", "log", "sqrt", "abs"];
-    mathFuncs.forEach(fn => {
-       parsedExpr = parsedExpr.replace(new RegExp(`\\b${fn}\\b`, 'g'), `Math.${fn}`);
+    mathFuncs.forEach((fn) => {
+      parsedExpr = parsedExpr.replace(
+        new RegExp(`\\b${fn}\\b`, "g"),
+        `Math.${fn}`,
+      );
     });
     parsedExpr = parsedExpr.replace(/\bpi\b/g, "Math.PI");
     parsedExpr = parsedExpr.replace(/\be\b/g, "Math.E");
@@ -27,112 +35,44 @@ function safeEval(expr: string, x: number, y: number, z: number): number {
     const result = f(x, y, z);
     return Number.isFinite(result) ? result : 0;
   } catch (err) {
-    return 0; 
+    return 0;
   }
 }
 
-// Numerical derivative using central difference
-function partialDerivative(expr: string, variable: 'x' | 'y' | 'z', x: number, y: number, z: number): number {
-  const h = 1e-4; 
-  if (variable === 'x') {
-    return (safeEval(expr, x + h, y, z) - safeEval(expr, x - h, y, z)) / (2 * h);
-  } else if (variable === 'y') {
-    return (safeEval(expr, x, y + h, z) - safeEval(expr, x, y - h, z)) / (2 * h);
+function partialDerivative(
+  expr: string,
+  variable: "x" | "y" | "z",
+  x: number,
+  y: number,
+  z: number,
+): number {
+  const h = 1e-4;
+  if (variable === "x") {
+    return (
+      (safeEval(expr, x + h, y, z) - safeEval(expr, x - h, y, z)) / (2 * h)
+    );
+  } else if (variable === "y") {
+    return (
+      (safeEval(expr, x, y + h, z) - safeEval(expr, x, y - h, z)) / (2 * h)
+    );
   } else {
-    return (safeEval(expr, x, y, z + h) - safeEval(expr, x, y, z - h)) / (2 * h);
+    return (
+      (safeEval(expr, x, y, z + h) - safeEval(expr, x, y, z - h)) / (2 * h)
+    );
   }
 }
-
-// --- HELPER COMPONENTS ---
-
-// Replaced buggy <Line> with native <cylinderGeometry> for total stability
-function Axes({ length = 10, width = 0.03 }: { length?: number; width?: number }) {
-  return (
-    <group>
-      {/* X axis */}
-      <mesh position={[0, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
-        <cylinderGeometry args={[width, width, length * 2, 8]} />
-        <meshBasicMaterial color="#ef4444" />
-      </mesh>
-      {/* Y axis */}
-      <mesh position={[0, 0, 0]} rotation={[0, 0, 0]}>
-        <cylinderGeometry args={[width, width, length * 2, 8]} />
-        <meshBasicMaterial color="#22c55e" />
-      </mesh>
-      {/* Z axis */}
-      <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[width, width, length * 2, 8]} />
-        <meshBasicMaterial color="#3b82f6" />
-      </mesh>
-    </group>
-  );
-}
-
-type VectorArrowProps = {
-  vector: [number, number, number] | number[];
-  origin?: [number, number, number] | number[];
-  color?: string;
-  label?: string;
-  opacity?: number;
-  thickness?: number;
-};
-
-// Replaced buggy <arrowHelper> with native Meshes (Cylinder + Cone)
-function VectorArrow({ vector, origin = [0, 0, 0], color = "red", label = "", opacity = 1, thickness = 0.08 }: VectorArrowProps) {
-  const dir = new THREE.Vector3(...vector);
-  const length = dir.length();
-  
-  if (length < 1e-4) return null; 
-  dir.normalize();
-  
-  const start = new THREE.Vector3(...origin);
-  const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-  
-  const headLength = Math.min(length * 0.3, 0.4);
-  const headWidth = thickness * 2.5;
-  const shaftLength = Math.max(0, length - headLength);
-  
-  const shaftPos = start.clone().add(dir.clone().multiplyScalar(shaftLength / 2));
-  const headPos = start.clone().add(dir.clone().multiplyScalar(shaftLength + headLength / 2));
-  const labelPos = start.clone().add(dir.clone().multiplyScalar(length + 0.3));
-
-  return (
-    <group>
-      {shaftLength > 0 && (
-        <mesh position={shaftPos} quaternion={quaternion}>
-          <cylinderGeometry args={[thickness, thickness, shaftLength, 8]} />
-          <meshStandardMaterial color={color} transparent={opacity < 1} opacity={opacity} />
-        </mesh>
-      )}
-      <mesh position={headPos} quaternion={quaternion}>
-        <coneGeometry args={[headWidth, headLength, 8]} />
-        <meshStandardMaterial color={color} transparent={opacity < 1} opacity={opacity} />
-      </mesh>
-      {label && opacity === 1 && (
-        <Html position={labelPos} center distanceFactor={8}>
-          <div style={{ color: color, fontSize: '15px', fontWeight: 'bold', textShadow: '1px 1px 2px white' }}>
-            {label}
-          </div>
-        </Html>
-      )}
-    </group>
-  );
-}
-
-// --- MAIN COMPONENT ---
-import CanvasControlsToolbar from "./CanvasControlsToolbar";
 
 export default function DelOperator() {
   const [scalarField, setScalarField] = useState("x^2 + y^2 + z^2");
   const [vectorField, setVectorField] = useState(["y", "x", "0"]);
-  
-  // Point state as strings to allow typing minus signs smoothly
+
+  // Point state as strings to allow smooth typing
   const [pxStr, setPxStr] = useState("1");
   const [pyStr, setPyStr] = useState("1");
   const [pzStr, setPzStr] = useState("1");
 
-  const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
-  const controlsRef = useRef<any>(null);
+  const [interactionMode, setInteractionMode] = useState<"rotate" | "pan">("rotate");
+  const controlsRef = useRef<OrbitControlsImpl>(null);
 
   const handleZoomIn = () => {
     if (controlsRef.current) {
@@ -159,129 +99,59 @@ export default function DelOperator() {
     }
   };
 
-  // Safe parsing for 3D coordinates
   const px = parseFloat(pxStr) || 0;
   const py = parseFloat(pyStr) || 0;
   const pz = parseFloat(pzStr) || 0;
 
   // 1. Gradient of scalar field (∇F)
-  const gradient = useMemo(() => [
-    partialDerivative(scalarField, "x", px, py, pz),
-    partialDerivative(scalarField, "y", px, py, pz),
-    partialDerivative(scalarField, "z", px, py, pz)
-  ], [scalarField, px, py, pz]);
+  const gradient = useMemo<[number, number, number]>(
+    () => [
+      partialDerivative(scalarField, "x", px, py, pz),
+      partialDerivative(scalarField, "y", px, py, pz),
+      partialDerivative(scalarField, "z", px, py, pz),
+    ],
+    [scalarField, px, py, pz],
+  );
 
   // 2. Divergence of vector field (∇·F)
   const divergence = useMemo(() => {
-    return partialDerivative(vectorField[0], "x", px, py, pz) + 
-           partialDerivative(vectorField[1], "y", px, py, pz) + 
-           partialDerivative(vectorField[2], "z", px, py, pz);
+    return (
+      partialDerivative(vectorField[0], "x", px, py, pz) +
+      partialDerivative(vectorField[1], "y", px, py, pz) +
+      partialDerivative(vectorField[2], "z", px, py, pz)
+    );
   }, [vectorField, px, py, pz]);
 
   // 3. Curl of vector field (∇×F)
-  const curlVec = useMemo(() => [
-    partialDerivative(vectorField[2], "y", px, py, pz) - partialDerivative(vectorField[1], "z", px, py, pz),
-    partialDerivative(vectorField[0], "z", px, py, pz) - partialDerivative(vectorField[2], "x", px, py, pz),
-    partialDerivative(vectorField[1], "x", px, py, pz) - partialDerivative(vectorField[0], "y", px, py, pz)
-  ], [vectorField, px, py, pz]);
+  const curlVec = useMemo<[number, number, number]>(
+    () => [
+      partialDerivative(vectorField[2], "y", px, py, pz) -
+        partialDerivative(vectorField[1], "z", px, py, pz),
+      partialDerivative(vectorField[0], "z", px, py, pz) -
+        partialDerivative(vectorField[2], "x", px, py, pz),
+      partialDerivative(vectorField[1], "x", px, py, pz) -
+        partialDerivative(vectorField[0], "y", px, py, pz),
+    ],
+    [vectorField, px, py, pz],
+  );
 
-  // 4. Generate local vector field grid to provide visual context for Curl & Div
-  const localGrid = useMemo(() => {
-    const grid = [];
-    const step = 0.8;
-    for (let i = -1; i <= 1; i++) {
-      for (let j = -1; j <= 1; j++) {
-        for (let k = -1; k <= 1; k++) {
-           if (i === 0 && j === 0 && k === 0) continue; // Skip exact center to avoid overlapping
-           const cx = px + i*step;
-           const cy = py + j*step;
-           const cz = pz + k*step;
-           
-           const vx = safeEval(vectorField[0], cx, cy, cz);
-           const vy = safeEval(vectorField[1], cx, cy, cz);
-           const vz = safeEval(vectorField[2], cx, cy, cz);
-           
-           const scale = 0.3; 
-           grid.push({
-              origin: [cx, cy, cz],
-              vec: [vx * scale, vy * scale, vz * scale]
-           });
-        }
-      }
-    }
-    return grid;
-  }, [vectorField, px, py, pz]);
+  const gradMag = Math.sqrt(
+    gradient[0] * gradient[0] +
+      gradient[1] * gradient[1] +
+      gradient[2] * gradient[2],
+  );
+  const curlMag = Math.sqrt(
+    curlVec[0] * curlVec[0] + curlVec[1] * curlVec[1] + curlVec[2] * curlVec[2],
+  );
 
-  const formatNum = (n: number) => Number.isFinite(n) ? n.toFixed(2) : "0.00";
+  const formatNum = (n: number) => (Number.isFinite(n) ? n.toFixed(2) : "0.00");
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4 font-sans text-gray-800 bg-white">
-      
-      {/* --- TOP INPUTS --- */}
-      <div className="flex flex-wrap justify-center gap-6 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-        <div>
-          <h2 className="font-bold text-sm mb-1 text-gray-700">Scalar Field F(x, y, z):</h2>
-          <input
-            type="text"
-            value={scalarField}
-            onChange={(e) => setScalarField(e.target.value)}
-            className="border border-gray-300 p-1 w-60 rounded shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          />
-        </div>
-        
-        <div>
-          <h2 className="font-bold text-sm mb-1 text-gray-700">Vector Field F(x, y, z):</h2>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={vectorField[0]}
-              onChange={(e) => setVectorField([e.target.value, vectorField[1], vectorField[2]])}
-              className="border border-gray-300 p-1 w-24 rounded shadow-sm focus:outline-none focus:border-blue-500"
-            />
-            <input
-              type="text"
-              value={vectorField[1]}
-              onChange={(e) => setVectorField([vectorField[0], e.target.value, vectorField[2]])}
-              className="border border-gray-300 p-1 w-24 rounded shadow-sm focus:outline-none focus:border-blue-500"
-            />
-            <input
-              type="text"
-              value={vectorField[2]}
-              onChange={(e) => setVectorField([vectorField[0], vectorField[1], e.target.value])}
-              className="border border-gray-300 p-1 w-24 rounded shadow-sm focus:outline-none focus:border-blue-500"
-            />
-          </div>
-        </div>
-        
-        <div>
-          <h2 className="font-bold text-sm mb-1 text-gray-700">Point P (x,y,z):</h2>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={pxStr}
-              onChange={(e) => setPxStr(e.target.value)}
-              className="border border-gray-300 p-1 w-16 rounded text-center shadow-sm focus:outline-none focus:border-blue-500"
-            />
-            <input
-              type="text"
-              value={pyStr}
-              onChange={(e) => setPyStr(e.target.value)}
-              className="border border-gray-300 p-1 w-16 rounded text-center shadow-sm focus:outline-none focus:border-blue-500"
-            />
-            <input
-              type="text"
-              value={pzStr}
-              onChange={(e) => setPzStr(e.target.value)}
-              className="border border-gray-300 p-1 w-16 rounded text-center shadow-sm focus:outline-none focus:border-blue-500"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* --- CANVAS --- */}
+    <div className="flex flex-col items-center gap-4 p-4 w-full">
+      {/* 3D Canvas Box matching theme */}
       <div
-        className="relative border border-gray-300 rounded-xl overflow-hidden bg-gray-50 shadow-inner"
-        style={{ height: 500, width: 800, zIndex: 0 }}
+        className="relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50 w-full max-w-[800px]"
+        style={{ height: 500, zIndex: 0 }}
       >
         <CanvasControlsToolbar
           interactionMode={interactionMode}
@@ -290,90 +160,247 @@ export default function DelOperator() {
           onZoomOut={handleZoomOut}
           onReset={resetCamera}
         />
-        <Canvas camera={{ position: [4, 4, 6], fov: 45 }}>
+
+        <Canvas
+          style={{ height: "100%", width: "100%" }}
+          camera={{ position: [3, 2, 6], fov: 50 }}
+        >
           <ambientLight intensity={0.6} />
           <pointLight position={[10, 10, 10]} intensity={0.8} />
+
           <OrbitControls
             ref={controlsRef}
             makeDefault
             mouseButtons={{
-              LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+              LEFT:
+                interactionMode === "rotate"
+                  ? THREE.MOUSE.ROTATE
+                  : THREE.MOUSE.PAN,
               MIDDLE: THREE.MOUSE.DOLLY,
-              RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+              RIGHT:
+                interactionMode === "rotate"
+                  ? THREE.MOUSE.PAN
+                  : THREE.MOUSE.ROTATE,
             }}
           />
-          
-          <Axes length={10} width={0.03} />
-          <gridHelper args={[20, 20, '#e5e7eb', '#f3f4f6']} position={[0, -0.01, 0]} />
+
+          <Axes length={20} width={3} fontPosition={5.5} interval={1} />
 
           {/* Point P Marker */}
           <mesh position={[px, py, pz]}>
-            <sphereGeometry args={[0.15, 32, 32]} />
-            <meshStandardMaterial color="#3b82f6" />
+            <sphereGeometry args={[0.12, 16, 16]} />
+            <meshBasicMaterial color="#3b82f6" />
           </mesh>
-          <Html position={[px + 0.2, py + 0.2, pz + 0.2]} center distanceFactor={8}>
-            <div style={{ color: "#2563eb", fontSize: "20px", fontWeight: "bold", userSelect: "none" }}>
+          <Html
+            position={[px + 0.2, py + 0.2, pz + 0.2]}
+            center
+            distanceFactor={8}
+          >
+            <div
+              style={{
+                color: "#2563eb",
+                fontSize: "18px",
+                fontWeight: "bold",
+                userSelect: "none",
+              }}
+            >
               P
             </div>
           </Html>
 
-          {/* Gradient Vector (Red) */}
-          <VectorArrow vector={gradient} origin={[px, py, pz]} color="#ef4444" label="∇F (Grad)" thickness={0.08} />
-          
-          {/* Curl Vector (Green) */}
-          <VectorArrow vector={curlVec} origin={[px, py, pz]} color="#22c55e" label="∇×F (Curl)" thickness={0.08} />
+          {/* Gradient Vector (Purple / Resultant style) */}
+          {gradMag > 1e-4 && (
+            <VectorArrow
+              vector={gradient}
+              origin={[px, py, pz]}
+              color="purple"
+              label="∇F"
+            />
+          )}
 
-          {/* Local Vector Field Flow (Gray) */}
-          {localGrid.map((item, idx) => (
-             <VectorArrow 
-               key={idx} 
-               vector={item.vec} 
-               origin={item.origin} 
-               color="#9ca3af" // Gray-400
-               opacity={0.5} 
-               thickness={0.03} 
-             />
-          ))}
-
+          {/* Curl Vector (Dark Turquoise / Green) */}
+          {curlMag > 1e-4 && (
+            <VectorArrow
+              vector={curlVec}
+              origin={[px, py, pz]}
+              color="#059669"
+              label="∇×F"
+            />
+          )}
         </Canvas>
       </div>
 
-      {/* --- LEGEND --- */}
-      <div className="flex justify-center items-center gap-8 py-3 w-[800px] bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 shadow-sm">
+      {/* Axis & Element Legend */}
+      <div className="flex flex-wrap justify-center items-center gap-6 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium w-full max-w-[800px]">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-red-500"></span>
-          <span>X-axis / Gradient</span>
+          <span>X-axis</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-green-500"></span>
-          <span>Y-axis / Curl</span>
+          <span>Y-axis</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-          <span>Z-axis / Point P</span>
+          <span>Z-axis</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-gray-400"></span>
-          <span>Vector Field Flow</span>
+          <span className="w-3 h-3 rounded-full bg-purple-600"></span>
+          <span>∇F (Gradient)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-emerald-600"></span>
+          <span>∇×F (Curl)</span>
         </div>
       </div>
 
-      {/* --- TEXT OUTPUT --- */}
-      <div className="flex flex-col gap-2 text-lg w-[800px] p-5 bg-white border border-gray-200 rounded-xl shadow-sm">
-        <div className="flex gap-2">
-          <span className="font-bold text-red-600">Gradient (Scalar F):</span> 
-          <span>∇F = ({formatNum(gradient[0])}, {formatNum(gradient[1])}, {formatNum(gradient[2])})</span>
+      {/* Input Controls */}
+      <div className="flex flex-col gap-4 w-full max-w-[800px] bg-white p-4 border border-gray-200 rounded-lg shadow-xs">
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <span className="font-semibold text-gray-700 min-w-[170px]">
+            Scalar Field F(x, y, z):
+          </span>
+          <input
+            type="text"
+            value={scalarField}
+            onChange={(e) => setScalarField(e.target.value)}
+            className="border border-gray-300 p-1.5 px-2 rounded w-64 text-sm font-mono focus:border-blue-500 focus:outline-none"
+            placeholder="e.g. x^2 + y^2 + z^2"
+          />
         </div>
-        <div className="flex gap-2">
-          <span className="font-bold text-blue-600">Divergence (Vector F):</span> 
-          <span>∇·F = {formatNum(divergence)}</span>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <span className="font-semibold text-gray-700 min-w-[170px]">
+            Vector Field F(x, y, z):
+          </span>
+          <div className="flex items-center gap-2">
+            <label className="text-gray-500 text-xs">
+              Fx:
+              <input
+                type="text"
+                value={vectorField[0]}
+                onChange={(e) =>
+                  setVectorField([
+                    e.target.value,
+                    vectorField[1],
+                    vectorField[2],
+                  ])
+                }
+                className="border border-gray-300 p-1.5 px-2 rounded ml-1 w-24 text-sm font-mono focus:border-blue-500 focus:outline-none"
+              />
+            </label>
+            <label className="text-gray-500 text-xs">
+              Fy:
+              <input
+                type="text"
+                value={vectorField[1]}
+                onChange={(e) =>
+                  setVectorField([
+                    vectorField[0],
+                    e.target.value,
+                    vectorField[2],
+                  ])
+                }
+                className="border border-gray-300 p-1.5 px-2 rounded ml-1 w-24 text-sm font-mono focus:border-blue-500 focus:outline-none"
+              />
+            </label>
+            <label className="text-gray-500 text-xs">
+              Fz:
+              <input
+                type="text"
+                value={vectorField[2]}
+                onChange={(e) =>
+                  setVectorField([
+                    vectorField[0],
+                    vectorField[1],
+                    e.target.value,
+                  ])
+                }
+                className="border border-gray-300 p-1.5 px-2 rounded ml-1 w-24 text-sm font-mono focus:border-blue-500 focus:outline-none"
+              />
+            </label>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <span className="font-bold text-green-600">Curl (Vector F):</span> 
-          <span>∇×F = ({formatNum(curlVec[0])}, {formatNum(curlVec[1])}, {formatNum(curlVec[2])})</span>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <span className="font-semibold text-gray-700 min-w-[170px]">
+            Point P Coordinates:
+          </span>
+          <div className="flex items-center gap-2">
+            <label className="text-gray-500 text-xs">
+              X:
+              <input
+                type="text"
+                value={pxStr}
+                onChange={(e) => setPxStr(e.target.value)}
+                className="border border-gray-300 p-1.5 px-2 rounded ml-1 w-20 text-sm text-center focus:border-blue-500 focus:outline-none"
+              />
+            </label>
+            <label className="text-gray-500 text-xs">
+              Y:
+              <input
+                type="text"
+                value={pyStr}
+                onChange={(e) => setPyStr(e.target.value)}
+                className="border border-gray-300 p-1.5 px-2 rounded ml-1 w-20 text-sm text-center focus:border-blue-500 focus:outline-none"
+              />
+            </label>
+            <label className="text-gray-500 text-xs">
+              Z:
+              <input
+                type="text"
+                value={pzStr}
+                onChange={(e) => setPzStr(e.target.value)}
+                className="border border-gray-300 p-1.5 px-2 rounded ml-1 w-20 text-sm text-center focus:border-blue-500 focus:outline-none"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
+      {/* Output Mathematical Display Cards */}
+      <div className="flex flex-col gap-2.5 w-full max-w-[800px] p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm md:text-base">
+        <div className="flex flex-wrap items-baseline gap-2">
+          <span className="font-bold text-purple-700">
+            Gradient of Scalar Field (∇F):
+          </span>
+          <span className="font-semibold">
+            {formatNum(gradient[0])}{" "}
+            <span className="italic text-gray-700 font-normal">î</span>{" "}
+            {gradient[1] >= 0 ? "+ " : "- "}
+            {Math.abs(gradient[1]).toFixed(2)}{" "}
+            <span className="italic text-gray-700 font-normal">ĵ</span>{" "}
+            {gradient[2] >= 0 ? "+ " : "- "}
+            {Math.abs(gradient[2]).toFixed(2)}{" "}
+            <span className="italic text-gray-700 font-normal">k̂</span>
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-baseline gap-2">
+          <span className="font-bold text-blue-700">
+            Divergence of Vector Field (∇·F):
+          </span>
+          <span className="font-semibold text-gray-900">
+            {formatNum(divergence)}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-baseline gap-2">
+          <span className="font-bold text-emerald-700">
+            Curl of Vector Field (∇×F):
+          </span>
+          <span className="font-semibold">
+            {formatNum(curlVec[0])}{" "}
+            <span className="italic text-gray-700 font-normal">î</span>{" "}
+            {curlVec[1] >= 0 ? "+ " : "- "}
+            {Math.abs(curlVec[1]).toFixed(2)}{" "}
+            <span className="italic text-gray-700 font-normal">ĵ</span>{" "}
+            {curlVec[2] >= 0 ? "+ " : "- "}
+            {Math.abs(curlVec[2]).toFixed(2)}{" "}
+            <span className="italic text-gray-700 font-normal">k̂</span>
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
