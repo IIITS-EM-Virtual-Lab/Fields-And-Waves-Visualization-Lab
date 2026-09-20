@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Settings2, Cpu, Activity } from "lucide-react";
-import type * as PlotlyType from "plotly.js";
-
 declare global {
   interface Window {
-    Plotly: typeof PlotlyType;
+    Plotly: any;
   }
 }
 
@@ -188,7 +186,7 @@ export default function QuarterWaveTransformerVisualization() {
 
     // --- 1. SMITH CHART ---
     if (plotRef.current) {
-      const traces: PlotlyType.Data[] = [];
+      const traces: any[] = [];
       const gammaMag = Math.abs(results.gammaMismatch);
 
       // 1. VSWR Circle
@@ -211,7 +209,7 @@ export default function QuarterWaveTransformerVisualization() {
           imag: swrX,
           line: { color: "#22c55e", width: 2, dash: "dash" }, // Matched Smith Chart's green
           hoverinfo: "skip",
-        } as unknown as PlotlyType.Data);
+        });
       }
 
       // 2. Load Point
@@ -228,7 +226,7 @@ export default function QuarterWaveTransformerVisualization() {
           symbol: "circle",
           line: { color: "white", width: 1 },
         }, // Matched styling
-      } as unknown as PlotlyType.Data);
+      });
 
       // 3. Matched Point
       traces.push({
@@ -244,7 +242,7 @@ export default function QuarterWaveTransformerVisualization() {
           symbol: "diamond",
           line: { color: "white", width: 1 },
         }, // Matched styling
-      } as unknown as PlotlyType.Data);
+      });
 
       const layout = {
         paper_bgcolor: "#ffffff",
@@ -288,13 +286,13 @@ export default function QuarterWaveTransformerVisualization() {
           "lasso2d",
           "select2d",
           "toImage",
-        ] as PlotlyType.ModeBarDefaultButtons[],
+        ],
       };
 
       window.Plotly.newPlot(
         plotRef.current,
         traces,
-        layout as unknown as PlotlyType.Layout,
+        layout,
         config,
       );
     }
@@ -337,7 +335,7 @@ export default function QuarterWaveTransformerVisualization() {
         gamma_mag.push(g_mag);
       }
 
-      const traceFreq: PlotlyType.Data = {
+      const traceFreq: any = {
         x: f_norm,
         y: gamma_mag,
         type: "scatter",
@@ -381,7 +379,7 @@ export default function QuarterWaveTransformerVisualization() {
       window.Plotly.newPlot(
         freqPlotRef.current,
         [traceFreq],
-        layoutFreq as unknown as PlotlyType.Layout,
+        layoutFreq,
         { responsive: true, displayModeBar: false },
       );
     }

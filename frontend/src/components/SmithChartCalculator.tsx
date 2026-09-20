@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Activity, Cpu, Settings2 } from "lucide-react";
-import type * as PlotlyType from "plotly.js";
-import { Button } from "@/components/ui/button";
-
+import { Button } from "./ui/button";
 declare global {
   interface Window {
-    Plotly: typeof PlotlyType;
+    Plotly: any;
   }
 }
 
@@ -263,7 +261,7 @@ export default function SmithChartCalculator() {
   useEffect(() => {
     if (!plotlyLoaded || !plotRef.current || !window.Plotly) return;
 
-    const traces: PlotlyType.Data[] = [];
+    const traces: any[] = [];
     const isImp = chartMode === "impedance";
 
     // 1. SWR Circle (Dashed Green)
@@ -276,7 +274,7 @@ export default function SmithChartCalculator() {
         imag: chartData.swrCircleX,
         line: { color: "#22c55e", width: 2, dash: "dash" },
         hoverinfo: "skip",
-      } as unknown as PlotlyType.Data);
+      });
     }
 
     // 2. Rotation Arc (Thick Red)
@@ -289,7 +287,7 @@ export default function SmithChartCalculator() {
         imag: chartData.arcX,
         line: { color: "#ef4444", width: 3 },
         hoverinfo: "skip",
-      } as unknown as PlotlyType.Data);
+      });
     }
 
     // 3. Normalised Load Point (Dynamic zL or yL)
@@ -306,7 +304,7 @@ export default function SmithChartCalculator() {
         line: { color: "white", width: 1 },
       },
       hovertemplate: `<b>${isImp ? "z_load" : "y_load"}</b><br>${isImp ? "Real" : "Cond"}: %{real:.3f} <br>${isImp ? "Imag" : "Susc"}: %{imag:.3f} <extra></extra>`,
-    } as unknown as PlotlyType.Data);
+    });
 
     // 4. Normalised Input Point (Dynamic zin or yin)
     if (results.safeLen > 0) {
@@ -323,7 +321,7 @@ export default function SmithChartCalculator() {
           line: { color: "white", width: 1 },
         },
         hovertemplate: `<b>${isImp ? "z_in" : "y_in"}</b><br>${isImp ? "Real" : "Cond"}: %{real:.3f} <br>${isImp ? "Imag" : "Susc"}: %{imag:.3f} <extra></extra>`,
-      } as unknown as PlotlyType.Data);
+      });
     }
 
     const layout = {
@@ -368,13 +366,13 @@ export default function SmithChartCalculator() {
         "lasso2d",
         "select2d",
         "toImage",
-      ] as PlotlyType.ModeBarDefaultButtons[],
+      ],
     };
 
     window.Plotly.newPlot(
       plotRef.current,
       traces,
-      layout as unknown as PlotlyType.Layout,
+      layout,
       config,
     );
   }, [results, chartData, plotlyLoaded, chartMode]);
