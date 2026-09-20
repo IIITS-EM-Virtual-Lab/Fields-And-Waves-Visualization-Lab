@@ -1,7 +1,12 @@
 /* ---------- Global & layout ---------- */
 *,
 *::before,
-*::after { box-sizing: border-box; }
+*::after {
+  box-sizing: border-box;
+}
+
+/* wave_reflection.css */
+/* Styles for custom visualization elements in Wave Reflection module */
 
 .wave-container {
   width: 100%;
@@ -17,6 +22,10 @@
   overflow: visible;
 }
 
+.wave-reflection-card {
+  transition: all 0.2s ease-in-out;
+}
+
 /* Headings */
 .wave-container h1,
 .wave-container .text-2xl {
@@ -26,6 +35,7 @@
   text-align: center;
   color: #0b1320;
 }
+
 .wave-container h2,
 .wave-container .text-xl {
   font-size: 1.25rem;
@@ -46,17 +56,43 @@
 }
 
 /* Utilities */
-.wave-container .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-.wave-container .mb-6 { margin-bottom: 1.5rem; }
-.wave-container .mt-6 { margin-top: 1.5rem; }
-.wave-container .mt-8 { margin-top: 2rem; }
-.wave-container .mb-4 { margin-bottom: 1rem; }
-.wave-container .ml-6 { margin-left: 1.5rem; }
-.wave-container .space-y-2 > * + * { margin-top: 0.5rem; }
-.wave-container .p-10 { padding: 2.5rem; }
+.wave-container .py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.wave-container .mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.wave-container .mt-6 {
+  margin-top: 1.5rem;
+}
+
+.wave-container .mt-8 {
+  margin-top: 2rem;
+}
+
+.wave-container .mb-4 {
+  margin-bottom: 1rem;
+}
+
+.wave-container .ml-6 {
+  margin-left: 1.5rem;
+}
+
+.wave-container .space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+.wave-container .p-10 {
+  padding: 2.5rem;
+}
 
 /* Sections */
-.wave-container .topic { margin-bottom: 1.5rem; }
+.wave-container .topic {
+  margin-bottom: 1.5rem;
+}
 
 /* ---------- Visualizer container ---------- */
 .visualizer-container {
@@ -65,7 +101,7 @@
   border: 2px solid #2563eb;
   border-radius: 0.75rem;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   background: #ffffff;
 }
 
@@ -75,14 +111,20 @@
   top: 12px;
   left: 12px;
   z-index: 5;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   padding: 12px;
   border-radius: 0.5rem;
   border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
   font-size: 0.85rem;
 }
-.visualizer-container .controls label { display: block; margin-bottom: 0.4rem; color: #1f2937; }
+
+.visualizer-container .controls label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: #1f2937;
+}
+
 .visualizer-container .controls input,
 .visualizer-container .controls select {
   border: 1px solid #d1d5db;
@@ -90,19 +132,45 @@
   padding: 2px 6px;
   background-color: #fff;
 }
-.visualizer-container .controls input[type="range"] { cursor: pointer; }
-.visualizer-container .controls .current-medium { font-size: 0.8rem; margin-top: 6px; color: #4b5563; }
+
+.visualizer-container .controls input[type="range"] {
+  cursor: pointer;
+}
+
+.visualizer-container .controls .current-medium {
+  font-size: 0.8rem;
+  margin-top: 6px;
+  color: #4b5563;
+}
 
 /* ---------- 2D SVG model ---------- */
-.wave2d-svg { width: 100%; height: auto; display: block; border-radius: 10px; border: 1px solid #e5eaf1; }
+.wave2d-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  border: 1px solid #e5eaf1;
+}
 
 /* Text styles used inside SVG (must rely on 'fill' for color) */
-.badge  { font: 600 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; fill: #1e3a8a; }
-.tag    { font: 700 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; fill: #111827; }
-.legend { font: 600 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; fill: #374151; }
+.badge {
+  font: 600 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  fill: #1e3a8a;
+}
+
+.tag {
+  font: 700 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  fill: #111827;
+}
+
+.legend {
+  font: 600 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  fill: #374151;
+}
 
 /* ---------- Hints (page footer under viz) ---------- */
-.r3f-hints, .hints {
+.r3f-hints,
+.hints {
   padding: 0.5rem 0.8rem;
   color: #4b5563;
   background: #f9fafb;
@@ -112,18 +180,68 @@
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
-  .wave-container { padding: 16px; margin: 0.6rem; }
-  .wave-container h1, .wave-container .text-2xl { font-size: 1.35rem; }
-  .wave-container h2, .wave-container .text-xl { font-size: 1.05rem; }
-  .wave-container .p-10 { padding: 1rem; }
-  .visualizer-container .controls { top: 8px; left: 8px; padding: 10px; }
+  .wave-container {
+    padding: 16px;
+    margin: 0.6rem;
+  }
+
+  .wave-container h1,
+  .wave-container .text-2xl {
+    font-size: 1.35rem;
+  }
+
+  .wave-container h2,
+  .wave-container .text-xl {
+    font-size: 1.05rem;
+  }
+
+  .wave-container .p-10 {
+    padding: 1rem;
+  }
+
+  .visualizer-container .controls {
+    top: 8px;
+    left: 8px;
+    padding: 10px;
+  }
 }
+
 @media (max-width: 600px) {
-  .wave-container { padding: 12px; }
-  .wave-container h1, .wave-container .text-2xl { font-size: 1.1rem; }
-  .wave-container h2, .wave-container .text-xl { font-size: 1rem; }
-  .wave-container p, .wave-container .text-lg { font-size: 0.95rem; }
-  .visualizer-container .controls { padding: 8px; }
-  .visualizer-container .controls input { width: 68px; }
-  .badge, .tag { font-size: 11px; }
+  .wave-container {
+    padding: 12px;
+  }
+
+  .wave-container h1,
+  .wave-container .text-2xl {
+    font-size: 1.1rem;
+  }
+
+  .wave-container h2,
+  .wave-container .text-xl {
+    font-size: 1rem;
+  }
+
+  .wave-container p,
+  .wave-container .text-lg {
+    font-size: 0.95rem;
+  }
+
+  .visualizer-container .controls {
+    padding: 8px;
+  }
+
+  .visualizer-container .controls input {
+    width: 68px;
+  }
+
+  .badge,
+  .tag {
+    font-size: 11px;
+  }
 }
+
+/* Hover effect */
+.wave-reflection-card:hover {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+}
+
