@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectCurrentToken } from '../store/slices/authSlice';
+import { allLocalQuizzes, electrostaticsQuizzes } from '../data/quizQuestions';
 import './ChapterQuiz.css';
 
 const API = 'https://fields-and-waves-visualization-lab.onrender.com';
@@ -85,6 +86,8 @@ const ChapterQuiz = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [showResults, setShowResults]   = useState(false);
   const [showReview, setShowReview]     = useState(false);
+  const [showQuestionBank, setShowQuestionBank] = useState(false);
+  const [bankFilter, setBankFilter]     = useState<'ALL' | 'EASY' | 'MEDIUM' | 'HARD'>('ALL');
   const [userAnswers, setUserAnswers]   = useState<UserAnswer[]>([]);
   const [submitted, setSubmitted]       = useState(false);
   const [aiTutorAnswers, setAiTutorAnswers] = useState<Record<string, string>>({});
@@ -102,24 +105,59 @@ const ChapterQuiz = () => {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const url =
-          !chapterName || chapterName === 'common'
-            ? `${API}/api/quizzes/module/${moduleName}/common`
-            : `${API}/api/quizzes/module/${moduleName}/chapter/${chapterName}`;
+        let remoteQuestions: Question[] = [];
+        let quizId = `${moduleName}-${chapterName}`;
 
-        const res = await axios.get(url);
+        try {
+          const url =
+            !chapterName || chapterName === 'common'
+              ? `${API}/api/quizzes/module/${moduleName}/common`
+              : `${API}/api/quizzes/module/${moduleName}/chapter/${chapterName}`;
+
+          const res = await axios.get(url);
+          if (res.data?.data) {
+            quizId = res.data.data._id || quizId;
+            remoteQuestions = res.data.data.questions || [];
+          }
+        } catch (apiErr) {
+          console.warn('Remote quiz fetch note:', apiErr);
+        }
+
+        // Get local curated question bank for this module & chapter if available
+        const localModule = moduleName ? (allLocalQuizzes as any)[moduleName] : null;
+        const localData = localModule && chapterName ? localModule[chapterName] : null;
+        let combinedQuestions: Question[] = [];
+
+        if (localData && localData.questions.length > 0) {
+          combinedQuestions = localData.questions.map((q: any, idx: number) => ({
+            _id: q._id || `local-${idx}`,
+            type: q.type,
+            question: q.question,
+            options: q.options,
+            correctAnswer: q.correctAnswer,
+            explanation: q.explanation,
+            difficulty: q.difficulty,
+            points: q.points,
+            timeLimitSeconds: q.timeLimitSeconds ?? 120,
+            imageUrl: q.imageUrl,
+            solutionImageUrl: q.solutionImageUrl,
+          }));
+        } else {
+          combinedQuestions = remoteQuestions;
+        }
+
         const fullQuiz: Quiz = {
-          _id:       res.data.data._id,
-          module:    res.data.data.module,
-          chapter:   res.data.data.chapter,
-          questions: res.data.data.questions,
+          _id: quizId,
+          module: moduleName,
+          chapter: chapterName,
+          questions: combinedQuestions,
         };
 
         setRawQuiz(fullQuiz);
         const selectedQuestions = selectQuizQuestions(fullQuiz.questions);
         setQuiz({ ...fullQuiz, questions: selectedQuestions });
       } catch (err) {
-        console.error('Error fetching quiz:', err);
+        console.error('Error in fetchQuiz:', err);
       } finally {
         setLoading(false);
       }
@@ -464,8 +502,129 @@ Explain why the student's answer is wrong or incomplete, why the correct answer 
     );
   };
 
+  // ── Teacher / Full Question Bank Preview screen ──────────────
+  const renderQuestionBank = () => {
+    const allQuestions = rawQuiz?.questions || quiz?.questions || [];
+    const filteredQuestions =
+      bankFilter === 'ALL'
+        ? allQuestions
+        : allQuestions.filter((q) => q.difficulty === bankFilter);
+
+    const counts = {
+      all: allQuestions.length,
+      easy: allQuestions.filter((q) => q.difficulty === 'EASY').length,
+      medium: allQuestions.filter((q) => q.difficulty === 'MEDIUM').length,
+      hard: allQuestions.filter((q) => q.difficulty === 'HARD').length,
+    };
+
+    return (
+      <div className="question-bank-container">
+        <div className="question-bank-header">
+          <div className="bank-header-left">
+            <button className="bank-back-btn" onClick={() => setShowQuestionBank(false)}>
+              ← Back to Quiz Intro
+            </button>
+            <h1 className="bank-title">
+              📚 {moduleName.replace(/-/g, ' ').toUpperCase()} — {chapterName.replace(/-/g, ' ').toUpperCase()}
+            </h1>
+            <p className="bank-subtitle">
+              Teacher &amp; Instructor Question Bank Preview · Complete repository of all {counts.all} questions with answers &amp; step-by-step solutions
+            </p>
+          </div>
+          <div className="bank-header-right">
+            <button className="bank-print-btn" onClick={() => window.print()}>
+              🖨 Print / PDF
+            </button>
+          </div>
+        </div>
+
+        {/* Filter Badges */}
+        <div className="bank-filter-bar">
+          <button
+            className={`bank-filter-btn ${bankFilter === 'ALL' ? 'active' : ''}`}
+            onClick={() => setBankFilter('ALL')}
+          >
+            All Questions ({counts.all})
+          </button>
+          <button
+            className={`bank-filter-btn filter-easy ${bankFilter === 'EASY' ? 'active' : ''}`}
+            onClick={() => setBankFilter('EASY')}
+          >
+            🟢 Easy ({counts.easy})
+          </button>
+          <button
+            className={`bank-filter-btn filter-medium ${bankFilter === 'MEDIUM' ? 'active' : ''}`}
+            onClick={() => setBankFilter('MEDIUM')}
+          >
+            🟡 Medium ({counts.medium})
+          </button>
+          <button
+            className={`bank-filter-btn filter-hard ${bankFilter === 'HARD' ? 'active' : ''}`}
+            onClick={() => setBankFilter('HARD')}
+          >
+            🔴 Hard ({counts.hard})
+          </button>
+        </div>
+
+        {/* List of Questions */}
+        <div className="bank-questions-list">
+          {filteredQuestions.map((question, idx) => {
+            const correctAnswer = getCorrectAnswer(question);
+            return (
+              <div key={question._id || idx} className="bank-question-card">
+                <div className="bank-card-top">
+                  <span className="bank-q-num">Q{idx + 1}</span>
+                  <span className={`review-diff-tag diff-${question.difficulty.toLowerCase()}`}>
+                    {question.difficulty}
+                  </span>
+                  <span className="bank-q-pts">{question.points} {question.points === 1 ? 'pt' : 'pts'}</span>
+                </div>
+
+                <div className="bank-q-text">{question.question}</div>
+                {question.imageUrl && (
+                  <div className="question-image">
+                    <img src={question.imageUrl} alt="Question Diagram" />
+                  </div>
+                )}
+
+                {question.type === 'MCQ' && question.options && (
+                  <div className="bank-options-grid">
+                    {question.options.map((opt, optIdx) => {
+                      const isCorrect = opt.trim() === String(correctAnswer).trim();
+                      return (
+                        <div
+                          key={optIdx}
+                          className={`bank-option-item ${isCorrect ? 'bank-opt-correct' : ''}`}
+                        >
+                          <span className="bank-opt-letter">
+                            {String.fromCharCode(65 + optIdx)}.
+                          </span>
+                          <span className="bank-opt-text">{opt}</span>
+                          {isCorrect && <span className="bank-correct-tag">✓ Correct Answer</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {question.explanation && (
+                  <div className="bank-explanation-box">
+                    <div className="bank-exp-title">💡 Step-by-Step Mathematical Solution:</div>
+                    <div className="bank-exp-content">{question.explanation}</div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   // ── Guards ───────────────────────────────────────────────────
   if (loading || !quiz) return <div className="quiz-loading">Loading quiz...</div>;
+
+  if (showQuestionBank) return renderQuestionBank();
 
   if (quiz.questions.length === 0) {
     return (
@@ -484,6 +643,7 @@ Explain why the student's answer is wrong or incomplete, why the correct answer 
     const counts     = getDifficultyCounts();
     const totalSecs  = calcTotalSeconds(quiz.questions);
     const totalMins  = Math.ceil(totalSecs / 60);
+    const totalBankCount = rawQuiz?.questions.length || quiz.questions.length;
 
     return (
       <div className="quiz-intro-page">
@@ -496,7 +656,7 @@ Explain why the student's answer is wrong or incomplete, why the correct answer 
           <p className="intro-subtitle">Ready for a challenge?</p>
           <p>Test your knowledge and earn points for what you already know!</p>
           <p>
-            <strong>{quiz.questions.length} questions</strong> —{' '}
+            <strong>{quiz.questions.length} questions per test</strong> —{' '}
             {counts.easy   > 0 && <span className="intro-diff easy">{counts.easy} Easy</span>}
             {counts.medium > 0 && <><span style={{ color: '#718096' }}> · </span><span className="intro-diff medium">{counts.medium} Medium</span></>}
             {counts.hard   > 0 && <><span style={{ color: '#718096' }}> · </span><span className="intro-diff hard">{counts.hard} Hard</span></>}
@@ -512,7 +672,32 @@ Explain why the student's answer is wrong or incomplete, why the correct answer 
           </p>
 
           <p><em>Note: You get only one attempt per question. The timer starts when you click Let's go.</em></p>
-          <button className="start-btn" onClick={startQuiz}>Let's go</button>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '1rem' }}>
+            <button className="start-btn" onClick={startQuiz}>Let's go (Start Test)</button>
+            
+            {/* 🔐 Only visible to Admin/Teacher or via ?preview=true */}
+            {(currentUser?.isAdmin || new URLSearchParams(window.location.search).get('preview') === 'true') && (
+              <button
+                type="button"
+                className="bank-preview-btn"
+                onClick={() => setShowQuestionBank(true)}
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '2px solid #2563eb',
+                  color: '#2563eb',
+                  padding: '12px 20px',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                📘 Teacher Preview / View All {totalBankCount} Questions (Instructor Mode)
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
