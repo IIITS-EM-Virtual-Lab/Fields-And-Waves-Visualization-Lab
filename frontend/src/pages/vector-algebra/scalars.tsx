@@ -56,7 +56,7 @@ const Scalars = () => {
             <div className="pt-8">
               To distinguish between a scalar and a vector, it is customary to
               represent a vector by a letter with an arrow on top, such as A̅ and
-              B̅, or by a letter in boldface type such as **A** and **B**.
+              B̅, or by a letter in boldface type such as A and B.
             </div>
           </ul>
           <div className="w-full lg:w-1/2 flex justify-center">

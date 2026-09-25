@@ -5,6 +5,7 @@ import Team from "@/pages/team";
 import Content from "@/pages/Content";
 import Scalars from "./pages/vector-algebra/scalars";
 import VectorAdditionPage from "./pages/vector-algebra/addition";
+import VectorSubtractionPage from "./pages/vector-algebra/subtraction";
 import VectorMultiplicationPage from "./pages/vector-algebra/multiplication";
 import TripleProductPage from "./pages/vector-algebra/triple-product";
 import VectorCalculusIntro from "./pages/vector-calculus/vector-calculus-intro";
@@ -78,6 +79,7 @@ const AppRoutes = () => {
           <Route element={<ContentLayout />}>
             <Route path="/home" element={<Home />} />
             <Route path="/vector-addition" element={<VectorAdditionPage />} />
+            <Route path="/vector-subtraction" element={<VectorSubtractionPage />} />
             <Route path="/scalars-and-vectors" element={<Scalars />} />
             <Route
               path="/vector-multiplication"

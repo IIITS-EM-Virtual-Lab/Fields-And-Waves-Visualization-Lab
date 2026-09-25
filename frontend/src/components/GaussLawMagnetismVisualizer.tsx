@@ -1,8 +1,8 @@
-import { useRef, useMemo, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Line, Text } from "@react-three/drei";
+import React, { useMemo, useState, useRef } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Text } from "@react-three/drei";
 import * as THREE from "three";
-import Axes from "./Axes";
+import CanvasControlsToolbar from "./CanvasControlsToolbar";
 
 type MFLProps = {
     magnetLength: number;
@@ -153,6 +153,34 @@ export default function GaussLawMagnetismVisualizer() {
   const [lineCount, setLineCount] = useState(12);
   const [showGaussian, setShowGaussian] = useState(true);
 
+  const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+  const controlsRef = useRef<any>(null);
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom *= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom /= 1.2;
+      camera.updateProjectionMatrix();
+    }
+  };
+
+  const resetCamera = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object;
+      camera.zoom = 1;
+      camera.updateProjectionMatrix();
+      controlsRef.current.reset();
+    }
+  };
+
   const flux = 0; // Gauss law: Net flux = 0 for magnetic monopoles
 
   return (
@@ -202,13 +230,28 @@ export default function GaussLawMagnetismVisualizer() {
 
       {/* 3D Canvas */}
       <div
-        className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-4"
+        className="relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50 mt-4"
         style={{ height: 500, width: 800, zIndex: 0 }}
       >
+        <CanvasControlsToolbar
+          interactionMode={interactionMode}
+          setInteractionMode={setInteractionMode}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onReset={resetCamera}
+        />
         <Canvas camera={{ position: [8, 8, 8], fov: 45 }}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
-          <OrbitControls />
+          <OrbitControls
+            ref={controlsRef}
+            makeDefault
+            mouseButtons={{
+              LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+              MIDDLE: THREE.MOUSE.DOLLY,
+              RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+            }}
+          />
           <gridHelper args={[20, 20]} />
 
           {/* Bar Magnet */}

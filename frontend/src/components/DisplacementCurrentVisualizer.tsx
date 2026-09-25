@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import Axes from './Axes';
 import VectorArrow from './VectorArrow';
+import CanvasControlsToolbar from './CanvasControlsToolbar';
 
 function TimeUpdater({ setTime }: { setTime: React.Dispatch<React.SetStateAction<number>> }) {
     useFrame((_, delta) => {
@@ -18,6 +19,34 @@ function DisplacementCurrentVisualizer() {
     const [plateDistance, setPlateDistance] = useState(2);
     const [voltageAmplitude, setVoltageAmplitude] = useState(5);
     const [frequency, setFrequency] = useState(1);
+
+    const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+    const controlsRef = useRef<any>(null);
+
+    const handleZoomIn = () => {
+        if (controlsRef.current) {
+            const camera = controlsRef.current.object;
+            camera.zoom *= 1.2;
+            camera.updateProjectionMatrix();
+        }
+    };
+
+    const handleZoomOut = () => {
+        if (controlsRef.current) {
+            const camera = controlsRef.current.object;
+            camera.zoom /= 1.2;
+            camera.updateProjectionMatrix();
+        }
+    };
+
+    const resetCamera = () => {
+        if (controlsRef.current) {
+            const camera = controlsRef.current.object;
+            camera.zoom = 1;
+            camera.updateProjectionMatrix();
+            controlsRef.current.reset();
+        }
+    };
 
     const epsilon0 = 8.854e-12;
     const plateArea = 1; // m^2
@@ -96,11 +125,26 @@ function DisplacementCurrentVisualizer() {
                 </div>
             </div>
 
-            <div className="mt-6 border-2 border-blue-600 rounded-lg overflow-hidden w-full max-w-4xl aspect-video bg-white" style={{ zIndex: 0 }}>
+            <div className="mt-6 border-2 border-blue-600 rounded-lg overflow-hidden w-full max-w-4xl aspect-video bg-gray-50 relative" style={{ zIndex: 0 }}>
+                <CanvasControlsToolbar
+                    interactionMode={interactionMode}
+                    setInteractionMode={setInteractionMode}
+                    onZoomIn={handleZoomIn}
+                    onZoomOut={handleZoomOut}
+                    onReset={resetCamera}
+                />
                 <Canvas className="!h-full !w-full" camera={{ position: [5, 0, 5], fov: 45 }}>
                     <ambientLight intensity={0.5} />
                     <pointLight position={[10, 10, 10]} />
-                    <OrbitControls />
+                    <OrbitControls
+                        ref={controlsRef}
+                        makeDefault
+                        mouseButtons={{
+                            LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+                            MIDDLE: THREE.MOUSE.DOLLY,
+                            RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+                        }}
+                    />
 
                     <Axes length={20} width={3} fontPosition={4.5} interval={1} />
 

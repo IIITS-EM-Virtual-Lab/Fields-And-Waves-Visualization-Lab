@@ -2,37 +2,44 @@ import { Line, Html } from '@react-three/drei';
 
 type AxisProps = {
   axis: 'x' | 'y' | 'z';
-  length: number;
-  interval: number;
+  realLength: number;
+  realInterval: number;
   color: string;
+  scaleFactor: number;
 };
 
-function AxisTicks({ axis, length, interval, color }: AxisProps) {
+function AxisTicks({ axis, realLength, realInterval, color, scaleFactor }: AxisProps) {
   const ticks = [];
+  
+  // Failsafe to prevent infinite loops if interval is somehow 0
+  const safeInterval = Math.max(1, realInterval);
 
-  for (let i = -length; i <= length; i += interval) {
-    if (i === 0) continue;
+  for (let val = -realLength; val <= realLength; val += safeInterval) {
+    if (val === 0) continue;
+
+    // The physical position on the screen is scaled down, but the label 'val' stays true
+    const posVal = val / scaleFactor;
 
     let pos: [number, number, number] = [0, 0, 0];
     let tickStart: [number, number, number] = [0, 0, 0];
     let tickEnd: [number, number, number] = [0, 0, 0];
 
     if (axis === 'x') {
-      pos = [i, 0.2, 0];
-      tickStart = [i, -0.1, 0];
-      tickEnd = [i, 0.1, 0];
+      pos = [posVal, 0.2, 0];
+      tickStart = [posVal, -0.1, 0];
+      tickEnd = [posVal, 0.1, 0];
     } else if (axis === 'y') {
-      pos = [-0.2, i, 0];
-      tickStart = [-0.1, i, 0];
-      tickEnd = [0.1, i, 0];
+      pos = [-0.2, posVal, 0];
+      tickStart = [-0.1, posVal, 0];
+      tickEnd = [0.1, posVal, 0];
     } else {
-      pos = [0, 0.2, i];
-      tickStart = [0, -0.1, i];
-      tickEnd = [0, 0.1, i];
+      pos = [0, 0.2, posVal];
+      tickStart = [0, -0.1, posVal];
+      tickEnd = [0, 0.1, posVal];
     }
 
     ticks.push(
-      <group key={`${axis}-${i}`}>
+      <group key={`${axis}-${val}`}>
         <Line points={[tickStart, tickEnd]} color={color} lineWidth={1} />
         <Html position={pos} center distanceFactor={8}>
           <div style={{
@@ -41,7 +48,7 @@ function AxisTicks({ axis, length, interval, color }: AxisProps) {
             userSelect: 'none',
             whiteSpace: 'nowrap'
           }}>
-            {i}
+            {val}
           </div>
         </Html>
       </group>
@@ -51,66 +58,54 @@ function AxisTicks({ axis, length, interval, color }: AxisProps) {
   return <>{ticks}</>;
 }
 
-// ✅ UPDATED PROPS
 type AxesProps = {
   length?: number;
-  width?: number;
-  fontPosition?: number;
+  xLength?: number;
+  yLength?: number;
+  zLength?: number;
   interval?: number;
+  xInterval?: number;
+  yInterval?: number;
+  zInterval?: number;
+  width?: number;
   xcolor?: string;
   ycolor?: string;
   zcolor?: string;
-  labels?: [string, string, string]; // ✅ dynamic labels
+  scaleFactor?: number;
+  fontPosition?: number;
 };
 
 function Axes({
-  length = 20,
-  width = 3,
-  fontPosition = 5.5,
-  interval = 1,
-  xcolor = "black",
-  ycolor = "black",
-  zcolor = "black",
-  labels = ["X", "Y", "Z"] // ✅ default
+  length,
+  xLength = length ?? 100,
+  yLength = length ?? 100,
+  zLength = length ?? 100,
+  interval,
+  xInterval = interval ?? 1,
+  yInterval = interval ?? 1,
+  zInterval = interval ?? 1,
+  width = 1,
+  xcolor = "#ef4444",
+  ycolor = "#22c55e",
+  zcolor = "#3b82f6",
+  scaleFactor = 1,
+  fontPosition,
 }: AxesProps) {
+  
+  // Scale down the physical length of the axis lines
+  const visXL = xLength / scaleFactor;
+  const visYL = yLength / scaleFactor;
+  const visZL = zLength / scaleFactor;
 
   return (
     <>
-      {/* Axis lines */}
-      <Line points={[[-length, 0, 0], [length, 0, 0]]} color={xcolor} lineWidth={width} />
-      <Line points={[[0, -length, 0], [0, length, 0]]} color={ycolor} lineWidth={width} />
-      <Line points={[[0, 0, -length], [0, 0, length]]} color={zcolor} lineWidth={width} />
+      <Line points={[[-visXL, 0, 0], [visXL, 0, 0]]} color={xcolor} lineWidth={width} />
+      <Line points={[[0, -visYL, 0], [0, visYL, 0]]} color={ycolor} lineWidth={width} />
+      <Line points={[[0, 0, -visZL], [0, 0, visZL]]} color={zcolor} lineWidth={width} />
 
-      {/* Ticks */}
-      <AxisTicks axis='x' length={length} interval={interval} color={xcolor} />
-      <AxisTicks axis='y' length={length} interval={interval} color={ycolor} />
-      <AxisTicks axis='z' length={length} interval={interval} color={zcolor} />
-
-      {/* Positive Labels */}
-      <Html position={[fontPosition, 0.3, 0]} center distanceFactor={8}>
-        <div style={{ color: xcolor, fontSize: '28px' }}>{labels[0]}</div>
-      </Html>
-
-      <Html position={[0.3, fontPosition, 0]} center distanceFactor={8}>
-        <div style={{ color: ycolor, fontSize: '28px' }}>{labels[1]}</div>
-      </Html>
-
-      <Html position={[0, 0.3, fontPosition]} center distanceFactor={8}>
-        <div style={{ color: zcolor, fontSize: '28px' }}>{labels[2]}</div>
-      </Html>
-
-      {/* Negative Labels */}
-      <Html position={[-fontPosition, 0.3, 0]} center distanceFactor={8}>
-        <div style={{ color: xcolor, fontSize: '28px' }}>-{labels[0]}</div>
-      </Html>
-
-      <Html position={[0.3, -fontPosition, 0]} center distanceFactor={8}>
-        <div style={{ color: ycolor, fontSize: '28px' }}>-{labels[1]}</div>
-      </Html>
-
-      <Html position={[0, 0.3, -fontPosition]} center distanceFactor={8}>
-        <div style={{ color: zcolor, fontSize: '28px' }}>-{labels[2]}</div>
-      </Html>
+      <AxisTicks axis='x' realLength={xLength} realInterval={xInterval} color={xcolor} scaleFactor={scaleFactor} />
+      <AxisTicks axis='y' realLength={yLength} realInterval={yInterval} color={ycolor} scaleFactor={scaleFactor} />
+      <AxisTicks axis='z' realLength={zLength} realInterval={zInterval} color={zcolor} scaleFactor={scaleFactor} />
     </>
   );
 }

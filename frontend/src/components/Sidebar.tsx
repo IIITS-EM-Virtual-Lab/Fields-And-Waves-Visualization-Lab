@@ -21,6 +21,7 @@ const sidebarData: SidebarSection[] = [
     subtopics: [
       { name: "Scalars and Vectors", path: "/scalars-and-vectors", quizPath: "/quiz/vector-algebra/scalars" },
       { name: "Addition", path: "/vector-addition", quizPath: "/quiz/vector-algebra/addition" },
+      { name: "Subtraction", path: "/vector-subtraction", quizPath: "/quiz/vector-algebra/subtraction" },
       { name: "Multiplication", path: "/vector-multiplication", quizPath: "/quiz/vector-algebra/multiplication" },
       { name: "Triple Product", path: "/triple-product", quizPath: "/quiz/vector-algebra/triple-product" },
     ],
@@ -53,13 +54,13 @@ const sidebarData: SidebarSection[] = [
     topic: "Maxwell Equations",
     icon: "/assets/maxwell.png",
     subtopics: [
-      { name: "Gauss Law", path: "/gauss-law-contd" },
-      { name: "Gauss Law Magnetism", path: "/gauss-law-magnetism" },
-      { name: "Faraday Law", path: "/faraday-law" },
-      { name: "Ampere Law", path: "/ampere-law" },
-      { name: "Displacement Current", path: "/displacement-current" },
-      { name: "Time Varying Potential", path: "/time-varying-potential" },
-      { name: "EMF", path: "/transformer-motional-emf" },
+      { name: "Gauss Law", path: "/gauss-law-contd", quizPath: "/quiz/maxwell-equations/gauss-law-contd" },
+      { name: "Gauss Law Magnetism", path: "/gauss-law-magnetism", quizPath: "/quiz/maxwell-equations/gauss-law-magnetism" },
+      { name: "Faraday Law", path: "/faraday-law", quizPath: "/quiz/maxwell-equations/faradays-law" },
+      { name: "Ampere Law", path: "/ampere-law", quizPath: "/quiz/maxwell-equations/amperes-law" },
+      { name: "Displacement Current", path: "/displacement-current", quizPath: "/quiz/maxwell-equations/displacement-current" },
+      { name: "Time Varying Potential", path: "/time-varying-potential", quizPath: "/quiz/maxwell-equations/time-varying-potential" },
+      { name: "EMF", path: "/transformer-motional-emf", quizPath: "/quiz/maxwell-equations/emfs" },
     ],
   },
   {

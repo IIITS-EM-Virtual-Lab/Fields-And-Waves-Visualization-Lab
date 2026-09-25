@@ -197,13 +197,7 @@ return (
                 color="purple"
             />
         )}
-        {showField && (
-            <VectorArrow
-                vector={E_total.toArray() as [number, number, number]}
-                origin={testParticle.toArray() as [number, number, number]}
-                color="orange"
-            />
-        )}
+        
 
         {fieldLines}
         {potentialMap}
@@ -441,11 +435,7 @@ return (
 
             {/* Toggles */}
             <div className="col-span-2 grid grid-cols-3 gap-3">
-                <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={showField}
-                        onChange={() => setShowField(v => !v)} />
-                    Field at probe
-                </label>
+
                 <label className="flex items-center gap-2 text-sm">
                     <input type="checkbox" checked={showDipoleVector}
                         onChange={() => setShowDipoleVector(v => !v)} />
@@ -478,7 +468,7 @@ return (
         </div>
 
         {/* ── Physics readout ── */}
-        <div className="grid grid-cols-2 gap-2 w-full max-w-2xl text-sm font-mono text-green-400 p-3 rounded bg-black/20">
+        <div className="grid grid-cols-2 gap-2 w-full max-w-2xl text-sm font-mono text-green-400 p-3 rounded bg-white">
             <div>
                 <span className="text-gray-400">E at probe</span><br />
                 ({E_total.x.toExponential(2)}, {E_total.y.toExponential(2)}, {E_total.z.toExponential(2)}) V/m
@@ -550,7 +540,7 @@ export default ElectricDipoleVisualizer;
 | Dipole moment  | (p = qd)                     |
 | Torque         | τ=p×E         |
 | Angular motion | τ=Iα            | α=−pEsinθ / I
-	​
+	
 
 | Energy         | (U = -p . E)             |
 | 

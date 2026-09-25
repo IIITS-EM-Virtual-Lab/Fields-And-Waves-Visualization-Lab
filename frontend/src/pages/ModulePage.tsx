@@ -7,6 +7,7 @@ const modules: Record<string, { name: string; path: string; topics: string[] }[]
  "vector-algebra": [
     { name: "Scalars and Vectors", path: "/scalars-and-vectors", topics: ["Definition", "Examples"] },
     { name: "Addition", path: "/vector-addition", topics: ["Vector Sum", "Graphical Representation"] },
+    { name: "Subtraction", path: "/vector-subtraction", topics: ["Vector Subtraction", "Graphical Representation"] },
     { name: "Multiplication", path: "/vector-multiplication", topics: ["Dot Product", "Cross Product"] },
     { name: "Triple Product", path: "/triple-product", topics: ["Scalar Triple", "Vector Triple"] },
   ],

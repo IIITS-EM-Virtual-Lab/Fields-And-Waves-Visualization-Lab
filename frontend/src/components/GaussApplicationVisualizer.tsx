@@ -1,15 +1,44 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import Axes from './Axes';
 import VectorArrow from './VectorArrow';
+import CanvasControlsToolbar from './CanvasControlsToolbar';
 
 const epsilon0 = 8.854e-12;
 
 function GaussApplicationVisualizer() {
 	const [chargeValue, setChargeValue] = useState(1e-9);
 	const [chargePosition, setChargePosition] = useState([0, 0, 0]);
+
+	const [interactionMode, setInteractionMode] = useState<'rotate' | 'pan'>('rotate');
+	const controlsRef = useRef<any>(null);
+
+	const handleZoomIn = () => {
+		if (controlsRef.current) {
+			const camera = controlsRef.current.object;
+			camera.zoom *= 1.2;
+			camera.updateProjectionMatrix();
+		}
+	};
+
+	const handleZoomOut = () => {
+		if (controlsRef.current) {
+			const camera = controlsRef.current.object;
+			camera.zoom /= 1.2;
+			camera.updateProjectionMatrix();
+		}
+	};
+
+	const resetCamera = () => {
+		if (controlsRef.current) {
+			const camera = controlsRef.current.object;
+			camera.zoom = 1;
+			camera.updateProjectionMatrix();
+			controlsRef.current.reset();
+		}
+	};
 
 	// Shape type: Sphere or Cylinder
 	const [shapeType, setShapeType] = useState<'sphere' | 'cylinder'>('sphere');
@@ -336,11 +365,26 @@ function GaussApplicationVisualizer() {
 			</div>
 
 			{/* 3D Visualization */}
-			<div className="relative overflow-hidden rounded-lg border-2 border-blue-600 mt-6" style={{ height: 500, width: 800, zIndex: 0 }}>
+			<div className="relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50 mt-6" style={{ height: 500, width: 800, zIndex: 0 }}>
+				<CanvasControlsToolbar
+					interactionMode={interactionMode}
+					setInteractionMode={setInteractionMode}
+					onZoomIn={handleZoomIn}
+					onZoomOut={handleZoomOut}
+					onReset={resetCamera}
+				/>
                 <Canvas style={{ height: '100%', width: '100%' }} camera={{ position: [5, 5, 5], fov: 50 }}>
 					<ambientLight intensity={0.5} />
 					<pointLight position={[10, 10, 10]} />
-					<OrbitControls />
+					<OrbitControls
+						ref={controlsRef}
+						makeDefault
+						mouseButtons={{
+							LEFT: interactionMode === 'rotate' ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN,
+							MIDDLE: THREE.MOUSE.DOLLY,
+							RIGHT: interactionMode === 'rotate' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
+						}}
+					/>
 					<Axes length={20} width={3} fontPosition={4.5} interval={1} xcolor="black" ycolor="black" zcolor="black" />
 					{/* Charge */}
 					<mesh position={charge.toArray()}>
