@@ -56,38 +56,46 @@ const SmithChart = () => {
         </div>
       </div>
 
-      {/* 3 Normalized Impedance */}
+      {/* 3 Normalized Impedance and Admittance */}
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 mb-10">
         <h2 className="text-lg sm:text-xl font-black mb-4">
-          Normalized Impedance
+          Normalized Impedance & Admittance
         </h2>
 
         <p className="mb-4">
           To make the chart independent of the characteristic impedance,
-          the impedance is normalized as
+          the load impedance is normalized as
         </p>
 
         <div className="flex justify-center my-4">
           <BlockMath math="z_L = \frac{Z_L}{Z_0}" />
         </div>
 
-        <p>
-          Substituting in the reflection coefficient equation gives
+        <p className="mb-4">
+          Similarly, the normalized load admittance (<InlineMath math="y_L" />) is defined relative to the characteristic admittance (<InlineMath math="Y_0 = 1/Z_0" />) or as the reciprocal of normalized impedance:
         </p>
 
         <div className="flex justify-center my-4">
-          <BlockMath math="\Gamma = \frac{z_L - 1}{z_L + 1}" />
+          <BlockMath math="y_L = \frac{Y_L}{Y_0} = \frac{1}{z_L}" />
+        </div>
+
+        <p>
+          Substituting into the reflection coefficient equation gives
+        </p>
+
+        <div className="flex justify-center my-4">
+          <BlockMath math="\Gamma = \frac{z_L - 1}{z_L + 1} = \frac{1 - y_L}{1 + y_L}" />
         </div>
       </div>
 
-      {/* 4 Complex Impedance Representation */}
+      {/* 4 Complex Impedance and Admittance Representation */}
       <div className="bg-white border border-slate-200 rounded-xl p-8 mb-10">
         <h2 className="text-lg sm:text-xl font-black mb-4">
-          Complex Form of Impedance
+          Complex Form of Impedance & Admittance
         </h2>
 
         <p>
-          The normalized impedance is expressed as
+          The normalized load impedance is expressed as
         </p>
 
         <div className="flex justify-center my-4">
@@ -101,6 +109,23 @@ const SmithChart = () => {
         <ul className="list-disc pl-6 mt-3">
           <li><InlineMath math="r" /> = normalized resistance</li>
           <li><InlineMath math="x" /> = normalized reactance</li>
+        </ul>
+
+        <p className="mt-6">
+          The normalized load admittance is expressed as
+        </p>
+
+        <div className="flex justify-center my-4">
+          <BlockMath math="y_L = g + jb = \frac{1}{r + jx} = \frac{r - jx}{r^2 + x^2}" />
+        </div>
+
+        <p>
+          where
+        </p>
+
+        <ul className="list-disc pl-6 mt-3">
+          <li><InlineMath math="g = \frac{r}{r^2 + x^2}" /> = normalized conductance</li>
+          <li><InlineMath math="b = -\frac{x}{r^2 + x^2}" /> = normalized susceptance</li>
         </ul>
       </div>
 

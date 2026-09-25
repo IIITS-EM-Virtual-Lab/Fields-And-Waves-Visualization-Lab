@@ -292,38 +292,75 @@ export default function SmithChartCalculator() {
       } as unknown as PlotlyType.Data);
     }
 
-    // 3. Normalised Load Point (Dynamic zL or yL)
-    traces.push({
-      type: "scattersmith",
-      mode: "markers",
-      name: isImp ? "Normalised Load (z_load)" : "Normalised Load (y_load)",
-      real: [isImp ? results.r : results.g],
-      imag: [isImp ? results.x : results.b],
-      marker: {
-        color: "#3b82f6",
-        size: 12,
-        symbol: "circle",
-        line: { color: "white", width: 1 },
-      },
-      hovertemplate: `<b>${isImp ? "z_load" : "y_load"}</b><br>${isImp ? "Real" : "Cond"}: %{real:.3f} <br>${isImp ? "Imag" : "Susc"}: %{imag:.3f} <extra></extra>`,
-    } as unknown as PlotlyType.Data);
-
-    // 4. Normalised Input Point (Dynamic zin or yin)
-    if (results.safeLen > 0) {
+    // 3. Normalised Load Impedance (z_L) Point
+    if (isFinite(results.r) && isFinite(results.x)) {
       traces.push({
         type: "scattersmith",
         mode: "markers",
-        name: isImp ? "Normalised Input (z_in)" : "Normalised Input (y_in)",
-        real: [isImp ? results.zinNormR : results.gin],
-        imag: [isImp ? results.zinNormX : results.bin],
+        name: "Normalised Load (z_L)",
+        real: [results.r],
+        imag: [results.x],
         marker: {
-          color: "#ef4444",
+          color: "#2563eb",
           size: 12,
-          symbol: "diamond",
-          line: { color: "white", width: 1 },
+          symbol: "circle",
+          line: { color: "white", width: 1.5 },
         },
-        hovertemplate: `<b>${isImp ? "z_in" : "y_in"}</b><br>${isImp ? "Real" : "Cond"}: %{real:.3f} <br>${isImp ? "Imag" : "Susc"}: %{imag:.3f} <extra></extra>`,
+        hovertemplate: `<b>z_L (Load Impedance)</b><br>r: %{real:.3f}<br>x: %{imag:.3f}<extra></extra>`,
       } as unknown as PlotlyType.Data);
+    }
+
+    // 4. Normalised Load Admittance (y_L) Point
+    if (isFinite(results.g) && isFinite(results.b)) {
+      traces.push({
+        type: "scattersmith",
+        mode: "markers",
+        name: "Normalised Admittance (y_L)",
+        real: [results.g],
+        imag: [results.b],
+        marker: {
+          color: "#059669",
+          size: 12,
+          symbol: "square",
+          line: { color: "white", width: 1.5 },
+        },
+        hovertemplate: `<b>y_L (Load Admittance)</b><br>g: %{real:.3f}<br>b: %{imag:.3f}<extra></extra>`,
+      } as unknown as PlotlyType.Data);
+    }
+
+    // 5. Normalised Input Point (z_in in impedance mode, y_in in admittance mode)
+    if (results.safeLen > 0) {
+      if (isImp && isFinite(results.zinNormR) && isFinite(results.zinNormX)) {
+        traces.push({
+          type: "scattersmith",
+          mode: "markers",
+          name: "Normalised Input (z_in)",
+          real: [results.zinNormR],
+          imag: [results.zinNormX],
+          marker: {
+            color: "#ef4444",
+            size: 12,
+            symbol: "diamond",
+            line: { color: "white", width: 1.5 },
+          },
+          hovertemplate: `<b>z_in (Input Impedance)</b><br>r_in: %{real:.3f}<br>x_in: %{imag:.3f}<extra></extra>`,
+        } as unknown as PlotlyType.Data);
+      } else if (!isImp && isFinite(results.gin) && isFinite(results.bin)) {
+        traces.push({
+          type: "scattersmith",
+          mode: "markers",
+          name: "Normalised Input (y_in)",
+          real: [results.gin],
+          imag: [results.bin],
+          marker: {
+            color: "#ef4444",
+            size: 12,
+            symbol: "diamond",
+            line: { color: "white", width: 1.5 },
+          },
+          hovertemplate: `<b>y_in (Input Admittance)</b><br>g_in: %{real:.3f}<br>b_in: %{imag:.3f}<extra></extra>`,
+        } as unknown as PlotlyType.Data);
+      }
     }
 
     const layout = {
@@ -350,13 +387,13 @@ export default function SmithChartCalculator() {
       margin: { l: 40, r: 40, t: 80, b: 40 },
       showlegend: true,
       legend: {
-        orientation: "v",
+        orientation: "h",
         x: 0.5,
         xanchor: "center",
-        y: 1.3,
-        yanchor: "top",
-        font: { color: "#475569", size: 14 },
-        bgcolor: "rgba(255,255,255,0)",
+        y: 1.2,
+        yanchor: "bottom",
+        font: { color: "#475569", size: 12 },
+        bgcolor: "rgba(255,255,255,0.8)",
       },
     };
 
@@ -678,6 +715,15 @@ export default function SmithChartCalculator() {
                   </span>
                 </div>
 
+                <div className="flex justify-between items-center bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
+                  <span className="text-slate-600 text-sm">
+                    Normalised Admittance (y<sub>L</sub>)
+                  </span>
+                  <span className="font-mono text-emerald-600 font-medium">
+                    {formatComplex(results.g, results.b, "norm")}
+                  </span>
+                </div>
+
                 <div className="flex justify-between items-center bg-red-50/50 p-3 rounded-lg border border-red-100">
                   <span className="text-slate-600 text-sm">
                     Input (Z<sub>in</sub>)
@@ -689,12 +735,21 @@ export default function SmithChartCalculator() {
               </>
             ) : (
               <>
-                <div className="flex justify-between items-center bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                <div className="flex justify-between items-center bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
                   <span className="text-slate-600 text-sm">
                     Normalised Load (y<sub>L</sub>)
                   </span>
-                  <span className="font-mono text-blue-600 font-medium">
+                  <span className="font-mono text-emerald-600 font-medium">
                     {formatComplex(results.g, results.b, "norm")}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                  <span className="text-slate-600 text-sm">
+                    Normalised Impedance (z<sub>L</sub>)
+                  </span>
+                  <span className="font-mono text-blue-600 font-medium">
+                    {formatComplex(results.r, results.x, "norm")}
                   </span>
                 </div>
 
