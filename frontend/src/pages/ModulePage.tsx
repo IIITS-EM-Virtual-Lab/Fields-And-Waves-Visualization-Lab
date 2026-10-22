@@ -40,7 +40,8 @@ const modules: Record<string, { name: string; path: string; topics: string[] }[]
     { name: "Terminated Transmission Line", path: "/terminated-transmission-line", topics:["Terminated Transmission Line"] },
     { name: "Smith Chart", path: "/smith-chart", topics:["Smith Chart"] },
     { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer", topics:["Quarter Wave Transformer"]},
-    { name: "Single Stub Tuner", path: "/single-stub-tuner", topics:["Single Stub Tuner"]}
+    { name: "Single Stub Tuner", path: "/single-stub-tuner", topics:["Single Stub Tuner"]},
+    { name: "L-Section Matching", path: "/l-section-matching", topics:["L-Section Matching", "Lumped Element Tuning"]}
   ],
 };
 

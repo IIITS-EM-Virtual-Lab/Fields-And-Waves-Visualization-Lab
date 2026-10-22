@@ -86,6 +86,7 @@ const exploreModules = [
       { name: "Smith Chart", path: "/smith-chart" },
       { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer" },
       { name: "Single Stub Tuner", path: "/single-stub-tuner" },
+      { name: "L-Section Matching", path: "/l-section-matching" },
     ],
   },
 ];
