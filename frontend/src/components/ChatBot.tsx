@@ -16,6 +16,8 @@ import {
   Mic,
   Volume2,
   VolumeX,
+  FileText,
+  FileUp,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -48,10 +50,12 @@ type ChatMessage = {
   imageUrl?: string;
   topic?: CourseTopicLink;
   alternatives?: CourseTopicLink[];
+  docTopics?: CourseTopicLink[];
 };
 
 const SUPPORTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
+const MAX_PDF_SIZE = 15 * 1024 * 1024;
 
 // Minimal shape for the Web Speech API (not in the default TS DOM lib).
 type SpeechRecognitionResult = {
@@ -141,6 +145,8 @@ export default function ChatBot() {
   const [cameraError, setCameraError] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
+  const [analyzingDoc, setAnalyzingDoc] = useState(false);
+  const [activeDoc, setActiveDoc] = useState<{ name: string; topics: CourseTopicLink[] } | null>(null);
   const [isWaving, setIsWaving] = useState(false);
   const [peekState, setPeekState] = useState<"hidden" | "peeking" | "full">("peeking");
   const [waves, setWaves] = useState<Array<{ id: number; x: number; y: number }>>([]);
@@ -148,6 +154,7 @@ export default function ChatBot() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
@@ -231,11 +238,13 @@ export default function ChatBot() {
       setSelectedImage(null);
       setSelectedImagePreview(null);
       setUploadError("");
+      setActiveDoc(null);
       return;
     }
 
     setMessages([]);
     setInput("");
+    setActiveDoc(null);
     setChatThreadId(createChatThreadId());
   }, [user?._id]);
 
@@ -578,9 +587,135 @@ export default function ChatBot() {
     }
   };
 
+  const handlePdfSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      setUploadError("Please choose a PDF file.");
+      return;
+    }
+    if (file.size > MAX_PDF_SIZE) {
+      setUploadError("Please choose a PDF smaller than 15 MB.");
+      return;
+    }
+    if (!isAuthenticated || !token || !user?._id) {
+      handleSignIn();
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("pdf", file);
+    formData.append("session_id", getChatSessionId());
+
+    setMessages((prev) => [...prev, { role: "user", text: `📄 ${file.name}` }]);
+    setUploadError("");
+    setAnalyzingDoc(true);
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat/upload-pdf`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.message || `Upload failed (HTTP ${response.status}).`);
+      }
+
+      const topics: CourseTopicLink[] = Array.isArray(data.topics) ? data.topics : [];
+      setActiveDoc({ name: data.name || file.name, topics });
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "bot",
+          text: data.answer || `I've read "${file.name}". Ask me anything about it.`,
+          docTopics: topics,
+        },
+      ]);
+    } catch (error) {
+      console.error("[ChatBot] pdf upload error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "bot",
+          text: error instanceof Error ? error.message : "I couldn't read that PDF. Please try again.",
+        },
+      ]);
+    } finally {
+      setAnalyzingDoc(false);
+      setLoading(false);
+    }
+  };
+
+  const clearActiveDoc = () => {
+    setActiveDoc(null);
+  };
+
+  const askDoc = async (prompt: string) => {
+    if (!prompt.trim() || loading) return;
+    if (!isAuthenticated || !token || !user?._id) {
+      handleSignIn();
+      return;
+    }
+
+    const question = prompt.trim();
+    setMessages((prev) => [...prev, { role: "user", text: question }]);
+    setInput("");
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat/ask-doc`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ query: question, session_id: getChatSessionId() }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (response.status === 409) {
+        // Document context expired on the server.
+        setActiveDoc(null);
+        setMessages((prev) => [
+          ...prev,
+          { role: "bot", text: "Your document is no longer loaded. Please upload the PDF again." },
+        ]);
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(data.message || `Request failed (HTTP ${response.status}).`);
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "bot",
+          text: data.answer || "I couldn't form an answer from the document.",
+          topic: data.topic || undefined,
+        },
+      ]);
+    } catch (error) {
+      console.error("[ChatBot] ask-doc error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "bot",
+          text: error instanceof Error ? error.message : "I couldn't answer from the document right now.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const sendMessage = async () => {
     if (selectedImage) {
       await findTopicFromImage();
+      return;
+    }
+    if (activeDoc) {
+      await askDoc(input);
       return;
     }
     await sendPrompt(input);
@@ -640,6 +775,8 @@ export default function ChatBot() {
     setSelectedImage(null);
     setSelectedImagePreview(null);
     setUploadError("");
+    setAnalyzingDoc(false);
+    setActiveDoc(null);
     setChatThreadId(createChatThreadId());
   };
 
@@ -893,6 +1030,26 @@ export default function ChatBot() {
                       )}
                     </div>
                   )}
+                  {msg.docTopics && msg.docTopics.length > 0 && (
+                    <div className="topic-match-card">
+                      <div className="topic-match-module">
+                        <FileText size={11} style={{ verticalAlign: "-1px", marginRight: 4 }} />
+                        This document covers
+                      </div>
+                      {msg.docTopics.map((t) => (
+                        <button
+                          type="button"
+                          key={t.path}
+                          className="doc-topic-row"
+                          onClick={() => openCourseTopic(t.path)}
+                          title={`Open ${t.title}`}
+                        >
+                          <span className="doc-topic-title">{t.title}</span>
+                          <ExternalLink size={13} />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   {msg.role === "bot" && (
                     <svg className="message-wave" viewBox="0 0 100 10">
                       <path d="M0,5 Q25,0 50,5 T100,5" fill="none" stroke="currentColor" strokeWidth="0.5" />
@@ -918,7 +1075,13 @@ export default function ChatBot() {
                       <span className="pulse-dot" />
                     </div>
                     <span className="loading-text">
-                      {analyzingImage ? "Reading your image..." : "Processing waves..."}
+                      {analyzingImage
+                        ? "Reading your image..."
+                        : analyzingDoc
+                        ? "Reading your document..."
+                        : activeDoc
+                        ? "Searching your document..."
+                        : "Processing waves..."}
                     </span>
                   </div>
                 </div>
@@ -974,6 +1137,18 @@ export default function ChatBot() {
                 </button>
               </div>
             )}
+            {activeDoc && (
+              <div className="active-doc-chip">
+                <FileText size={15} />
+                <div className="active-doc-details">
+                  <strong>{activeDoc.name}</strong>
+                  <span>Answering from your document</span>
+                </div>
+                <button type="button" onClick={clearActiveDoc} title="Stop using this document">
+                  <X size={15} />
+                </button>
+              </div>
+            )}
             {uploadError && <div className="upload-error">{uploadError}</div>}
             <div className="input-wrapper">
               <input
@@ -982,6 +1157,13 @@ export default function ChatBot() {
                 className="image-file-input"
                 accept="image/jpeg,image/png,image/webp"
                 onChange={handleImageSelected}
+              />
+              <input
+                ref={pdfInputRef}
+                type="file"
+                className="image-file-input"
+                accept="application/pdf"
+                onChange={handlePdfSelected}
               />
               <button
                 type="button"
@@ -1000,6 +1182,15 @@ export default function ChatBot() {
                 title={isAuthenticated ? "Take a photo to find its course topic" : "Sign in to use the camera"}
               >
                 <Camera size={18} />
+              </button>
+              <button
+                type="button"
+                className="attach-image-button"
+                onClick={() => isAuthenticated ? pdfInputRef.current?.click() : handleSignIn()}
+                disabled={loading}
+                title={isAuthenticated ? "Upload a PDF to ask questions about it" : "Sign in to upload a PDF"}
+              >
+                <FileUp size={18} />
               </button>
               {speechRecognitionSupported && (
                 <button
@@ -1029,7 +1220,13 @@ export default function ChatBot() {
                     sendMessage();
                   }
                 }}
-                placeholder={selectedImage ? "Add a note (optional)..." : "Send a wave of curiosity..."}
+                placeholder={
+                  selectedImage
+                    ? "Add a note (optional)..."
+                    : activeDoc
+                    ? "Ask about your document..."
+                    : "Send a wave of curiosity..."
+                }
                 disabled={!isAuthenticated}
               />
               <button
@@ -1416,12 +1613,18 @@ export default function ChatBot() {
           right: 80px;
           top: 50%;
           transform: translateY(-50%);
-          width: 340px;
-          max-width: 90vw;
-          height: 480px;
-          background: linear-gradient(135deg, #faf5ff 0%, #fdf4ff 100%);
-          border-radius: 30px;
-          box-shadow: 0 20px 60px rgba(168, 85, 247, 0.3), 0 0 0 1px rgba(168, 85, 247, 0.1);
+          width: 360px;
+          max-width: 92vw;
+          height: 500px;
+          background: linear-gradient(150deg, rgba(255, 255, 255, 0.82) 0%, rgba(245, 237, 255, 0.72) 55%, rgba(237, 242, 255, 0.72) 100%);
+          backdrop-filter: blur(26px) saturate(165%);
+          -webkit-backdrop-filter: blur(26px) saturate(165%);
+          border: 1px solid rgba(255, 255, 255, 0.55);
+          border-radius: 26px;
+          box-shadow:
+            0 24px 70px rgba(124, 58, 237, 0.28),
+            0 6px 20px rgba(236, 72, 153, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6);
           display: flex;
           flex-direction: column;
           overflow: hidden;
@@ -1463,13 +1666,17 @@ export default function ChatBot() {
         /* Header */
         .wave-header {
           position: relative;
-          background: linear-gradient(135deg, #ec4899, #a855f7, #3b82f6);
-          padding: 10px 12px;
+          background: linear-gradient(135deg, rgba(236, 72, 153, 0.92), rgba(168, 85, 247, 0.92), rgba(59, 130, 246, 0.9));
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          padding: 12px 14px;
           display: flex;
           justify-content: space-between;
           align-items: center;
           z-index: 1;
           flex-shrink: 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+          box-shadow: 0 6px 18px rgba(124, 58, 237, 0.18);
         }
 
         .header-content {
@@ -1535,8 +1742,8 @@ export default function ChatBot() {
         }
 
         .close-button {
-          background: rgba(255, 255, 255, 0.2);
-          border: none;
+          background: rgba(255, 255, 255, 0.18);
+          border: 1px solid rgba(255, 255, 255, 0.3);
           color: white;
           width: 32px;
           height: 32px;
@@ -1547,6 +1754,8 @@ export default function ChatBot() {
           cursor: pointer;
           transition: all 0.2s;
           flex-shrink: 0;
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
         }
 
         .header-actions {
@@ -1556,8 +1765,8 @@ export default function ChatBot() {
         }
 
         .header-action-button {
-          background: rgba(255, 255, 255, 0.2);
-          border: none;
+          background: rgba(255, 255, 255, 0.18);
+          border: 1px solid rgba(255, 255, 255, 0.3);
           color: white;
           width: 32px;
           height: 32px;
@@ -1568,6 +1777,8 @@ export default function ChatBot() {
           cursor: pointer;
           transition: all 0.2s;
           flex-shrink: 0;
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
         }
 
         .header-action-button:hover {
@@ -1627,9 +1838,11 @@ export default function ChatBot() {
           display: flex;
           align-items: center;
           gap: 5px;
-          padding: 6px 12px;
-          background: white;
-          border: 2px solid #e9d5ff;
+          padding: 7px 13px;
+          background: rgba(255, 255, 255, 0.55);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          border: 1px solid rgba(168, 85, 247, 0.3);
           border-radius: 20px;
           font-size: 12px;
           color: #7c3aed;
@@ -1638,9 +1851,10 @@ export default function ChatBot() {
         }
 
         .topic-chip:hover {
-          background: linear-gradient(135deg, #fae8ff, #f3e8ff);
-          border-color: #a855f7;
+          background: linear-gradient(135deg, rgba(250, 232, 255, 0.85), rgba(243, 232, 255, 0.85));
+          border-color: rgba(168, 85, 247, 0.6);
           transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(168, 85, 247, 0.2);
         }
 
         .signin-chat-button {
@@ -1672,22 +1886,26 @@ export default function ChatBot() {
 
         .message-bubble {
           max-width: 85%;
-          padding: 8px 12px;
-          border-radius: 18px;
+          padding: 10px 14px;
+          border-radius: 20px;
           position: relative;
         }
 
         .message-bubble.user {
-          background: linear-gradient(135deg, #a855f7, #ec4899);
+          background: linear-gradient(135deg, rgba(168, 85, 247, 0.95), rgba(236, 72, 153, 0.95));
           color: white;
-          border-bottom-right-radius: 4px;
+          border-bottom-right-radius: 5px;
+          box-shadow: 0 8px 20px rgba(168, 85, 247, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
 
         .message-bubble.bot {
-          background: white;
-          border: 1.5px solid #e9d5ff;
+          background: rgba(255, 255, 255, 0.62);
+          backdrop-filter: blur(14px) saturate(160%);
+          -webkit-backdrop-filter: blur(14px) saturate(160%);
+          border: 1px solid rgba(255, 255, 255, 0.7);
           color: #1f2937;
-          border-bottom-left-radius: 4px;
+          border-bottom-left-radius: 5px;
+          box-shadow: 0 6px 18px rgba(124, 58, 237, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5);
         }
 
         .message-header {
@@ -1740,10 +1958,13 @@ export default function ChatBot() {
 
         .topic-match-card {
           margin-top: 10px;
-          padding: 10px;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #faf5ff, #eff6ff);
-          border: 1px solid #ddd6fe;
+          padding: 11px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, rgba(250, 245, 255, 0.7), rgba(239, 246, 255, 0.7));
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(221, 214, 254, 0.8);
+          box-shadow: 0 4px 14px rgba(124, 58, 237, 0.1);
         }
 
         .topic-match-module {
@@ -1856,9 +2077,11 @@ export default function ChatBot() {
         /* Input */
         .input-container {
           position: relative;
-          background: white;
-          border-top: 1.5px solid #e9d5ff;
-          padding: 10px;
+          background: rgba(255, 255, 255, 0.55);
+          backdrop-filter: blur(18px) saturate(160%);
+          -webkit-backdrop-filter: blur(18px) saturate(160%);
+          border-top: 1px solid rgba(255, 255, 255, 0.6);
+          padding: 12px;
           z-index: 1;
           flex-shrink: 0;
         }
@@ -1946,6 +2169,70 @@ export default function ChatBot() {
           background: #faf5ff;
         }
 
+        .active-doc-chip {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 8px;
+          padding: 7px 9px;
+          border: 1px solid #ddd6fe;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #faf5ff, #eff6ff);
+          color: #6d28d9;
+        }
+
+        .active-doc-details {
+          min-width: 0;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .active-doc-details strong {
+          overflow: hidden;
+          color: #4c1d95;
+          font-size: 11px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .active-doc-details span { color: #7c3aed; font-size: 9px; }
+
+        .active-doc-chip > button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 25px;
+          height: 25px;
+          flex-shrink: 0;
+          border: none;
+          border-radius: 50%;
+          color: #7c3aed;
+          background: white;
+          cursor: pointer;
+        }
+
+        .doc-topic-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          width: 100%;
+          margin-top: 6px;
+          padding: 7px 10px;
+          border: 1px solid #ddd6fe;
+          border-radius: 9px;
+          background: white;
+          color: #6d28d9;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.2s, transform 0.2s;
+        }
+
+        .doc-topic-row:hover { background: #f3e8ff; transform: translateY(-1px); }
+        .doc-topic-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
         .selected-image-preview img {
           width: 42px;
           height: 42px;
@@ -1992,24 +2279,27 @@ export default function ChatBot() {
         }
 
         .attach-image-button {
-          width: 38px;
-          height: 38px;
+          width: 36px;
+          height: 36px;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1.5px solid #e9d5ff;
+          border: 1px solid rgba(168, 85, 247, 0.25);
           border-radius: 50%;
           color: #7c3aed;
-          background: #faf5ff;
+          background: rgba(255, 255, 255, 0.5);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           cursor: pointer;
           transition: all 0.2s;
         }
 
         .attach-image-button:not(:disabled):hover {
-          border-color: #a855f7;
-          background: #f3e8ff;
-          transform: scale(1.06);
+          border-color: rgba(168, 85, 247, 0.6);
+          background: rgba(243, 232, 255, 0.8);
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 6px 14px rgba(168, 85, 247, 0.2);
         }
 
         .attach-image-button:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -2046,21 +2336,25 @@ export default function ChatBot() {
 
         .wave-input {
           flex: 1;
-          border: 1.5px solid #e9d5ff;
+          border: 1px solid rgba(168, 85, 247, 0.25);
           border-radius: 18px;
-          padding: 8px 12px;
+          padding: 9px 14px;
           font-size: 13px;
           resize: none;
           outline: none;
-          background: linear-gradient(135deg, #faf5ff, #ffffff);
+          background: rgba(255, 255, 255, 0.55);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          color: #3b0764;
           transition: all 0.2s;
           max-height: 80px;
           font-family: inherit;
         }
 
         .wave-input:focus {
-          border-color: #a855f7;
-          box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+          border-color: rgba(168, 85, 247, 0.65);
+          background: rgba(255, 255, 255, 0.75);
+          box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
         }
 
         .wave-input::placeholder { color: #c084fc; }
@@ -2086,6 +2380,7 @@ export default function ChatBot() {
           transition: all 0.2s;
           overflow: hidden;
           flex-shrink: 0;
+          box-shadow: 0 6px 16px rgba(168, 85, 247, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         .send-button:not(:disabled):hover {
