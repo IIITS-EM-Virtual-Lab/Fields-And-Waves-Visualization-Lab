@@ -7,6 +7,12 @@ import { setCredentials } from '../store/slices/authSlice';
 import './login-signup.css';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_API_URL ||
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000'
+    : 'https://fields-and-waves-visualization-lab.onrender.com');
+
 const Login = () => {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -78,7 +84,7 @@ const Login = () => {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('https://fields-and-waves-visualization-lab.onrender.com/api/auth/login', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email: emailRef.current?.value,
         password: passwordRef.current?.value
       }, {
@@ -115,7 +121,7 @@ const Login = () => {
   // ✅ Redirect to Google OAuth URL
   const handleGoogleLogin = async () => {
     try {
-      const response = await axios.get('https://fields-and-waves-visualization-lab.onrender.com/api/auth/google');
+      const response = await axios.get(`${API_BASE_URL}/api/auth/google`);
       if (response.data.url) {
         window.location.href = response.data.url;
       } else {

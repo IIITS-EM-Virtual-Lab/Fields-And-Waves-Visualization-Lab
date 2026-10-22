@@ -5,6 +5,12 @@ import axios from 'axios';
 import './login-signup.css';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_API_URL ||
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000'
+    : 'https://fields-and-waves-visualization-lab.onrender.com');
+
 const Signup = () => {
   const navigate = useNavigate();
   const nameRef = useRef<HTMLInputElement>(null);
@@ -80,7 +86,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        'https://fields-and-waves-visualization-lab.onrender.com/api/auth/signup',
+        `${API_BASE_URL}/api/auth/signup`,
         { name, email, password, otp },
         { validateStatus: status => status >= 200 && status < 500 }
       );
@@ -107,7 +113,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        'https://fields-and-waves-visualization-lab.onrender.com/api/auth/signup/send-otp',
+        `${API_BASE_URL}/api/auth/signup/send-otp`,
         { name, email, password },
         { validateStatus: status => status >= 200 && status < 500 }
       );
@@ -130,7 +136,7 @@ const Signup = () => {
 
   const handleGoogleSignup = async () => {
     try {
-      const response = await axios.get('https://fields-and-waves-visualization-lab.onrender.com/api/auth/google');
+      const response = await axios.get(`${API_BASE_URL}/api/auth/google`);
       if (response.data.url) {
         window.location.href = response.data.url;
       }
