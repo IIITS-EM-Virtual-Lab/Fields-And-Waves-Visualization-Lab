@@ -108,7 +108,7 @@ const ProfilePage = () => {
     'vector-algebra': ['addition', 'subtraction', 'multiplication', 'scalars', 'triple-product'],
     'vector-calculus': ['cylindrical-coordinates', 'del-operator', 'spherical-coordinates', 'vector-calculus-intro'],
     'wave-propagation': ['pow_vector', 'wave_analysis', 'wave_reflection', 'waves_in_general'],
-    'transmission-lines': ['types-of-transmission-line', 'characteristic-impedance', 'terminated-transmission-line', 'smith-chart', 'quarter-wave-transformer','single-stub-tuner']
+    'transmission-lines': ['types-of-transmission-line', 'characteristic-impedance', 'terminated-transmission-line', 'smith-chart', 'quarter-wave-transformer', 'single-stub-tuner', 'l-section-matching']
   };
 
   const sidebarItems = [

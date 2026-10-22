@@ -83,6 +83,7 @@ const sidebarData: SidebarSection[] = [
     { name: "Smith Chart", path: "/smith-chart", quizPath: "/quiz/transmission-lines/smith-chart" },
     { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer", quizPath: "/quiz/transmission-lines/types-of-transmission-line" },
     { name: "Single Stub Tuner", path: "/single-stub-tuner", quizPath: "/quiz/transmission-lines/single-stub-tuner" },
+    { name: "L-Section Matching", path: "/l-section-matching", quizPath: "/quiz/transmission-lines/l-section-matching" },
   ],
 },
 
