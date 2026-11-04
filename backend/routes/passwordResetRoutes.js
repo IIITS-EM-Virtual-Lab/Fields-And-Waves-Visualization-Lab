@@ -23,10 +23,12 @@ router.post('/request', async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Find user by email
-    const user = await User.findOne({
-      email: new RegExp(`^${escapeRegex(normalizedEmail)}$`, 'i')
-    });
+    let user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      user = await User.findOne({
+        email: new RegExp(`^${escapeRegex(normalizedEmail)}$`, 'i')
+      });
+    }
 
     if (!user) {
       // Don't reveal if user exists or not (security)

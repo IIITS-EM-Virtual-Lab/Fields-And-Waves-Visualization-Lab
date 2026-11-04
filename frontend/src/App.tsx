@@ -1,4 +1,9 @@
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store/store";
+import { checkAuth } from "@/store/slices/authSlice";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 import Home from "@/pages/Home";
 import Team from "@/pages/team";
@@ -36,6 +41,7 @@ import SmithChart from './pages/transmission-line/smith_chart';
 import QuarterWaveTransformer from './pages/transmission-line/quarter_wave_transformer.tsx';
 import SingleStubTuner from './pages/transmission-line/single_stub_tuner';
 import LSectionMatchingPage from './pages/transmission-line/l_section_matching.tsx';
+import MicrowaveAmplifierDesign from "./pages/transmission-line/MicrowaveAmplifierDesign.tsx";
 
 import Footer from "./components/Footer";
 import Settings from "./pages/settings";
@@ -56,7 +62,12 @@ import ChatBot from "./components/ChatBot";
 import TerminatedTransmissionLine from "./pages/transmission-line/TerminatedTransmissionLine.tsx";
 
 const AppRoutes = () => {
-  const location = useLocation();
+  const dispatch = useDispatch<AppDispatch>();
+
+  // Check and restore authentication session on app initialization
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -68,12 +79,30 @@ const AppRoutes = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/" element={<Home />} />
-          <Route path="/profilepage" element={<ProfilePage />} />
+          <Route
+            path="/profilepage"
+            element={
+              <ProtectedRoute adminOnly>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/quiz/:moduleName/:chapterName"
-            element={<ChapterQuiz />}
+            element={
+              <ProtectedRoute>
+                <ChapterQuiz />
+              </ProtectedRoute>
+            }
           />
           <Route path="/feedback" element={<Feedback />} />
 
@@ -151,6 +180,7 @@ const AppRoutes = () => {
             <Route path="/quarter-wave-transformer" element={<QuarterWaveTransformer />} />
             <Route path="/single-stub-tuner" element={<SingleStubTuner />} />
             <Route path="/l-section-matching" element={<LSectionMatchingPage />} />
+            <Route path="/microwave-amplifier-design" element={<MicrowaveAmplifierDesign />} />
 
             <Route path="/module/:moduleSlug" element={<ModulePage />} />
           </Route>
@@ -158,11 +188,22 @@ const AppRoutes = () => {
           <Route path="/team" element={<Team />} />
           <Route
             path="/quizzes/module/:moduleName/common"
-            element={<ChapterQuiz />}
+            element={
+              <ProtectedRoute>
+                <ChapterQuiz />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/userdashboard" element={<UserDashboard />} />
-          </Routes>
-          <ChatBot />
+          <Route
+            path="/userdashboard"
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+        <ChatBot />
       </div>
       <Footer />
     </div>

@@ -5,8 +5,15 @@ const QuizResult = require('../models/QuizResult');
 const Quiz = require('../models/Quiz');
 const { auth } = require('../middleware/auth');
 
+// Helper: Derive target userId safely from session (admin can inspect others; students only inspect self)
+const resolveTargetUserId = (req, requestedUserId) => {
+  if (req.user && req.user.isAdmin && requestedUserId) {
+    return requestedUserId;
+  }
+  return req.user._id.toString();
+};
+
 // ── Save quiz result ────────────────────────────────────────
-// Fixed: now saves chapter and userAnswers (were missing before)
 router.post('/save', auth, async (req, res) => {
   try {
     const {
@@ -20,7 +27,8 @@ router.post('/save', auth, async (req, res) => {
       userAnswers
     } = req.body;
 
-    const userId = req.user.id;
+    // Derived strictly from verified session
+    const userId = req.user._id;
 
     const newResult = new QuizResult({
       userId,
@@ -46,7 +54,7 @@ router.post('/save', auth, async (req, res) => {
 // ── Get quiz history ────────────────────────────────────────
 router.get('/history/:userId', auth, async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = resolveTargetUserId(req, req.params.userId);
     const results = await QuizResult.find({ userId }).sort({ createdAt: -1 });
     res.json({ success: true, data: results });
   } catch (error) {
@@ -58,7 +66,7 @@ router.get('/history/:userId', auth, async (req, res) => {
 // ── Overall stats (best attempt per quiz) ──────────────────
 router.get('/stats/:userId', auth, async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = resolveTargetUserId(req, req.params.userId);
     const uid = new mongoose.Types.ObjectId(userId);
 
     const bestAttempts = await QuizResult.aggregate([
@@ -78,73 +86,38 @@ router.get('/stats/:userId', auth, async (req, res) => {
           _id: null,
           totalPoints: { $sum: '$score' },
           totalQuizzes: { $sum: 1 },
-          totalCorrectAnswers: { $sum: '$correctAnswers' },
-          totalQuestionsAttempted: { $sum: '$totalQuestions' },
-          averageScore: { $avg: '$score' },
-          averageAccuracy: { $avg: '$accuracy' }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          totalPoints: 1,
-          totalQuizzes: 1,
-          averageScore: { $round: ['$averageScore', 1] },
-          accuracy: { $round: ['$averageAccuracy', 1] }
+          avgScore: { $avg: '$score' },
+          avgAccuracy: { $avg: '$accuracy' }
         }
       }
     ]);
 
-    const quizTotals = await Quiz.aggregate([
-      {
-        $project: {
-          questionPoints: { $sum: '$questions.points' }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalAvailableQuizzes: { $sum: 1 },
-          totalAvailablePoints: { $sum: '$questionPoints' }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          totalAvailableQuizzes: 1,
-          totalAvailablePoints: 1
-        }
-      }
-    ]);
-
-    const totals = quizTotals[0] || {
-      totalAvailableQuizzes: 0,
-      totalAvailablePoints: 0
-    };
-
-    const overall = bestAttempts[0] || {
+    const stats = bestAttempts[0] || {
       totalPoints: 0,
       totalQuizzes: 0,
-      averageScore: 0,
-      accuracy: 0
+      avgScore: 0,
+      avgAccuracy: 0
     };
 
-    overall.totalAvailableQuizzes = totals.totalAvailableQuizzes;
-    overall.totalAvailablePoints = totals.totalAvailablePoints;
-
-    res.json({ success: true, data: { overall } });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Failed to fetch stats', error: err.message });
+    res.json({
+      success: true,
+      data: {
+        totalPoints: stats.totalPoints,
+        totalQuizzes: stats.totalQuizzes,
+        avgScore: Math.round(stats.avgScore || 0),
+        avgAccuracy: Math.round(stats.avgAccuracy || 0)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching quiz stats:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch quiz stats' });
   }
 });
 
 // ── User quiz results with populated questions ──────────────
-// Fixed: only returns the questions the student actually answered
-// by filtering quiz questions to match the stored userAnswers questionIds
 router.get('/user/:userId', auth, async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = resolveTargetUserId(req, req.params.userId);
     const { page = 1, limit = 10, module, sortBy = 'completedAt', sortOrder = 'desc' } = req.query;
 
     const query = { userId };
@@ -162,8 +135,6 @@ router.get('/user/:userId', auth, async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
 
-    // For each result, filter the quiz's questions down to only
-    // the ones the student actually saw (matched by userAnswers questionIds)
     const enriched = results.map(result => {
       const resultObj = result.toObject();
 
@@ -206,7 +177,7 @@ router.get('/user/:userId', auth, async (req, res) => {
 // ── Topic-wise stats (best attempt per quiz) ────────────────
 router.get('/stats-by-topic/:userId', auth, async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = resolveTargetUserId(req, req.params.userId);
     const uid = new mongoose.Types.ObjectId(userId);
 
     const bestAttempts = await QuizResult.aggregate([

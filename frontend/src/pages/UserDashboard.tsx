@@ -1,12 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { selectCurrentUser, selectCurrentToken } from "../store/slices/authSlice";
-import axios from "axios";
+import { selectCurrentUser } from "../store/slices/authSlice";
+import { apiClient } from "../config/api";
 import { FaChartBar, FaBullseye, FaMedal, FaTimes, FaFilter } from "react-icons/fa";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-
-const API = "https://fields-and-waves-visualization-lab.onrender.com";
 
 interface UserAnswer {
   questionId: string;
@@ -57,7 +55,6 @@ interface TopicStatsMap {
 
 const UserDashboard = () => {
   const user = useSelector(selectCurrentUser);
-  const token = useSelector(selectCurrentToken);
 
   const [stats, setStats] = useState({
     totalPoints: 0,
@@ -103,14 +100,9 @@ const UserDashboard = () => {
   useEffect(() => {
     if (!user?._id) return;
 
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    };
-
     const fetchStats = async () => {
       try {
-        const res = await axios.get(`${API}/api/quizresult/stats/${user._id}`, { headers });
+        const res = await apiClient.get(`/api/quizresult/stats/${user._id}`);
         setStats(res.data.data.overall);
       } catch (err) {
         console.error("Error fetching stats", err);
@@ -119,7 +111,7 @@ const UserDashboard = () => {
 
     const fetchTopicStats = async () => {
       try {
-        const res = await axios.get(`${API}/api/quizresult/stats-by-topic/${user._id}`, { headers });
+        const res = await apiClient.get(`/api/quizresult/stats-by-topic/${user._id}`);
         setTopicStats(res.data.data);
       } catch (err) {
         console.error("Error fetching topic stats", err);
@@ -128,7 +120,7 @@ const UserDashboard = () => {
 
     const fetchHistory = async () => {
       try {
-        const res = await axios.get(`${API}/api/quizresult/user/${user._id}`, { headers });
+        const res = await apiClient.get(`/api/quizresult/user/${user._id}`);
         setHistory(res.data.data);
         setFilteredHistory(res.data.data);
       } catch (err) {
@@ -139,7 +131,7 @@ const UserDashboard = () => {
     fetchStats();
     fetchTopicStats();
     fetchHistory();
-  }, [user, token]);
+  }, [user]);
 
   useEffect(() => {
     let filtered = [...history];
