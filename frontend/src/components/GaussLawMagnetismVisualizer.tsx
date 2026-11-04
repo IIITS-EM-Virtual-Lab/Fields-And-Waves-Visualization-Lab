@@ -231,7 +231,7 @@ export default function GaussLawMagnetismVisualizer() {
       {/* 3D Canvas */}
       <div
         className="relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50 mt-4"
-        style={{ height: 500, width: 800, zIndex: 0 }}
+        style={{ height: "auto", width: "100%", maxWidth: 800, aspectRatio: "8 / 5", zIndex: 0 }}
       >
         <CanvasControlsToolbar
           interactionMode={interactionMode}
