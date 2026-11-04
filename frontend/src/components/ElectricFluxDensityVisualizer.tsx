@@ -461,7 +461,7 @@ export default function ElectricFluxDensityVisualizer() {
       {/* ── CANVAS ── */}
       <div
         className="relative overflow-hidden rounded-lg border-2 border-blue-600 bg-gray-50"
-        style={{ height: 500, width: 800, zIndex: 0 }}
+        style={{ height: "auto", width: "100%", maxWidth: 800, aspectRatio: "8 / 5", zIndex: 0 }}
       >
         <CanvasControlsToolbar
           interactionMode={interactionMode}

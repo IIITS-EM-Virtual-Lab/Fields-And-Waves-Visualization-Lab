@@ -504,7 +504,7 @@ return (
         </div>
 
         {/* ── Canvas ── */}
-        <div className="border-2 border-blue-500 rounded" style={{ height: 500, width: 800 }}>
+        <div className="border-2 border-blue-500 rounded" style={{ height: "auto", width: "100%", maxWidth: 800, aspectRatio: "8 / 5" }}>
             <Canvas camera={{ position: [4, 4, 6] }}>
                 <ambientLight intensity={0.6} />
                 <pointLight position={[10, 10, 10]} />
