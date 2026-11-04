@@ -41,7 +41,8 @@ const modules: Record<string, { name: string; path: string; topics: string[] }[]
     { name: "Smith Chart", path: "/smith-chart", topics:["Smith Chart"] },
     { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer", topics:["Quarter Wave Transformer"]},
     { name: "Single Stub Tuner", path: "/single-stub-tuner", topics:["Single Stub Tuner"]},
-    { name: "L-Section Matching", path: "/l-section-matching", topics:["L-Section Matching", "Lumped Element Tuning"]}
+    { name: "L-Section Matching", path: "/l-section-matching", topics:["L-Section Matching", "Lumped Element Tuning"]},
+    { name: "Microwave Amplifier Design", path: "/microwave-amplifier-design", topics:["Microwave Amplifier Design"]},
   ],
 };
 

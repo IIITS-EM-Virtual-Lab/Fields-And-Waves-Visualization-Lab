@@ -84,6 +84,7 @@ const sidebarData: SidebarSection[] = [
     { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer", quizPath: "/quiz/transmission-lines/types-of-transmission-line" },
     { name: "Single Stub Tuner", path: "/single-stub-tuner", quizPath: "/quiz/transmission-lines/single-stub-tuner" },
     { name: "L-Section Matching", path: "/l-section-matching", quizPath: "/quiz/transmission-lines/l-section-matching" },
+    { name: "Microwave Amplifier Design", path: "/microwave-amplifier-design", quizPath: "/quiz/transmission-lines/microwave-amplifier-design" },
   ],
 },
 

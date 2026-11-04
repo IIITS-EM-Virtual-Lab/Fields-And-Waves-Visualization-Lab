@@ -5,7 +5,9 @@ import {
   selectIsAuthenticated,
   selectCurrentUser,
   logout,
+  logoutUser,
 } from "@/store/slices/authSlice";
+import { AppDispatch } from "@/store/store";
 import {
   ChevronDown,
   Search,
@@ -87,13 +89,14 @@ const exploreModules = [
       { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer" },
       { name: "Single Stub Tuner", path: "/single-stub-tuner" },
       { name: "L-Section Matching", path: "/l-section-matching" },
+      { name: "Microwave Amplifier Design", path: "/microwave-amplifier-design" },
     ],
   },
 ];
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectCurrentUser);
   const [showExplore, setShowExplore] = useState(false);
@@ -190,13 +193,25 @@ const Navbar = () => {
     setShowMobileMenu(false);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    dispatch(logout());
-    navigate("/login");
-    setShowUserDropdown(false);
-    setShowMobileMenu(false);
+  const handleLogout = async () => {
+    try {
+      if (typeof window !== "undefined" && (window as any).google?.accounts?.id) {
+        (window as any).google.accounts.id.disableAutoSelect();
+      }
+      await dispatch(logoutUser()).unwrap();
+    } catch (e) {
+      console.warn("Backend logout error:", e);
+      dispatch(logout());
+    } finally {
+      try {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("reduxState");
+      } catch (e) {}
+      setShowUserDropdown(false);
+      setShowMobileMenu(false);
+      navigate("/login");
+    }
   };
 
   const handleUserDashboard = () => {

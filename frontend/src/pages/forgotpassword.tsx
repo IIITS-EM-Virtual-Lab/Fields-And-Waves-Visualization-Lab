@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL, warmUpServer } from "../config/api";
 import "./login-signup.css";
 
 const ForgotPassword: React.FC = () => {
@@ -10,6 +11,10 @@ const ForgotPassword: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    warmUpServer();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputEmail = e.target.value;
@@ -32,9 +37,9 @@ const ForgotPassword: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "https://fields-and-waves-visualization-lab.onrender.com/api/password-reset/request",
-        { email },
-        { validateStatus: status => status >= 200 && status < 500 }
+        `${API_BASE_URL}/api/password-reset/request`,
+        { email: email.trim().toLowerCase() },
+        { timeout: 30000, validateStatus: status => status >= 200 && status < 500 }
       );
 
       if (response.data.success) {
@@ -163,10 +168,12 @@ const ForgotPassword: React.FC = () => {
 
                   <div className="auth-actions">
                     <button
+                      type="button"
                       className={`auth-btn primary ${(!isValidEmail || isLoading) ? 'disabled' : ''}`}
                       onClick={handleReset}
                       disabled={!isValidEmail || isLoading}
                     >
+                      {isLoading && <span className="auth-spinner" />}
                       {isLoading ? 'Sending...' : 'Send Reset Link'}
                     </button>
                   </div>
