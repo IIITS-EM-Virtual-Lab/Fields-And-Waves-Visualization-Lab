@@ -99,13 +99,38 @@ router.get('/stats/:userId', auth, async (req, res) => {
       avgAccuracy: 0
     };
 
+    const quizTotals = await Quiz.aggregate([
+      {
+        $project: {
+          questionPoints: { $sum: '$questions.points' }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalAvailableQuizzes: { $sum: 1 },
+          totalAvailablePoints: { $sum: '$questionPoints' }
+        }
+      }
+    ]);
+
+    const totals = quizTotals[0] || { totalAvailableQuizzes: 0, totalAvailablePoints: 0 };
+
+    const overallData = {
+      totalPoints: stats.totalPoints || 0,
+      totalAvailablePoints: totals.totalAvailablePoints || 0,
+      totalQuizzes: stats.totalQuizzes || 0,
+      totalAvailableQuizzes: totals.totalAvailableQuizzes || 0,
+      avgScore: Math.round(stats.avgScore || 0),
+      avgAccuracy: Math.round(stats.avgAccuracy || 0),
+      accuracy: Math.round(stats.avgAccuracy || 0)
+    };
+
     res.json({
       success: true,
       data: {
-        totalPoints: stats.totalPoints,
-        totalQuizzes: stats.totalQuizzes,
-        avgScore: Math.round(stats.avgScore || 0),
-        avgAccuracy: Math.round(stats.avgAccuracy || 0)
+        ...overallData,
+        overall: overallData
       }
     });
   } catch (error) {

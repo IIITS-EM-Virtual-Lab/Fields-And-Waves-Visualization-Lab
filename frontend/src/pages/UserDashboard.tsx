@@ -103,7 +103,18 @@ const UserDashboard = () => {
     const fetchStats = async () => {
       try {
         const res = await apiClient.get(`/api/quizresult/stats/${user._id}`);
-        setStats(res.data.data.overall);
+        const data = res.data?.data;
+        const overall = data?.overall || data;
+        if (overall && typeof overall === "object") {
+          setStats((prev) => ({
+            ...prev,
+            totalPoints: overall.totalPoints ?? prev.totalPoints,
+            totalAvailablePoints: overall.totalAvailablePoints ?? prev.totalAvailablePoints,
+            totalQuizzes: overall.totalQuizzes ?? prev.totalQuizzes,
+            totalAvailableQuizzes: overall.totalAvailableQuizzes ?? prev.totalAvailableQuizzes,
+            accuracy: overall.accuracy ?? overall.avgAccuracy ?? prev.accuracy,
+          }));
+        }
       } catch (err) {
         console.error("Error fetching stats", err);
       }
@@ -192,12 +203,15 @@ const UserDashboard = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
             {topicKeys.map((topic) => {
               const tStats = topicStats[topic];
+              if (!tStats) return null;
               const displayName =
                 topicDisplayNames[topic] ||
                 topic.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-              const accuracy = Math.round(tStats.accuracy);
-              const attemptedPercent = tStats.totalQuizzes
-                ? Math.round((tStats.completedQuizzes / tStats.totalQuizzes) * 100)
+              const accuracy = Math.round(tStats.accuracy || 0);
+              const totalQuizzes = tStats.totalQuizzes || 0;
+              const completedQuizzes = tStats.completedQuizzes || 0;
+              const attemptedPercent = totalQuizzes
+                ? Math.round((completedQuizzes / totalQuizzes) * 100)
                 : 0;
               let progressColor = "#ef4444";
               if (accuracy >= 80) progressColor = "#10b981";
@@ -214,7 +228,7 @@ const UserDashboard = () => {
                         {displayName}
                       </h3>
                       <p className="mt-1 text-xs font-medium text-slate-500">
-                        {tStats.completedQuizzes} of {tStats.totalQuizzes || 0} quizzes attempted
+                        {completedQuizzes} of {totalQuizzes} quizzes attempted
                       </p>
                     </div>
                     <div className="h-16 w-16 shrink-0">
@@ -639,15 +653,21 @@ const UserDashboard = () => {
   };
 
   // ── Root render ────────────────────────────────────────
-  const quizzesAttemptedText = `${stats.totalQuizzes} / ${stats.totalAvailableQuizzes || 0}`;
-  const pointsText = stats.totalAvailablePoints
-    ? `${stats.totalPoints} / ${stats.totalAvailablePoints}`
-    : `${stats.totalPoints}`;
-  const quizCompletion = stats.totalAvailableQuizzes
-    ? Math.round((stats.totalQuizzes / stats.totalAvailableQuizzes) * 100)
+  const totalQuizzes = stats?.totalQuizzes || 0;
+  const totalAvailableQuizzes = stats?.totalAvailableQuizzes || 0;
+  const totalPoints = stats?.totalPoints || 0;
+  const totalAvailablePoints = stats?.totalAvailablePoints || 0;
+  const accuracy = Math.round(stats?.accuracy || 0);
+
+  const quizzesAttemptedText = `${totalQuizzes} / ${totalAvailableQuizzes}`;
+  const pointsText = totalAvailablePoints
+    ? `${totalPoints} / ${totalAvailablePoints}`
+    : `${totalPoints}`;
+  const quizCompletion = totalAvailableQuizzes
+    ? Math.round((totalQuizzes / totalAvailableQuizzes) * 100)
     : 0;
-  const pointsCompletion = stats.totalAvailablePoints
-    ? Math.round((stats.totalPoints / stats.totalAvailablePoints) * 100)
+  const pointsCompletion = totalAvailablePoints
+    ? Math.round((totalPoints / totalAvailablePoints) * 100)
     : 0;
 
   return (
@@ -720,11 +740,11 @@ const UserDashboard = () => {
                 </span>
               </div>
               <div className="mt-5">
-                <p className="text-3xl font-extrabold text-slate-950 leading-tight">{Math.round(stats.accuracy)}%</p>
+                <p className="text-3xl font-extrabold text-slate-950 leading-tight">{accuracy}%</p>
                 <p className="mt-1 text-sm font-medium text-slate-500">Overall Accuracy</p>
               </div>
               <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-                <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(Math.round(stats.accuracy), 100)}%` }} />
+                <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(accuracy, 100)}%` }} />
               </div>
             </div>
           </div>
