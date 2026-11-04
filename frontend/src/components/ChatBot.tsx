@@ -22,7 +22,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { selectCurrentToken, selectIsAuthenticated } from "@/store/slices/authSlice";
+import { selectIsAuthenticated } from "@/store/slices/authSlice";
 
 const API_BASE_URL =
   import.meta.env.VITE_BACKEND_API_URL ||
@@ -127,7 +127,6 @@ export default function ChatBot() {
   const location = useLocation();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.client);
-  const token = useSelector(selectCurrentToken);
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
   // 🚫 Hide chatbot completely on quiz page
@@ -456,7 +455,7 @@ export default function ChatBot() {
   const sendPrompt = useCallback(async (prompt: string) => {
     if (!prompt.trim() || loading) return;
 
-    if (!isAuthenticated || !token || !user?._id) {
+    if (!isAuthenticated || !user?._id) {
       setIsVisible(true);
       setIsOpen(true);
       setMessages((prev) => [
@@ -487,9 +486,10 @@ export default function ChatBot() {
 
       const response = await fetch(`${API_BASE_URL}/api/chat/ask`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "X-Requested-With": "XMLHttpRequest",
         },
         body: JSON.stringify({
           query: userMessage,
@@ -515,12 +515,12 @@ export default function ChatBot() {
     }
 
     setLoading(false);
-  }, [getChatSessionId, isAuthenticated, loading, token, user]);
+  }, [getChatSessionId, isAuthenticated, loading, user]);
 
   const findTopicFromImage = async () => {
     if (!selectedImage || loading) return;
 
-    if (!isAuthenticated || !token || !user?._id) {
+    if (!isAuthenticated || !user?._id) {
       setMessages((prev) => [
         ...prev,
         { role: "bot", text: "Please sign in to search the course with an image." },
@@ -552,7 +552,8 @@ export default function ChatBot() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chat/find-topic`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
         body: formData,
       });
       const data = await response.json().catch(() => ({}));
@@ -600,7 +601,7 @@ export default function ChatBot() {
       setUploadError("Please choose a PDF smaller than 15 MB.");
       return;
     }
-    if (!isAuthenticated || !token || !user?._id) {
+    if (!isAuthenticated || !user?._id) {
       handleSignIn();
       return;
     }
@@ -617,7 +618,8 @@ export default function ChatBot() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chat/upload-pdf`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
         body: formData,
       });
       const data = await response.json().catch(() => ({}));
@@ -656,7 +658,7 @@ export default function ChatBot() {
 
   const askDoc = async (prompt: string) => {
     if (!prompt.trim() || loading) return;
-    if (!isAuthenticated || !token || !user?._id) {
+    if (!isAuthenticated || !user?._id) {
       handleSignIn();
       return;
     }
@@ -669,7 +671,8 @@ export default function ChatBot() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/chat/ask-doc`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
         body: JSON.stringify({ query: question, session_id: getChatSessionId() }),
       });
       const data = await response.json().catch(() => ({}));

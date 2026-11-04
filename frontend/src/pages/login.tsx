@@ -1,71 +1,101 @@
 // /src/pages/Login.tsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { setCredentials } from '../store/slices/authSlice';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '../store/store';
+import {
+  setCredentials,
+  checkAuth,
+  selectIsAuthenticated,
+  selectCurrentUser,
+} from '../store/slices/authSlice';
+import { API_BASE_URL, warmUpServer } from '../config/api';
 import './login-signup.css';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_API_URL ||
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000'
-    : 'https://fields-and-waves-visualization-lab.onrender.com');
-
-const Login = () => {
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-  const [resetButton, setResetButton] = useState(false);
+const Login: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({ email: '', password: '' });
+  const [serverMessage, setServerMessage] = useState<{ type: 'error' | 'success' | 'info'; text: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const [slowNotice, setSlowNotice] = useState(false);
 
-  // ✅ Process token from Google Redirect
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch<AppDispatch>();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const currentUser = useSelector(selectCurrentUser);
+
+  // If already authenticated, redirect to destination
   useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      const from = (location.state as any)?.from?.pathname;
+      if (from && from !== '/login') {
+        navigate(from, { replace: true });
+      } else if (currentUser.isAdmin) {
+        navigate('/profilepage', { replace: true });
+      } else {
+        navigate('/userdashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, currentUser, navigate, location]);
+
+  useEffect(() => {
+    warmUpServer();
+
     const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    const name = urlParams.get('name');
-    const email = urlParams.get('email');
-    const isAdmin = urlParams.get('isAdmin');
+    const oauthStatus = urlParams.get('oauth');
     const error = urlParams.get('error');
-    const userId = urlParams.get('userId')!;
 
     if (error) {
-      alert('Google Sign-in Failed');
+      let errorText = 'Google sign-in failed. Please try again.';
+      if (error === 'AccountNotFound') {
+        errorText = 'No account found with this Google email. Please register on the Sign Up page first.';
+      } else if (error === 'AccountDeleted') {
+        errorText = 'This account has been deactivated or deleted. Please contact support.';
+      } else if (error === 'NoCode') {
+        errorText = 'Google authentication was cancelled.';
+      }
+      setServerMessage({ type: 'error', text: errorText });
+      window.history.replaceState({}, '', window.location.pathname);
       return;
     }
 
-    if (token && name && email) {
-      dispatch(setCredentials({
-        token,
-        client: { 
-          name, 
-          email, 
-          isAdmin: isAdmin === 'true',
-          _id: userId, 
-        }
-      }));
-      if (isAdmin === "true") {
-        navigate("/profilepage");
-      } else {
-        navigate("/userdashboard");
-      }
+    if (oauthStatus === 'success') {
+      window.history.replaceState({}, '', window.location.pathname);
+      setIsLoading(true);
+      dispatch(checkAuth())
+        .unwrap()
+        .then((user) => {
+          if (user.isAdmin) {
+            navigate('/profilepage');
+          } else {
+            navigate('/userdashboard');
+          }
+        })
+        .catch(() => {
+          setServerMessage({
+            type: 'error',
+            text: 'Failed to verify session after Google sign-in. Please try again.'
+          });
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
-  }, []);
+  }, [dispatch, navigate]);
 
   // Validation function
   const validateForm = () => {
-    const email = emailRef.current?.value || '';
-    const password = passwordRef.current?.value || '';
     const newErrors = { email: '', password: '' };
 
     if (!email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Please enter a valid email';
+    } else if (!/\S+@\S+\.\S+/.test(email.trim())) {
+      newErrors.email = 'Please enter a valid email address';
     }
 
     if (!password.trim()) {
@@ -78,58 +108,91 @@ const Login = () => {
     return !newErrors.email && !newErrors.password;
   };
 
-  // ✅ Manual Login
   const handleLogin = async () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
+    setServerMessage(null);
+    setSlowNotice(false);
+
+    const timer = setTimeout(() => {
+      setSlowNotice(true);
+    }, 2500);
+
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
-        email: emailRef.current?.value,
-        password: passwordRef.current?.value
-      }, {
-        validateStatus: status => status >= 200 && status < 500
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/login`,
+        {
+          email: email.trim().toLowerCase(),
+          password
+        },
+        {
+          withCredentials: true,
+          timeout: 45000,
+          validateStatus: (status) => status >= 200 && status < 500
+        }
+      );
+
+      clearTimeout(timer);
 
       if (!response.data.success) {
         throw new Error(response.data.message || 'Login failed');
       }
 
-      const user = response.data.data.user;
-      const token = response.data.data.token;
+      const { user } = response.data.data;
 
-      dispatch(setCredentials({
-        token,
-        client: { _id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin }
-      }));
+      dispatch(
+        setCredentials({
+          client: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            isAdmin: Boolean(user.isAdmin),
+            profilePicture: user.profilePicture
+          }
+        })
+      );
 
-      // 🔐 Save token and user to localStorage so ChapterQuiz can access them
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      navigate('/home');
+      const from = (location.state as any)?.from?.pathname;
+      if (from && from !== '/login') {
+        navigate(from, { replace: true });
+      } else if (user.isAdmin) {
+        navigate('/profilepage');
+      } else {
+        navigate('/userdashboard');
+      }
     } catch (error: any) {
-      console.error("Login Error:", error);
-      alert(error.message || 'Login failed');
-      setResetButton(true);
-      setTimeout(() => setResetButton(false), 1000);
+      clearTimeout(timer);
+      console.error('Login Error:', error);
+      const msg = error.response?.data?.message || error.message || 'Login failed. Please check your credentials.';
+      setServerMessage({ type: 'error', text: msg });
     } finally {
+      clearTimeout(timer);
       setIsLoading(false);
+      setSlowNotice(false);
     }
   };
 
-  // ✅ Redirect to Google OAuth URL
   const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    setServerMessage(null);
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/auth/google`);
+      const response = await axios.get(`${API_BASE_URL}/api/auth/google?action=login`, {
+        withCredentials: true,
+        timeout: 15000
+      });
       if (response.data.url) {
         window.location.href = response.data.url;
       } else {
         throw new Error('No redirect URL received');
       }
-    } catch (err) {
-      console.error("Google login error:", err);
-      alert('Google login failed');
+    } catch (err: any) {
+      console.error('Google login error:', err);
+      setServerMessage({
+        type: 'error',
+        text: 'Failed to connect to Google Sign-in. Please try again in a moment.'
+      });
+      setIsLoading(false);
     }
   };
 
@@ -137,10 +200,12 @@ const Login = () => {
     navigate('/forgot-password');
   };
 
-  const isFormValid = () => {
-    const email = emailRef.current?.value?.trim();
-    const password = passwordRef.current?.value?.trim();
-    return email && password && email.length > 0 && password.length > 0;
+  const isFormValid = email.trim().length > 0 && password.trim().length >= 6;
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && isFormValid && !isLoading) {
+      handleLogin();
+    }
   };
 
   return (
@@ -164,8 +229,20 @@ const Login = () => {
               <p className="auth-subtitle">Sign in to your account</p>
             </div>
 
+            {serverMessage && (
+              <div className={`auth-alert ${serverMessage.type}`}>
+                {serverMessage.text}
+              </div>
+            )}
+
+            {isLoading && slowNotice && (
+              <div className="auth-alert info">
+                Connecting to server... If the server was idle, it may take a few seconds to wake up.
+              </div>
+            )}
+
             {/* Login form */}
-            <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
+            <form className="auth-form" onSubmit={(e) => e.preventDefault()} onKeyDown={handleKeyDown}>
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
                   Email Address <span className="required">*</span>
@@ -174,9 +251,15 @@ const Login = () => {
                   id="email"
                   type="email"
                   placeholder="Enter your email"
-                  ref={emailRef}
+                  value={email}
                   className={`auth-input ${errors.email ? 'error' : ''}`}
-                  onChange={() => setErrors({ ...errors, email: '' })}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors({ ...errors, email: '' });
+                    if (serverMessage) setServerMessage(null);
+                  }}
+                  disabled={isLoading}
+                  autoComplete="email"
                 />
                 {errors.email && <span className="error-message">{errors.email}</span>}
               </div>
@@ -190,14 +273,21 @@ const Login = () => {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
-                    ref={passwordRef}
+                    value={password}
                     className={`auth-input ${errors.password ? 'error' : ''}`}
-                    onChange={() => setErrors({ ...errors, password: '' })}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errors.password) setErrors({ ...errors, password: '' });
+                      if (serverMessage) setServerMessage(null);
+                    }}
+                    disabled={isLoading}
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"
                     className="password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -207,10 +297,12 @@ const Login = () => {
 
               <div className="auth-actions">
                 <button
-                  className={`auth-btn primary ${(!isFormValid() || isLoading) ? 'disabled' : ''}`}
+                  type="button"
+                  className={`auth-btn primary ${(!isFormValid || isLoading) ? 'disabled' : ''}`}
                   onClick={handleLogin}
-                  disabled={!isFormValid() || resetButton || isLoading}
+                  disabled={!isFormValid || isLoading}
                 >
+                  {isLoading && <span className="auth-spinner" />}
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
               </div>
@@ -237,6 +329,7 @@ const Login = () => {
                   type="button"
                   className="link-btn"
                   onClick={handleForgotPassword}
+                  disabled={isLoading}
                 >
                   Forgot Password?
                 </button>
@@ -246,6 +339,7 @@ const Login = () => {
                     type="button"
                     className="link-btn primary"
                     onClick={() => navigate('/signup')}
+                    disabled={isLoading}
                   >
                     Create Account
                   </button>

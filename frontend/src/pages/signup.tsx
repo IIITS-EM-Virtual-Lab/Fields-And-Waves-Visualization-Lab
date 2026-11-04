@@ -1,23 +1,24 @@
 // /src/pages/Signup.tsx
-import React, { useRef, useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../store/slices/authSlice';
+import { AppDispatch } from '../store/store';
+import { API_BASE_URL, warmUpServer } from '../config/api';
 import './login-signup.css';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 
-const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_API_URL ||
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000'
-    : 'https://fields-and-waves-visualization-lab.onrender.com');
-
-const Signup = () => {
+const Signup: React.FC = () => {
   const navigate = useNavigate();
-  const nameRef = useRef<HTMLInputElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-  const confirmRef = useRef<HTMLInputElement>(null);
-  
+  const dispatch = useDispatch<AppDispatch>();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [otp, setOtp] = useState('');
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({
@@ -27,28 +28,39 @@ const Signup = () => {
     confirmPassword: '',
     otp: ''
   });
+
+  const [serverMessage, setServerMessage] = useState<{ type: 'error' | 'success' | 'info'; text: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [slowNotice, setSlowNotice] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    warmUpServer();
+  }, []);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
 
   // Validation function
   const validateForm = () => {
-    const name = nameRef.current?.value || '';
-    const email = emailRef.current?.value || '';
-    const password = passwordRef.current?.value || '';
-    const confirmPassword = confirmRef.current?.value || '';
     const newErrors = { name: '', email: '', password: '', confirmPassword: '', otp: '' };
 
     if (!name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = 'Full name is required';
     } else if (name.trim().length < 2) {
       newErrors.name = 'Name must be at least 2 characters';
     }
 
     if (!email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = 'Email address is required';
+    } else if (!/\S+@\S+\.\S+/.test(email.trim())) {
+      newErrors.email = 'Please enter a valid email address';
     }
 
     if (!password.trim()) {
@@ -67,98 +79,166 @@ const Signup = () => {
     return !newErrors.name && !newErrors.email && !newErrors.password && !newErrors.confirmPassword;
   };
 
-  const handleSignup = async () => {
+  const handleSendOtp = async () => {
     if (!validateForm()) return;
+
+    setIsLoading(true);
+    setServerMessage(null);
+    setSlowNotice(false);
+
+    const timer = setTimeout(() => setSlowNotice(true), 2500);
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/signup/send-otp`,
+        {
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          password
+        },
+        {
+          timeout: 45000,
+          validateStatus: (status) => status >= 200 && status < 500
+        }
+      );
+
+      clearTimeout(timer);
+
+      if (response.data.success) {
+        setOtpSent(true);
+        setOtp('');
+        setResendCooldown(45);
+        setErrors((prev) => ({ ...prev, otp: '' }));
+        setServerMessage({
+          type: 'success',
+          text: `Verification code sent to ${email.trim()}. Please enter the 6-digit code below.`
+        });
+      } else {
+        setServerMessage({
+          type: 'error',
+          text: response.data.message || 'Failed to send verification code'
+        });
+      }
+    } catch (error: any) {
+      clearTimeout(timer);
+      console.error('Signup OTP error:', error);
+      const msg = error.response?.data?.message || error.message || 'Could not send verification code. Please try again.';
+      setServerMessage({ type: 'error', text: msg });
+    } finally {
+      clearTimeout(timer);
+      setIsLoading(false);
+      setSlowNotice(false);
+    }
+  };
+
+  const handleSignup = async () => {
     if (!otpSent) {
       await handleSendOtp();
       return;
     }
 
     if (!/^\d{6}$/.test(otp.trim())) {
-      setErrors((prev) => ({ ...prev, otp: 'Enter the 6-digit code sent to your email' }));
+      setErrors((prev) => ({ ...prev, otp: 'Please enter the 6-digit verification code' }));
       return;
     }
 
     setIsLoading(true);
-    const name = nameRef.current?.value || '';
-    const email = emailRef.current?.value || '';
-    const password = passwordRef.current?.value || '';
+    setServerMessage(null);
+    setSlowNotice(false);
+
+    const timer = setTimeout(() => setSlowNotice(true), 2500);
 
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/auth/signup`,
-        { name, email, password, otp },
-        { validateStatus: status => status >= 200 && status < 500 }
+        {
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          password,
+          otp: otp.trim()
+        },
+        {
+          withCredentials: true,
+          timeout: 45000,
+          validateStatus: (status) => status >= 200 && status < 500
+        }
       );
 
+      clearTimeout(timer);
+
       if (response.data.success) {
-        alert('Account created successfully! Please login.');
-        navigate('/login');
+        setServerMessage({
+          type: 'success',
+          text: 'Account created successfully! Logging you in...'
+        });
+
+        if (response.data.data?.user) {
+          dispatch(
+            setCredentials({
+              client: response.data.data.user
+            })
+          );
+          setTimeout(() => navigate('/userdashboard'), 1200);
+        } else {
+          setTimeout(() => navigate('/login'), 1500);
+        }
       } else {
-        alert(response.data.message || 'Signup failed');
+        setServerMessage({
+          type: 'error',
+          text: response.data.message || 'Signup failed'
+        });
       }
     } catch (error: any) {
+      clearTimeout(timer);
       console.error('Signup error:', error);
-      alert(error.response?.data?.message || 'Signup error. Please try again.');
+      const msg = error.response?.data?.message || error.message || 'Signup error. Please try again.';
+      setServerMessage({ type: 'error', text: msg });
     } finally {
+      clearTimeout(timer);
       setIsLoading(false);
-    }
-  };
-
-  const handleSendOtp = async () => {
-    setIsLoading(true);
-    const name = nameRef.current?.value || '';
-    const email = emailRef.current?.value || '';
-    const password = passwordRef.current?.value || '';
-
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/auth/signup/send-otp`,
-        { name, email, password },
-        { validateStatus: status => status >= 200 && status < 500 }
-      );
-
-      if (response.data.success) {
-        setOtpSent(true);
-        setOtp('');
-        setErrors((prev) => ({ ...prev, otp: '' }));
-        alert('Verification code sent to your email.');
-      } else {
-        alert(response.data.message || 'Failed to send verification code');
-      }
-    } catch (error: any) {
-      console.error('Signup OTP error:', error);
-      alert(error.response?.data?.message || 'Could not send verification code. Please try again.');
-    } finally {
-      setIsLoading(false);
+      setSlowNotice(false);
     }
   };
 
   const handleGoogleSignup = async () => {
+    setIsLoading(true);
+    setServerMessage(null);
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/auth/google`);
+      const response = await axios.get(`${API_BASE_URL}/api/auth/google?action=signup`, { withCredentials: true, timeout: 15000 });
       if (response.data.url) {
         window.location.href = response.data.url;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Google signup error:', err);
-      alert('Google signup failed');
+      setServerMessage({
+        type: 'error',
+        text: 'Failed to connect to Google sign-up. Please try again.'
+      });
+      setIsLoading(false);
     }
   };
 
-  const isFormValid = () => {
-    const name = nameRef.current?.value?.trim();
-    const email = emailRef.current?.value?.trim();
-    const password = passwordRef.current?.value?.trim();
-    const confirmPassword = confirmRef.current?.value?.trim();
-    return name && email && password && confirmPassword && 
-           name.length > 0 && email.length > 0 && password.length > 0 && confirmPassword.length > 0;
-  };
-
-  const handleEditEmail = () => {
+  const handleEditDetails = () => {
     setOtpSent(false);
     setOtp('');
+    setServerMessage(null);
     setErrors((prev) => ({ ...prev, otp: '' }));
+  };
+
+  const isFormValid =
+    name.trim().length >= 2 &&
+    /\S+@\S+\.\S+/.test(email.trim()) &&
+    password.trim().length >= 6 &&
+    password === confirmPassword;
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !isLoading) {
+      if (!otpSent && isFormValid) {
+        handleSendOtp();
+      } else if (otpSent && otp.trim().length === 6) {
+        handleSignup();
+      }
+    }
   };
 
   return (
@@ -179,10 +259,24 @@ const Signup = () => {
           <div className="auth-form-container">
             <div className="auth-header">
               <h2 className="auth-title">Create Account</h2>
-              <p className="auth-subtitle">Join us to get started</p>
+              <p className="auth-subtitle">Join us to explore fields & waves simulations</p>
             </div>
 
-            <form className="auth-form" onSubmit={(e) => e.preventDefault()}>
+            {/* Server Message Alert */}
+            {serverMessage && (
+              <div className={`auth-alert ${serverMessage.type}`}>
+                {serverMessage.text}
+              </div>
+            )}
+
+            {/* Slow connection hint */}
+            {isLoading && slowNotice && (
+              <div className="auth-alert info">
+                Connecting to server... If the server was idle, it may take a few seconds to wake up.
+              </div>
+            )}
+
+            <form className="auth-form" onSubmit={(e) => e.preventDefault()} onKeyDown={handleKeyDown}>
               <div className="form-group">
                 <label htmlFor="name" className="form-label">
                   Full Name <span className="required">*</span>
@@ -191,10 +285,15 @@ const Signup = () => {
                   id="name"
                   type="text"
                   placeholder="Enter your full name"
-                  ref={nameRef}
+                  value={name}
                   className={`auth-input ${errors.name ? 'error' : ''}`}
-                  onChange={() => setErrors({ ...errors, name: '' })}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (errors.name) setErrors({ ...errors, name: '' });
+                    if (serverMessage) setServerMessage(null);
+                  }}
                   disabled={otpSent || isLoading}
+                  autoComplete="name"
                 />
                 {errors.name && <span className="error-message">{errors.name}</span>}
               </div>
@@ -207,10 +306,15 @@ const Signup = () => {
                   id="email"
                   type="email"
                   placeholder="Enter your email"
-                  ref={emailRef}
+                  value={email}
                   className={`auth-input ${errors.email ? 'error' : ''}`}
-                  onChange={() => setErrors({ ...errors, email: '' })}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors({ ...errors, email: '' });
+                    if (serverMessage) setServerMessage(null);
+                  }}
                   disabled={otpSent || isLoading}
+                  autoComplete="email"
                 />
                 {errors.email && <span className="error-message">{errors.email}</span>}
               </div>
@@ -224,15 +328,21 @@ const Signup = () => {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Create a password (min 6 characters)"
-                    ref={passwordRef}
+                    value={password}
                     className={`auth-input ${errors.password ? 'error' : ''}`}
-                    onChange={() => setErrors({ ...errors, password: '' })}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errors.password) setErrors({ ...errors, password: '' });
+                      if (serverMessage) setServerMessage(null);
+                    }}
                     disabled={otpSent || isLoading}
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
                     className="password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -249,15 +359,21 @@ const Signup = () => {
                     id="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="Confirm your password"
-                    ref={confirmRef}
+                    value={confirmPassword}
                     className={`auth-input ${errors.confirmPassword ? 'error' : ''}`}
-                    onChange={() => setErrors({ ...errors, confirmPassword: '' })}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: '' });
+                      if (serverMessage) setServerMessage(null);
+                    }}
                     disabled={otpSent || isLoading}
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
                     className="password-toggle"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    tabIndex={-1}
                   >
                     {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -267,27 +383,22 @@ const Signup = () => {
 
               {otpSent && (
                 <div className="otp-container">
-                  <div className="auth-info-box">
-                    <p className="info-text">
-                      We sent a 6-digit verification code to {emailRef.current?.value}.
-                    </p>
-                  </div>
-
                   <div className="form-group">
                     <label htmlFor="signupOtp" className="form-label">
-                      Verification Code <span className="required">*</span>
+                      6-Digit Verification Code <span className="required">*</span>
                     </label>
                     <input
                       id="signupOtp"
                       type="text"
                       inputMode="numeric"
+                      pattern="[0-9]*"
                       maxLength={6}
                       value={otp}
                       onChange={(e) => {
                         setOtp(e.target.value.replace(/\D/g, '').slice(0, 6));
-                        setErrors({ ...errors, otp: '' });
+                        if (errors.otp) setErrors({ ...errors, otp: '' });
                       }}
-                      placeholder="Enter 6-digit code"
+                      placeholder="• • • • • •"
                       className={`auth-input otp-code-input ${errors.otp ? 'error' : ''}`}
                       disabled={isLoading}
                       autoFocus
@@ -300,14 +411,14 @@ const Signup = () => {
                       type="button"
                       className="link-btn primary"
                       onClick={handleSendOtp}
-                      disabled={isLoading}
+                      disabled={isLoading || resendCooldown > 0}
                     >
-                      Resend code
+                      {resendCooldown > 0 ? `Resend code (${resendCooldown}s)` : 'Resend code'}
                     </button>
                     <button
                       type="button"
                       className="link-btn"
-                      onClick={handleEditEmail}
+                      onClick={handleEditDetails}
                       disabled={isLoading}
                     >
                       Edit details
@@ -318,11 +429,15 @@ const Signup = () => {
 
               <div className="auth-actions">
                 <button
-                  className={`auth-btn primary ${(!isFormValid() || isLoading || (otpSent && otp.length !== 6)) ? 'disabled' : ''}`}
+                  type="button"
+                  className={`auth-btn primary ${(isLoading || (!otpSent && !isFormValid) || (otpSent && otp.trim().length !== 6)) ? 'disabled' : ''}`}
                   onClick={handleSignup}
-                  disabled={!isFormValid() || isLoading || (otpSent && otp.length !== 6)}
+                  disabled={isLoading || (!otpSent && !isFormValid) || (otpSent && otp.trim().length !== 6)}
                 >
-                  {isLoading ? (otpSent ? 'Verifying...' : 'Sending Code...') : (otpSent ? 'Verify & Create Account' : 'Send Verification Code')}
+                  {isLoading && <span className="auth-spinner" />}
+                  {isLoading
+                    ? (otpSent ? 'Verifying...' : 'Sending Code...')
+                    : (otpSent ? 'Verify & Create Account' : 'Send Verification Code')}
                 </button>
               </div>
 
@@ -349,6 +464,7 @@ const Signup = () => {
                     type="button"
                     className="link-btn primary"
                     onClick={() => navigate('/login')}
+                    disabled={isLoading}
                   >
                     Sign In
                   </button>
