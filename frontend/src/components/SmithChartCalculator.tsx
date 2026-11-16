@@ -367,8 +367,6 @@ export default function SmithChartCalculator() {
       paper_bgcolor: "#ffffff",
       plot_bgcolor: "#ffffff",
       autosize: true,
-      height: 650,
-      width: 650,
       smith: {
         realaxis: {
           tickcolor: "#94a3b8",
@@ -801,7 +799,7 @@ export default function SmithChartCalculator() {
           </h2>
           <div
             ref={plotRef}
-            className="w-[650px] h-[650px] max-w-full"
+            className="w-full max-w-[650px] aspect-square"
             style={{
               opacity: plotlyLoaded ? 1 : 0,
               transition: "opacity 0.3s ease-in-out",
