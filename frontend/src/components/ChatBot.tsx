@@ -18,9 +18,12 @@ import {
   VolumeX,
   FileText,
   FileUp,
+  Sigma,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { BlockMath } from "react-katex";
+import "katex/dist/katex.min.css";
 import { RootState } from "@/store/store";
 import { selectIsAuthenticated } from "@/store/slices/authSlice";
 
@@ -44,6 +47,13 @@ type CourseTopicLink = {
   confidence?: number | null;
 };
 
+type SolveStep = {
+  title: string;
+  explanation: string;
+  formula?: string;
+  topic?: CourseTopicLink | null;
+};
+
 type ChatMessage = {
   role: "user" | "bot";
   text: string;
@@ -51,7 +61,15 @@ type ChatMessage = {
   topic?: CourseTopicLink;
   alternatives?: CourseTopicLink[];
   docTopics?: CourseTopicLink[];
+  steps?: SolveStep[];
 };
+
+// Render a LaTeX formula, falling back to monospace text if it can't be parsed.
+function SafeMath({ formula }: { formula: string }) {
+  return (
+    <BlockMath math={formula} renderError={() => <code className="solve-formula-fallback">{formula}</code>} />
+  );
+}
 
 const SUPPORTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024;
@@ -146,6 +164,7 @@ export default function ChatBot() {
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
   const [analyzingDoc, setAnalyzingDoc] = useState(false);
   const [activeDoc, setActiveDoc] = useState<{ name: string; topics: CourseTopicLink[] } | null>(null);
+  const [solveMode, setSolveMode] = useState(false);
   const [isWaving, setIsWaving] = useState(false);
   const [peekState, setPeekState] = useState<"hidden" | "peeking" | "full">("peeking");
   const [waves, setWaves] = useState<Array<{ id: number; x: number; y: number }>>([]);
@@ -238,12 +257,14 @@ export default function ChatBot() {
       setSelectedImagePreview(null);
       setUploadError("");
       setActiveDoc(null);
+      setSolveMode(false);
       return;
     }
 
     setMessages([]);
     setInput("");
     setActiveDoc(null);
+    setSolveMode(false);
     setChatThreadId(createChatThreadId());
   }, [user?._id]);
 
@@ -712,9 +733,59 @@ export default function ChatBot() {
     }
   };
 
+  const solveProblem = async (prompt: string) => {
+    if (!prompt.trim() || loading) return;
+    if (!isAuthenticated || !user?._id) {
+      handleSignIn();
+      return;
+    }
+
+    const problem = prompt.trim();
+    setMessages((prev) => [...prev, { role: "user", text: problem }]);
+    setInput("");
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat/solve`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+        body: JSON.stringify({ query: problem }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.message || `Request failed (HTTP ${response.status}).`);
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "bot",
+          text: data.answer || "Here's the solution.",
+          steps: Array.isArray(data.steps) ? data.steps : [],
+        },
+      ]);
+    } catch (error) {
+      console.error("[ChatBot] solve error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "bot",
+          text: error instanceof Error ? error.message : "I couldn't solve that right now. Please try again.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const sendMessage = async () => {
     if (selectedImage) {
       await findTopicFromImage();
+      return;
+    }
+    if (solveMode) {
+      await solveProblem(input);
       return;
     }
     if (activeDoc) {
@@ -780,6 +851,7 @@ export default function ChatBot() {
     setUploadError("");
     setAnalyzingDoc(false);
     setActiveDoc(null);
+    setSolveMode(false);
     setChatThreadId(createChatThreadId());
   };
 
@@ -1053,6 +1125,36 @@ export default function ChatBot() {
                       ))}
                     </div>
                   )}
+                  {msg.steps && msg.steps.length > 0 && (
+                    <div className="solve-steps">
+                      {msg.steps.map((step, si) => (
+                        <div className="solve-step" key={si}>
+                          <div className="solve-step-head">
+                            <span className="solve-step-num">{si + 1}</span>
+                            <span className="solve-step-title">{step.title}</span>
+                          </div>
+                          {step.explanation && (
+                            <div className="solve-step-expl">{step.explanation}</div>
+                          )}
+                          {step.formula && (
+                            <div className="solve-step-formula">
+                              <SafeMath formula={step.formula} />
+                            </div>
+                          )}
+                          {step.topic && (
+                            <button
+                              type="button"
+                              className="solve-step-topic"
+                              onClick={() => openCourseTopic(step.topic!.path)}
+                              title={`Open ${step.topic.title}`}
+                            >
+                              {step.topic.title} <ExternalLink size={11} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {msg.role === "bot" && (
                     <svg className="message-wave" viewBox="0 0 100 10">
                       <path d="M0,5 Q25,0 50,5 T100,5" fill="none" stroke="currentColor" strokeWidth="0.5" />
@@ -1082,6 +1184,8 @@ export default function ChatBot() {
                         ? "Reading your image..."
                         : analyzingDoc
                         ? "Reading your document..."
+                        : solveMode
+                        ? "Working through the steps..."
                         : activeDoc
                         ? "Searching your document..."
                         : "Processing waves..."}
@@ -1152,6 +1256,18 @@ export default function ChatBot() {
                 </button>
               </div>
             )}
+            {solveMode && (
+              <div className="active-doc-chip">
+                <Sigma size={15} />
+                <div className="active-doc-details">
+                  <strong>Step-by-step solver</strong>
+                  <span>Type a problem — I'll work through it</span>
+                </div>
+                <button type="button" onClick={() => setSolveMode(false)} title="Exit solver mode">
+                  <X size={15} />
+                </button>
+              </div>
+            )}
             {uploadError && <div className="upload-error">{uploadError}</div>}
             <div className="input-wrapper">
               <input
@@ -1195,6 +1311,21 @@ export default function ChatBot() {
               >
                 <FileUp size={18} />
               </button>
+              <button
+                type="button"
+                className={`attach-image-button ${solveMode ? "solve-active" : ""}`}
+                onClick={() => isAuthenticated ? setSolveMode((prev) => !prev) : handleSignIn()}
+                disabled={loading}
+                title={
+                  !isAuthenticated
+                    ? "Sign in to use the step-by-step solver"
+                    : solveMode
+                    ? "Exit step-by-step solver"
+                    : "Solve a problem step by step"
+                }
+              >
+                <Sigma size={18} />
+              </button>
               {speechRecognitionSupported && (
                 <button
                   type="button"
@@ -1226,6 +1357,8 @@ export default function ChatBot() {
                 placeholder={
                   selectedImage
                     ? "Add a note (optional)..."
+                    : solveMode
+                    ? "Paste a problem to solve step by step..."
                     : activeDoc
                     ? "Ask about your document..."
                     : "Send a wave of curiosity..."
@@ -2235,6 +2368,88 @@ export default function ChatBot() {
 
         .doc-topic-row:hover { background: #f3e8ff; transform: translateY(-1px); }
         .doc-topic-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .attach-image-button.solve-active {
+          color: #fff;
+          border-color: #ec4899;
+          background: linear-gradient(135deg, #7c3aed, #ec4899);
+        }
+
+        .solve-steps {
+          margin-top: 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .solve-step {
+          padding: 10px 11px;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.6);
+          border: 1px solid rgba(221, 214, 254, 0.8);
+          box-shadow: 0 3px 10px rgba(124, 58, 237, 0.08);
+        }
+
+        .solve-step-head {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .solve-step-num {
+          flex-shrink: 0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #7c3aed, #ec4899);
+          color: #fff;
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .solve-step-title {
+          color: #1f2937;
+          font-size: 13.5px;
+          font-weight: 700;
+          line-height: 1.3;
+        }
+
+        .solve-step-expl {
+          margin-top: 6px;
+          color: #4b5563;
+          font-size: 12.5px;
+          line-height: 1.5;
+        }
+
+        .solve-step-formula {
+          margin-top: 7px;
+          padding: 6px 8px;
+          border-radius: 8px;
+          background: #faf5ff;
+          overflow-x: auto;
+          font-size: 13px;
+        }
+
+        .solve-step-formula .katex { color: #4c1d95; }
+        .solve-formula-fallback { color: #6d28d9; font-size: 12px; word-break: break-word; }
+
+        .solve-step-topic {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin-top: 8px;
+          border: none;
+          padding: 0;
+          background: transparent;
+          color: #7c3aed;
+          font-size: 11px;
+          font-weight: 600;
+          text-decoration: underline;
+          cursor: pointer;
+        }
 
         .selected-image-preview img {
           width: 42px;
