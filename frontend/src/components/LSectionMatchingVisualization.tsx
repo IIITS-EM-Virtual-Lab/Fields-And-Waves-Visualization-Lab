@@ -964,8 +964,6 @@ export default function LSectionMatchingVisualization() {
       paper_bgcolor: "#ffffff",
       plot_bgcolor: "#ffffff",
       autosize: true,
-      height: 580,
-      width: 580,
       smith: {
         realaxis: {
           tickcolor: "#94a3b8",
@@ -1280,7 +1278,7 @@ export default function LSectionMatchingVisualization() {
               )}
               <div
                 ref={plotRef}
-                className="w-[580px] h-[580px] max-w-full"
+                className="w-full max-w-[580px] aspect-square"
                 style={{
                   opacity: plotlyLoaded ? 1 : 0,
                   transition: "opacity 0.3s ease-in-out",

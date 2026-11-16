@@ -44,10 +44,10 @@ export default function DistributedModelSimulator() {
   }, [R, L, G, C, lossless]);
 
   return (
-    <div style={{ display: "flex", padding: "2rem", gap: "2rem" }}>
-      
+    <div style={{ display: "flex", flexWrap: "wrap", padding: "2rem", gap: "2rem" }}>
+
       {/* LEFT PANEL */}
-      <div style={{ width: "320px" }}>
+      <div style={{ width: "100%", maxWidth: 360, flex: "1 1 280px" }}>
         <h2>Distributed Line Controls</h2>
 
         <label>

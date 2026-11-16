@@ -220,8 +220,6 @@ export default function App() {
       paper_bgcolor: "#ffffff",
       plot_bgcolor: "#ffffff",
       autosize: true,
-      height: 650,
-      width: 650,
       margin: { l: 40, r: 40, t: 80, b: 40 },
       smith: {
         realaxis: { tickcolor: "#94a3b8", gridcolor: "#e2e8f0", linecolor: "#cbd5e1", tickangle: 0, },
@@ -380,7 +378,7 @@ export default function App() {
             </p>
             <div
               ref={plotRef}
-              className="w-[550px] h-[550px] max-w-full"
+              className="w-full max-w-[550px] aspect-square"
               style={{
                 opacity: plotlyLoaded ? 1 : 0,
                 transition: "opacity 0.3s ease-in-out",

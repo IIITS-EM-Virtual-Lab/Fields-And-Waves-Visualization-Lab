@@ -257,8 +257,6 @@ export default function MicrowaveAmplifierDesignVisualization() {
       paper_bgcolor: "#ffffff",
       plot_bgcolor: "#ffffff",
       autosize: true,
-      height: 520,
-      width: 520,
       margin: { l: 20, r: 20, t: 40, b: 20 },
       smith: {
         realaxis: { tickcolor: "#94a3b8", gridcolor: "#e2e8f0", linecolor: "#cbd5e1" },
@@ -439,7 +437,7 @@ export default function MicrowaveAmplifierDesignVisualization() {
                 )}
                 <div
                   ref={plotRef}
-                  className="w-[520px] h-[520px] max-w-full"
+                  className="w-full max-w-[520px] aspect-square"
                   style={{
                     opacity: plotlyLoaded ? 1 : 0,
                     transition: "opacity 0.3s ease-in-out",
