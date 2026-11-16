@@ -436,4 +436,79 @@ router.post('/ask-doc', auth, async (req, res) => {
   }
 });
 
+router.post('/solve', auth, async (req, res) => {
+  const { query } = req.body;
+
+  if (!query || typeof query !== 'string' || !query.trim()) {
+    return res.status(400).json({ success: false, message: 'Please enter a problem to solve.' });
+  }
+
+  const groq = getTextClient();
+  if (!groq) {
+    return res.status(503).json({
+      success: false,
+      message: 'The step-by-step solver is not configured yet. Add a GROQ_API_KEY to the backend environment.',
+    });
+  }
+
+  try {
+    const catalog = buildCourseCatalogForPrompt();
+    const completion = await groq.chat.completions.create({
+      model: TEXT_MODEL,
+      temperature: 0.2,
+      max_tokens: 1400,
+      response_format: { type: 'json_object' },
+      messages: [
+        {
+          role: 'system',
+          content: [
+            'You are Fieldora, an electromagnetics tutor. Solve the problem step by step so a student can learn the method, not just the answer.',
+            'Break the solution into clear, ordered steps. Each step has a short title, a one-to-three sentence explanation, and an optional formula.',
+            'Put every formula in the "formula" field as valid LaTeX WITHOUT dollar-sign delimiters (e.g. "\\\\Gamma = \\\\frac{Z_L - Z_0}{Z_L + Z_0}"). Never put LaTeX in the explanation text.',
+            'Show the formula first and then the substitution with the given numbers so the student can verify each step.',
+            'For each step, cite the single most relevant catalog topic (a path that appears verbatim in the catalog, or null). Never invent a URL.',
+            'If the problem is not an electromagnetics / physics / math problem, set steps to an empty array and explain that in final_answer.',
+            'Return JSON only with: problem_summary (one sentence), steps (array of { title, explanation, formula, citation }), final_answer (concise plain text).',
+          ].join(' '),
+        },
+        {
+          role: 'user',
+          content: `Course catalog: ${JSON.stringify(catalog)}\n\nProblem: ${query.trim()}`,
+        },
+      ],
+    });
+
+    const parsed = JSON.parse(completion.choices[0]?.message?.content || '{}');
+    const steps = Array.isArray(parsed.steps)
+      ? parsed.steps.slice(0, 12).map((step) => {
+        const citationPath = typeof step.citation === 'string'
+          ? step.citation
+          : step.citation && step.citation.path;
+        const topic = citationPath ? courseTopicByPath.get(citationPath) : null;
+        return {
+          title: typeof step.title === 'string' ? step.title : '',
+          explanation: typeof step.explanation === 'string' ? step.explanation : '',
+          formula: typeof step.formula === 'string' ? step.formula.trim() : '',
+          topic: topic ? { title: topic.title, module: topic.module, path: topic.path } : null,
+        };
+      }).filter((step) => step.title || step.explanation || step.formula)
+      : [];
+
+    return res.json({
+      success: true,
+      summary: typeof parsed.problem_summary === 'string' ? parsed.problem_summary : '',
+      steps,
+      answer: typeof parsed.final_answer === 'string' && parsed.final_answer.trim()
+        ? parsed.final_answer.trim()
+        : (steps.length ? 'See the steps above for the full solution.' : "I couldn't work this out as a step-by-step problem. Try rephrasing it."),
+    });
+  } catch (error) {
+    console.error('Step-by-step solve error:', error);
+    return res.status(502).json({
+      success: false,
+      message: 'Fieldora could not solve that right now. Please try again.',
+    });
+  }
+});
+
 module.exports = router;
