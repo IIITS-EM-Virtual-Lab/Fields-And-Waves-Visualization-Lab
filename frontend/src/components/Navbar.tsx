@@ -52,7 +52,7 @@ const exploreModules = [
         name: "Electric Field & Flux",
         path: "/electric-field-and-flux-density",
       },
-      // { name: "Field Operations", path: "/field-operations" },
+      { name: "Field Operations", path: "/field-operations" },
       { name: "Electric Potential", path: "/electric-potential" },
       // { name: "Gauss Law", path: "/gauss-law" },
       { name: "Electric Dipole", path: "/electric-dipole" },
@@ -82,7 +82,7 @@ const exploreModules = [
   {
     title: "Transmission Lines",
     items: [
-      { name: "Types of Transmission Lines", path: "/types-of-transmission-line" },
+      { name: "Types of Transmission Line", path: "/types-of-transmission-line" },
       { name: "Characteristic Impedance", path: "/characteristic-impedance" },
       { name: "Terminated Transmission Line", path: "/terminated-transmission-line" },
       { name: "Smith Chart", path: "/smith-chart" },
@@ -92,6 +92,14 @@ const exploreModules = [
       { name: "Microwave Amplifier Design", path: "/microwave-amplifier-design" },
     ],
   },
+  // {
+  //   title: "Antennas",
+  //   items: [
+  //     { name: "Introduction to Antennas", path: "/antenna-intro" },
+  //     { name: "Hertzian Dipole", path: "/hertzian-dipole" },
+  //     { name: "Half-wave Dipole", path: "/half-wave-dipole" },
+  //   ],
+  // },
 ];
 
 const Navbar = () => {

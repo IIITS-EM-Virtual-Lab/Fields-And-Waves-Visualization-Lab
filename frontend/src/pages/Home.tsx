@@ -21,7 +21,7 @@ const modules = [
         name: "Electric Field & Flux",
         path: "/electric-field-and-flux-density",
       },
-      // { name: "Field Operations", path: "/field-operations" },
+      { name: "Field Operations", path: "/field-operations" },
       { name: "Electric Potential", path: "/electric-potential" },
       // { name: "Gauss Law", path: "/gauss-law" },
       { name: "Electric Dipole", path: "/electric-dipole" },
@@ -81,6 +81,15 @@ const modules = [
       { name: "Microwave Amplifier Design", path: "/microwave-amplifier-design" },
     ],
   },
+  // {
+  //   title: "Antennas",
+  //   icon: "/assets/antenna.png",
+  //   topics: [
+  //     { name: "Introduction to Antennas", path: "/antenna-intro" },
+  //     { name: "Hertzian Dipole", path: "/hertzian-dipole" },
+  //     { name: "Half-wave Dipole", path: "/half-wave-dipole" },
+  //   ],
+  // },
 ];
 
 const aboutData = [

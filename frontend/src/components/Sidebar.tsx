@@ -40,7 +40,7 @@ const sidebarData: SidebarSection[] = [
   },
   {
     topic: "Electrostatics",
-    icon: "/assets/vector-calculus.png",
+    icon: "/assets/electrostatics.png",
     subtopics: [
       { name: "Intro", path: "/electrostatics-intro", quizPath: "/quiz/electrostatics/coulombs-law" },
       { name: "Electric Field & Flux", path: "/electric-field-and-flux-density", quizPath: "/quiz/electrostatics/electric-flux" },
@@ -65,7 +65,7 @@ const sidebarData: SidebarSection[] = [
   },
   {
     topic: "Wave Propagation",
-    icon: "/assets/hero.png",
+    icon: "/assets/wave.gif",
     subtopics: [
       { name: "Types of Waves", path: "/types-of-waves" },
       { name: "Wave Power Energy", path: "/wave-power-energy" },
@@ -81,12 +81,21 @@ const sidebarData: SidebarSection[] = [
     { name: "Characteristic Impedance", path: "/characteristic-impedance", quizPath: "/quiz/transmission-lines/characteristic-impedance" },
     { name: "Terminated Transmission Line", path: "/terminated-transmission-line", quizPath: "/quiz/transmission-lines/terminated-transmission-line" },
     { name: "Smith Chart", path: "/smith-chart", quizPath: "/quiz/transmission-lines/smith-chart" },
-    { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer", quizPath: "/quiz/transmission-lines/types-of-transmission-line" },
+    { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer", quizPath: "/quiz/transmission-lines/quarter-wave-transformer" },
     { name: "Single Stub Tuner", path: "/single-stub-tuner", quizPath: "/quiz/transmission-lines/single-stub-tuner" },
     { name: "L-Section Matching", path: "/l-section-matching", quizPath: "/quiz/transmission-lines/l-section-matching" },
     { name: "Microwave Amplifier Design", path: "/microwave-amplifier-design", quizPath: "/quiz/transmission-lines/microwave-amplifier-design" },
   ],
 },
+// {
+//   topic: "Antennas",
+//   icon: "/assets/antenna.png",
+//   subtopics: [
+//     { name: "Introduction to Antennas", path: "/antenna-intro" },
+//     { name: "Hertzian Dipole", path: "/hertzian-dipole" },
+//     { name: "Half-wave Dipole", path: "/half-wave-dipole" },
+//   ],
+// },
 
 ];
 

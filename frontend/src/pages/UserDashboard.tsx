@@ -95,6 +95,7 @@ const UserDashboard = () => {
     "maxwell-equations": "Maxwell Equations",
     "wave-propagation": "Wave Propagation",
     "transmission-lines": "Transmission Lines",
+    "antennas": "Antennas",
   };
 
   useEffect(() => {
