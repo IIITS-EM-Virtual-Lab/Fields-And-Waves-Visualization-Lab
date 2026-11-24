@@ -22,6 +22,7 @@ const modules: Record<string, { name: string; path: string; topics: string[] }[]
   "electrostatics": [
     { name: "Intro", path: "/electrostatics-intro", topics: ["Charge Basics"] },
     { name: "Electric Field & Flux", path: "/electric-field-and-flux-density", topics: ["Gauss Law Idea"] },
+    { name: "Field Operations", path: "/field-operations", topics: ["Gradient", "Field Lines"] },
     { name: "Electric Potential", path: "/electric-potential", topics: ["Potential Energy"] },
     { name: "Electric Dipole", path: "/electric-dipole", topics: ["Dipole Moment"] },
   ],
@@ -42,14 +43,27 @@ const modules: Record<string, { name: string; path: string; topics: string[] }[]
     { name: "Quarter Wave Transformer", path: "/quarter-wave-transformer", topics:["Quarter Wave Transformer"]},
     { name: "Single Stub Tuner", path: "/single-stub-tuner", topics:["Single Stub Tuner"]}
   ],
+  "wave-propagation": [
+    { name: "Types of Waves", path: "/types-of-waves", topics: ["Waves in General"] },
+    { name: "Wave Power Energy", path: "/wave-power-energy", topics: ["Poynting Vector"] },
+    { name: "Plane Wave Analysis", path: "/plane-wave-analysis", topics: ["Lossy / Lossless Medium"] },
+    { name: "Wave Reflection", path: "/wave-reflection", topics: ["Normal & Oblique Incidence"] },
+  ],
+  // "antennas": [
+  //   { name: "Introduction to Antennas", path: "/antenna-intro", topics: ["Antenna Fundamentals & Radiation Mechanism"] },
+  //   { name: "Hertzian Dipole", path: "/hertzian-dipole", topics: ["Infinitesimal Current Element", "Near & Far Fields", "Radiation Resistance & Pattern"] },
+  //   { name: "Half-wave Dipole", path: "/half-wave-dipole", topics: ["Finite Length Dipole", "Far-Field Pattern", "Radiation Resistance & Input Impedance"] },
+  // ],
 };
 
 const moduleIcons: Record<string, string> = {
   "vector-algebra": "/assets/vector-algebra.png",
   "vector-calculus": "/assets/vector-calculus.png",
-  "electrostatics": "/assets/vector-calculus.png",
+  "electrostatics": "/assets/electrostatics.png",
   "maxwell-equations": "/assets/maxwell.png",
-  "transmission-lines": "/assets/transmission-lines.png"
+  "wave-propagation": "/assets/wave.gif",
+  "transmission-lines": "/assets/transmission-lines.png",
+  // "antennas": "/assets/antenna.png"
 };
 
 const ModulePage = () => {

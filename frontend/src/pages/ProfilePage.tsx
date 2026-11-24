@@ -99,16 +99,18 @@ const ProfilePage = () => {
     'vector-algebra',
     'vector-calculus',
     'wave-propagation',
-    'transmission-lines'
+    'transmission-lines',
+    'antennas'
   ];
 
   const moduleChapters: { [key: string]: string[] } = {
     'electrostatics': ['coulombs-law', 'electric-dipole', 'electric-flux', 'electric-potential', 'gauss-law', 'gradient'],
     'maxwell-equations': ['amperes-law', 'displacement-current', 'emfs', 'faradays-law', 'gauss-law-contd', 'gauss-law-magnetism', 'time-varying-potential'],
     'vector-algebra': ['addition', 'subtraction', 'multiplication', 'scalars', 'triple-product'],
-    'vector-calculus': ['cylindrical-coordinates', 'del-operator', 'spherical-coordinates', 'vector-calculus-intro'],
+    'vector-calculus': ['cartesian-cylindrical-spherical', 'cylindrical-coordinates', 'del-operator', 'spherical-coordinates', 'vector-calculus-intro'],
     'wave-propagation': ['pow_vector', 'wave_analysis', 'wave_reflection', 'waves_in_general'],
-    'transmission-lines': ['types-of-transmission-line', 'characteristic-impedance', 'terminated-transmission-line', 'smith-chart', 'quarter-wave-transformer','single-stub-tuner']
+    'transmission-lines': ['types-of-transmission-line', 'characteristic-impedance', 'terminated-transmission-line', 'smith-chart', 'quarter-wave-transformer','single-stub-tuner'],
+    'antennas': ['antenna-intro', 'hertzian-dipole', 'half-wave-dipole']
   };
 
   const sidebarItems = [

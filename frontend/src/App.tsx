@@ -35,6 +35,9 @@ import CharacteristicImpedancePage from "./pages/transmission-line/Characteristi
 import SmithChart from './pages/transmission-line/smith_chart';
 import QuarterWaveTransformer from './pages/transmission-line/quarter_wave_transformer.tsx';
 import SingleStubTuner from './pages/transmission-line/single_stub_tuner';
+// import AntennaIntro from "./pages/antenna/antenna_intro";
+// import HertzianDipolePage from "./pages/antenna/hertzian_dipole";
+// import HalfwaveDipole from "./pages/antenna/Halfwavedipole";
 
 import Footer from "./components/Footer";
 import Settings from "./pages/settings";
@@ -149,6 +152,10 @@ const AppRoutes = () => {
             <Route path="/smith-chart" element={<SmithChart />} />
             <Route path="/quarter-wave-transformer" element={<QuarterWaveTransformer />} />
             <Route path="/single-stub-tuner" element={<SingleStubTuner />} />
+            {/* <Route path="/antenna-intro" element={<AntennaIntro />} />
+            <Route path="/hertzian-dipole" element={<HertzianDipolePage />} />
+            <Route path="/half-wave-dipole" element={<HalfwaveDipole />} />
+            <Route path="/halfwave-dipole" element={<HalfwaveDipole />} /> */}
 
             <Route path="/module/:moduleSlug" element={<ModulePage />} />
           </Route>
