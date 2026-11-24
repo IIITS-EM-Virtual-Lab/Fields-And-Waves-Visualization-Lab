@@ -1,0 +1,198 @@
+const courseCatalog = [
+  {
+    title: 'Scalars and Vectors',
+    module: 'Vector Algebra',
+    path: '/scalars-and-vectors',
+    signals: ['scalar', 'vector', 'magnitude', 'direction', 'unit vector', 'components'],
+  },
+  {
+    title: 'Vector Addition and Subtraction',
+    module: 'Vector Algebra',
+    path: '/vector-addition',
+    signals: ['parallelogram law', 'triangle law', 'resultant vector', 'vector sum', 'vector subtraction'],
+  },
+  {
+    title: 'Vector Multiplication',
+    module: 'Vector Algebra',
+    path: '/vector-multiplication',
+    signals: ['dot product', 'cross product', 'scalar product', 'vector product'],
+  },
+  {
+    title: 'Scalar and Vector Triple Product',
+    module: 'Vector Algebra',
+    path: '/triple-product',
+    signals: ['scalar triple product', 'vector triple product', 'box product'],
+  },
+  {
+    title: 'Differential Length, Area and Volume',
+    module: 'Vector Calculus',
+    path: '/vector-calculus-intro',
+    signals: ['differential length', 'differential area', 'differential volume', 'line element', 'surface element'],
+  },
+  {
+    title: 'Cylindrical Coordinates',
+    module: 'Vector Calculus',
+    path: '/cylindrical-coordinates',
+    signals: ['cylindrical coordinates', 'rho phi z', 'radial distance', 'azimuth'],
+  },
+  {
+    title: 'Spherical Coordinates',
+    module: 'Vector Calculus',
+    path: '/spherical-coordinates',
+    signals: ['spherical coordinates', 'r theta phi', 'polar angle', 'azimuthal angle'],
+  },
+  {
+    title: 'Cartesian, Cylindrical and Spherical Coordinates',
+    module: 'Vector Calculus',
+    path: '/cartesian-cylindrical-spherical',
+    signals: ['coordinate transformation', 'coordinate conversion', 'cartesian cylindrical spherical comparison'],
+  },
+  {
+    title: 'Del Operator',
+    module: 'Vector Calculus',
+    path: '/del-operator',
+    signals: ['del operator', 'nabla', 'gradient', 'divergence', 'curl', 'laplacian'],
+  },
+  {
+    title: "Coulomb's Law",
+    module: 'Electrostatics',
+    path: '/electrostatics-intro',
+    signals: ['coulomb law', 'point charges', 'electrostatic force', 'inverse square law'],
+  },
+  {
+    title: 'Electric Field and Flux Density',
+    module: 'Electrostatics',
+    path: '/electric-field-and-flux-density',
+    signals: ['electric field', 'electric flux', 'flux density', 'field lines', 'test charge'],
+  },
+  {
+    title: 'Field Operations',
+    module: 'Electrostatics',
+    path: '/field-operations',
+    signals: ['gradient', 'divergence', 'curl', 'laplacian', 'field operation'],
+  },
+  {
+    title: 'Electric Potential',
+    module: 'Electrostatics',
+    path: '/electric-potential',
+    signals: ['electric potential', 'voltage', 'equipotential', 'potential energy'],
+  },
+  {
+    title: "Gauss's Law",
+    module: 'Electrostatics',
+    path: '/gauss-law',
+    signals: ['gauss law', 'gaussian surface', 'enclosed charge', 'electric flux integral'],
+  },
+  {
+    title: 'Electric Dipole',
+    module: 'Electrostatics',
+    path: '/electric-dipole',
+    signals: ['electric dipole', 'dipole moment', 'equal opposite charges', 'dipole field'],
+  },
+  {
+    title: "Gauss's Law for Electric Fields",
+    module: "Maxwell's Equations",
+    path: '/gauss-law-contd',
+    signals: ['maxwell gauss electric law', 'closed surface electric field', 'charge density'],
+  },
+  {
+    title: "Gauss's Law for Magnetism",
+    module: "Maxwell's Equations",
+    path: '/gauss-law-magnetism',
+    signals: ['gauss law magnetism', 'magnetic flux', 'no magnetic monopoles', 'divergence of b'],
+  },
+  {
+    title: "Faraday's Law",
+    module: "Maxwell's Equations",
+    path: '/faraday-law',
+    signals: ['faraday law', 'electromagnetic induction', 'changing magnetic flux', 'induced emf', 'lenz law'],
+  },
+  {
+    title: "Ampere's Law",
+    module: "Maxwell's Equations",
+    path: '/ampere-law',
+    signals: ['ampere law', 'current enclosed', 'magnetic circulation', 'right hand rule'],
+  },
+  {
+    title: 'Displacement Current',
+    module: "Maxwell's Equations",
+    path: '/displacement-current',
+    signals: ['displacement current', 'ampere maxwell law', 'charging capacitor', 'changing electric flux'],
+  },
+  {
+    title: 'Time-Varying Potentials',
+    module: "Maxwell's Equations",
+    path: '/time-varying-potential',
+    signals: ['time varying potential', 'retarded potential', 'scalar potential', 'vector potential'],
+  },
+  {
+    title: 'Transformer and Motional EMF',
+    module: "Maxwell's Equations",
+    path: '/transformer-motional-emf',
+    signals: ['transformer emf', 'motional emf', 'moving conductor', 'lorentz force'],
+  },
+  {
+    title: 'Types of Waves',
+    module: 'Wave Propagation',
+    path: '/types-of-waves',
+    signals: ['transverse wave', 'longitudinal wave', 'wave propagation', 'sinusoidal wave', 'wave parameters'],
+  },
+  {
+    title: 'Plane Wave Analysis',
+    module: 'Wave Propagation',
+    path: '/plane-wave-analysis',
+    signals: ['plane wave', 'wave equation', 'propagation constant', 'phasor', 'uniform plane wave'],
+  },
+  {
+    title: 'Wave Power and Energy',
+    module: 'Wave Propagation',
+    path: '/wave-power-energy',
+    signals: ['poynting vector', 'power density', 'electromagnetic energy', 'energy flow'],
+  },
+  {
+    title: 'Wave Reflection',
+    module: 'Wave Propagation',
+    path: '/wave-reflection',
+    signals: ['wave reflection', 'reflection coefficient', 'transmission coefficient', 'incident reflected wave', 'boundary'],
+  },
+  {
+    title: 'Types of Transmission Lines',
+    module: 'Transmission Lines',
+    path: '/types-of-transmission-line',
+    signals: ['coaxial cable', 'two wire line', 'microstrip', 'stripline', 'transmission line types'],
+  },
+  {
+    title: 'Characteristic Impedance',
+    module: 'Transmission Lines',
+    path: '/characteristic-impedance',
+    signals: ['characteristic impedance', 'z zero', 'distributed parameters', 'lossless line impedance'],
+  },
+  {
+    title: 'Terminated Transmission Line',
+    module: 'Transmission Lines',
+    path: '/terminated-transmission-line',
+    signals: ['terminated line', 'load impedance', 'standing wave', 'vswr', 'input impedance'],
+  },
+  {
+    title: 'Smith Chart',
+    module: 'Transmission Lines',
+    path: '/smith-chart',
+    signals: ['smith chart', 'impedance circle', 'admittance chart', 'normalized impedance'],
+  },
+  {
+    title: 'Quarter-Wave Transformer',
+    module: 'Transmission Lines',
+    path: '/quarter-wave-transformer',
+    signals: ['quarter wave transformer', 'lambda by four', 'impedance matching'],
+  },
+  {
+    title: 'Single-Stub Tuner',
+    module: 'Transmission Lines',
+    path: '/single-stub-tuner',
+    signals: ['single stub tuner', 'open stub', 'shorted stub', 'impedance matching stub'],
+  },
+];
+
+const courseTopicByPath = new Map(courseCatalog.map((topic) => [topic.path, topic]));
+
+module.exports = { courseCatalog, courseTopicByPath };

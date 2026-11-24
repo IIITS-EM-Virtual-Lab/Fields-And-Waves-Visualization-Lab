@@ -77,6 +77,7 @@ The project is divided into two main parts:
 - **Responsive Design:** Works on all screen sizes.
 - **Admin Tools:** Add/edit quizzes and content (if enabled).
 - **Feedback & Support:** Contact form and contributor details.
+- **Image-to-Topic Navigation:** Upload an electromagnetic diagram, equation, or screenshot in Fieldora to receive a validated direct link to the closest course topic.
 
 ---
 
@@ -219,7 +220,11 @@ cd ../backend && npm install
 
 3. **Set up environment variables:**
 
-- `backend/.env`: MongoDB URI, JWT secret, email creds, etc.
+- Copy `backend/.env.example` to `backend/.env` and add the required MongoDB URI and JWT secret.
+- Add `GROQ_API_KEY` to enable AI quiz generation and Fieldora's image-to-topic matching. `GROQ_VISION_MODEL` can be overridden if needed.
+- Copy `frontend/.env.example` to `frontend/.env` and set the backend URL.
+
+Fieldora accepts JPEG, PNG, and WebP images up to 8 MB. Images are held in memory only long enough to send them to the configured Groq vision model; they are not written to local storage by this application.
 
 4. **Run the servers:**
 
@@ -270,4 +275,3 @@ cd backend && node app.js
 ---
 
 Enjoy building and contributing to the Fields and Waves Visualization Lab!
-

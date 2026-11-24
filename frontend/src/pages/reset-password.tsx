@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { API_BASE_URL, warmUpServer } from "../config/api";
 import "./login-signup.css";
 
 const ResetPassword: React.FC = () => {
@@ -20,6 +21,7 @@ const ResetPassword: React.FC = () => {
   const token = query.get("token");
 
   useEffect(() => {
+    warmUpServer();
     if (!token) {
       setTokenError("Invalid or missing reset token. Please request a new password reset.");
     }
@@ -58,17 +60,16 @@ const ResetPassword: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "https://fields-and-waves-visualization-lab.onrender.com/api/password-reset/reset",
+        `${API_BASE_URL}/api/password-reset/reset`,
         { token, newPassword: password },
-        { validateStatus: status => status >= 200 && status < 500 }
+        { timeout: 30000, validateStatus: status => status >= 200 && status < 500 }
       );
 
       if (response.data.success) {
         setResetSuccess(true);
-        // Redirect to login after 3 seconds
         setTimeout(() => {
           navigate("/login");
-        }, 3000);
+        }, 2000);
       } else {
         setTokenError(response.data.error || "Failed to reset password");
       }
@@ -119,12 +120,14 @@ const ResetPassword: React.FC = () => {
 
               <div className="auth-actions">
                 <button
+                  type="button"
                   className="auth-btn primary"
                   onClick={() => navigate('/forgot-password')}
                 >
                   Request New Reset Link
                 </button>
                 <button
+                  type="button"
                   className="auth-btn secondary"
                   onClick={() => navigate('/login')}
                 >
@@ -170,6 +173,7 @@ const ResetPassword: React.FC = () => {
 
               <div className="auth-actions">
                 <button
+                  type="button"
                   className="auth-btn primary"
                   onClick={() => navigate('/login')}
                 >
@@ -236,6 +240,7 @@ const ResetPassword: React.FC = () => {
                     type="button"
                     className="password-toggle"
                     onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -265,6 +270,7 @@ const ResetPassword: React.FC = () => {
                     type="button"
                     className="password-toggle"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    tabIndex={-1}
                   >
                     {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -274,10 +280,12 @@ const ResetPassword: React.FC = () => {
 
               <div className="auth-actions">
                 <button
+                  type="button"
                   className={`auth-btn primary ${(!isFormValid() || isLoading) ? 'disabled' : ''}`}
                   onClick={handleSubmit}
                   disabled={!isFormValid() || isLoading}
                 >
+                  {isLoading && <span className="auth-spinner" />}
                   {isLoading ? 'Resetting...' : 'Reset Password'}
                 </button>
               </div>

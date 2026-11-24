@@ -5,7 +5,8 @@ import { FaUser, FaCog, FaUsers, FaTrash, FaUserShield, FaQuestionCircle, FaEdit
 import axios from 'axios';
 import './ProfilePage.css';
 
-const API = 'https://fields-and-waves-visualization-lab.onrender.com';
+import { API_BASE_URL } from '../config/api';
+const API = API_BASE_URL;
 
 interface User {
   _id: string;
@@ -59,7 +60,7 @@ interface FeedbackEntry {
 }
 
 const ProfilePage = () => {
-  const { client, token } = useSelector((state: RootState) => state.auth);
+  const { client } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState('profile');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -100,7 +101,7 @@ const ProfilePage = () => {
     'vector-calculus',
     'wave-propagation',
     'transmission-lines',
-    'antennas'
+    // 'antennas'
   ];
 
   const moduleChapters: { [key: string]: string[] } = {
@@ -109,8 +110,8 @@ const ProfilePage = () => {
     'vector-algebra': ['addition', 'subtraction', 'multiplication', 'scalars', 'triple-product'],
     'vector-calculus': ['cartesian-cylindrical-spherical', 'cylindrical-coordinates', 'del-operator', 'spherical-coordinates', 'vector-calculus-intro'],
     'wave-propagation': ['pow_vector', 'wave_analysis', 'wave_reflection', 'waves_in_general'],
-    'transmission-lines': ['types-of-transmission-line', 'characteristic-impedance', 'terminated-transmission-line', 'smith-chart', 'quarter-wave-transformer','single-stub-tuner'],
-    'antennas': ['antenna-intro', 'hertzian-dipole', 'half-wave-dipole']
+    'transmission-lines': ['types-of-transmission-line', 'characteristic-impedance', 'terminated-transmission-line', 'smith-chart', 'quarter-wave-transformer', 'single-stub-tuner', 'l-section-matching', 'microwave-amplifier-design'],
+    // 'antennas': ['antenna-intro', 'hertzian-dipole', 'half-wave-dipole']
   };
 
   const sidebarItems = [
@@ -151,7 +152,8 @@ const ProfilePage = () => {
       setLoading(true);
       setError('');
       const response = await axios.get(`${API}/api/users`, {
-        headers: { Authorization: `Bearer ${token}` }
+        withCredentials: true,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
       setUsers(response.data.users);
     } catch (err) {
@@ -169,7 +171,7 @@ const ProfilePage = () => {
         selectedChapter === '__module__'
           ? `${API}/api/quizzes/module/${selectedModule}/common`
           : `${API}/api/quizzes/module/${selectedModule}/chapter/${selectedChapter}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true, headers: { 'X-Requested-With': 'XMLHttpRequest' } }
       );
       setCurrentQuiz(response.data.data);
     } catch (err: any) {
@@ -178,7 +180,7 @@ const ProfilePage = () => {
           const createResponse = await axios.post(
             `${API}/api/quizzes`,
             { module: selectedModule, chapter: selectedChapter === '__module__' ? '' : selectedChapter, questions: [] },
-            { headers: { Authorization: `Bearer ${token}` } }
+            { withCredentials: true, headers: { 'X-Requested-With': 'XMLHttpRequest' } }
           );
           setCurrentQuiz(createResponse.data.data);
         } catch {
@@ -196,7 +198,8 @@ const ProfilePage = () => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
       await axios.delete(`${API}/api/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        withCredentials: true,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
       setUsers(users.filter(user => user._id !== userId));
     } catch {
@@ -209,7 +212,7 @@ const ProfilePage = () => {
       await axios.patch(
         `${API}/api/users/${userId}/toggle-admin`,
         { isAdmin: !currentAdminStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true, headers: { 'X-Requested-With': 'XMLHttpRequest' } }
       );
       setUsers(users.map(user =>
         user._id === userId ? { ...user, isAdmin: !currentAdminStatus } : user
@@ -224,7 +227,7 @@ const ProfilePage = () => {
     try {
       await axios.delete(
         `${API}/api/quizzes/${currentQuiz._id}/questions/${questionId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true, headers: { 'X-Requested-With': 'XMLHttpRequest' } }
       );
       setCurrentQuiz(prev => prev ? {
         ...prev,
@@ -246,7 +249,7 @@ const ProfilePage = () => {
       await axios.post(
         `${API}/api/quizzes/${currentQuiz._id}/questions`,
         questionData,
-        { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
+        { withCredentials: true, headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'multipart/form-data' } }
       );
       setImagePreview(null);
       fetchChapterQuiz();
@@ -286,7 +289,7 @@ const ProfilePage = () => {
           module: selectedModule,
           chapter: selectedChapter === '__module__' ? '' : selectedChapter
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true, headers: { 'X-Requested-With': 'XMLHttpRequest' } }
       );
 
       const generated: AIQuestion[] = response.data.data;
@@ -355,7 +358,7 @@ const ProfilePage = () => {
       await axios.post(
         `${API}/api/quizzes/${currentQuiz._id}/questions`,
         formData,
-        { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
+        { withCredentials: true, headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'multipart/form-data' } }
       );
 
       setAiCards(prev => prev.map((c, i) => i === index ? { ...c, saving: false, saved: true } : c));

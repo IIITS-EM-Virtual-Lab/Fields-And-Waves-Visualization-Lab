@@ -6,13 +6,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    minlength: 3
+    minlength: 2
   },
   email: {
     type: String,
     required: true,
     unique: true,
     trim: true,
+    lowercase: true
   },
   password: {
     type: String,
@@ -23,6 +24,11 @@ const userSchema = new mongoose.Schema({
   isGoogleUser: {
     type: Boolean,
     default: false
+  },
+  googleId: {
+    type: String,
+    sparse: true,
+    index: true
   },
   profilePicture: {
     type: String
@@ -35,13 +41,20 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
+  deletedAt: {
+    type: Date
+  },
   resetToken: String,
   resetTokenExpiry: Date,
 });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || !this.password) return next();
   
   try {
     const salt = await bcrypt.genSalt(10);
@@ -54,6 +67,7 @@ userSchema.pre('save', async function(next) {
 
 // Method to compare password
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
 };
 

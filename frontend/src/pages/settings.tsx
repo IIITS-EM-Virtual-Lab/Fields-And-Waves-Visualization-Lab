@@ -1,82 +1,110 @@
 // /src/pages/Settings.tsx
 import React, { useState, useRef } from 'react';
 import './login-signup.css';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from '../store/slices/authSlice';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { selectCurrentUser, setCredentials, logout } from '../store/slices/authSlice';
+import { apiClient } from '../config/api';
 
-const Settings = () => {
+const Settings: React.FC = () => {
   const user = useSelector(selectCurrentUser);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const nameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleUpdate = async () => {
     if (!user) {
-        setError("User not available");
-        return;
+      setError('User session not available');
+      return;
     }
     const name = nameRef.current?.value.trim() || '';
     const password = passwordRef.current?.value.trim() || '';
     const confirmPassword = confirmRef.current?.value.trim() || '';
 
     if (!name && !password) {
-      setError("Nothing to update");
+      setError('Nothing to update');
+      return;
+    }
+
+    if (password && password.length < 6) {
+      setError('Password must be at least 6 characters');
       return;
     }
 
     if (password && password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError('Passwords do not match');
       return;
     }
+
+    setIsUpdating(true);
+    setError('');
+    setMessage('');
 
     try {
       const payload: any = {};
       if (name) payload.name = name;
       if (password) payload.password = password;
 
-      const res = await axios.put(`https://fields-and-waves-visualization-lab.onrender.com/api/users/${user._id}`, payload, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const res = await apiClient.put(`/api/users/${user._id}`, payload);
 
       if (res.data.success) {
-        setMessage("Settings updated successfully");
-        setError('');
+        setMessage('Settings updated successfully');
+        if (name) {
+          dispatch(
+            setCredentials({
+              client: {
+                ...user,
+                name: res.data.user?.name || name
+              }
+            })
+          );
+        }
+        if (passwordRef.current) passwordRef.current.value = '';
+        if (confirmRef.current) confirmRef.current.value = '';
       } else {
-        throw new Error(res.data.message);
+        throw new Error(res.data.message || 'Failed to update settings');
       }
     } catch (err: any) {
-      setError(err.message || "Failed to update settings");
-      setMessage('');
+      setError(err.response?.data?.message || err.message || 'Failed to update settings');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handleDeleteAccount = async () => {
     if (!user) {
-        setError("User not available");
-        return;
+      setError('User not available');
+      return;
     }
-    if (!window.confirm("Are you sure you want to delete your account? This action is irreversible.")) return;
+    if (!window.confirm('Are you sure you want to delete your account? This action is permanent and cannot be undone.')) {
+      return;
+    }
 
+    setIsUpdating(true);
     try {
-      const res = await axios.delete(`https://fields-and-waves-visualization-lab.onrender.com/api/users/${user._id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const res = await apiClient.delete(`/api/users/${user._id}`);
 
       if (res.data.success) {
-        localStorage.clear();
-        window.location.href = '/signup';
+        dispatch(logout());
+        try {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('reduxState');
+        } catch (e) {}
+        alert('Your account has been deleted successfully.');
+        navigate('/signup');
       } else {
-        throw new Error(res.data.message);
+        throw new Error(res.data.message || 'Failed to delete account');
       }
     } catch (err: any) {
-      setError(err.message || "Failed to delete account");
+      setError(err.response?.data?.message || err.message || 'Failed to delete account');
+      setIsUpdating(false);
     }
   };
 
@@ -110,9 +138,10 @@ const Settings = () => {
                 <label className="form-label">Full Name</label>
                 <input
                   type="text"
-                  placeholder="Update your name"
+                  placeholder={user?.name || 'Update your name'}
                   ref={nameRef}
                   className="auth-input"
+                  disabled={isUpdating}
                 />
               </div>
 
@@ -120,9 +149,10 @@ const Settings = () => {
                 <label className="form-label">New Password</label>
                 <input
                   type="password"
-                  placeholder="New password"
+                  placeholder="New password (min 6 characters)"
                   ref={passwordRef}
                   className="auth-input"
+                  disabled={isUpdating}
                 />
               </div>
 
@@ -133,15 +163,31 @@ const Settings = () => {
                   placeholder="Confirm new password"
                   ref={confirmRef}
                   className="auth-input"
+                  disabled={isUpdating}
                 />
               </div>
 
-              {message && <p className="success-message">{message}</p>}
-              {error && <p className="error-message">{error}</p>}
+              {message && <div className="auth-alert success">{message}</div>}
+              {error && <div className="auth-alert error">{error}</div>}
 
               <div className="auth-actions">
-                <button className="auth-btn primary" onClick={handleUpdate}>Save Changes</button>
-                <button className="auth-btn danger" onClick={handleDeleteAccount}>Delete Account</button>
+                <button
+                  type="button"
+                  className="auth-btn primary"
+                  onClick={handleUpdate}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  type="button"
+                  className="auth-btn danger"
+                  style={{ marginTop: '0.75rem', background: '#e53e3e', color: 'white' }}
+                  onClick={handleDeleteAccount}
+                  disabled={isUpdating}
+                >
+                  Delete Account
+                </button>
               </div>
             </form>
           </div>

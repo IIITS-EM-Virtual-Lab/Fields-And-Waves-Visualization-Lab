@@ -2,10 +2,11 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser, selectCurrentToken } from '../store/slices/authSlice';
+import { selectCurrentUser } from '../store/slices/authSlice';
 import './ChapterQuiz.css';
 
-const API = 'https://fields-and-waves-visualization-lab.onrender.com';
+import { API_BASE_URL } from '../config/api';
+const API = API_BASE_URL;
 
 interface Question {
   _id: string;
@@ -96,7 +97,6 @@ const ChapterQuiz = () => {
   const timerRef                        = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const currentUser = useSelector(selectCurrentUser);
-  const token       = useSelector(selectCurrentToken);
 
   // ── Fetch quiz ───────────────────────────────────────────────
   useEffect(() => {
@@ -149,9 +149,10 @@ const ChapterQuiz = () => {
           userAnswers:    finalUserAnswers,
         },
         {
+          withCredentials: true,
           headers: {
-            Authorization:  `Bearer ${token}`,
             'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
           },
         }
       );
@@ -159,7 +160,7 @@ const ChapterQuiz = () => {
     } catch (err) {
       console.error('❌ Error submitting quiz result:', err);
     }
-  }, [submitted, currentUser, quiz, token]);
+  }, [submitted, currentUser, quiz]);
 
   // ── Auto-submit when timer hits 0 ────────────────────────────
   // We need refs to the latest score/correctCount/userAnswers values
@@ -284,7 +285,7 @@ const ChapterQuiz = () => {
       : question.correctAnswer;
 
   const askAiTutor = async (question: Question, selectedAnswer: string) => {
-    if (!token || !currentUser?._id) {
+    if (!currentUser?._id) {
       alert('Please sign in to use the AI Quiz Tutor.');
       return;
     }
@@ -298,9 +299,10 @@ const ChapterQuiz = () => {
       const correctAnswer = getCorrectAnswer(question);
       const response = await fetch(`${API}/api/chat/ask`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          'X-Requested-With': 'XMLHttpRequest',
         },
         body: JSON.stringify({
           session_id: `quiz-tutor-${currentUser._id}`,

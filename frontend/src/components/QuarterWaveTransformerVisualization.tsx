@@ -250,8 +250,6 @@ export default function QuarterWaveTransformerVisualization() {
         paper_bgcolor: "#ffffff",
         plot_bgcolor: "#ffffff",
         autosize: true,
-        height: 650,
-        width: 650,
         margin: { l: 40, r: 40, t: 80, b: 40 },
         smith: {
           realaxis: {
@@ -514,7 +512,7 @@ export default function QuarterWaveTransformerVisualization() {
             </h2>
             <div
               ref={plotRef}
-              className="w-[650px] h-[650px] max-w-full"
+              className="w-full max-w-[650px] aspect-square"
               style={{
                 opacity: plotlyLoaded ? 1 : 0,
                 transition: "opacity 0.3s ease-in-out",

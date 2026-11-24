@@ -1,12 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { selectCurrentUser, selectCurrentToken } from "../store/slices/authSlice";
-import axios from "axios";
+import { selectCurrentUser } from "../store/slices/authSlice";
+import { apiClient } from "../config/api";
 import { FaChartBar, FaBullseye, FaMedal, FaTimes, FaFilter } from "react-icons/fa";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-
-const API = "https://fields-and-waves-visualization-lab.onrender.com";
 
 interface UserAnswer {
   questionId: string;
@@ -57,7 +55,6 @@ interface TopicStatsMap {
 
 const UserDashboard = () => {
   const user = useSelector(selectCurrentUser);
-  const token = useSelector(selectCurrentToken);
 
   const [stats, setStats] = useState({
     totalPoints: 0,
@@ -104,15 +101,21 @@ const UserDashboard = () => {
   useEffect(() => {
     if (!user?._id) return;
 
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    };
-
     const fetchStats = async () => {
       try {
-        const res = await axios.get(`${API}/api/quizresult/stats/${user._id}`, { headers });
-        setStats(res.data.data.overall);
+        const res = await apiClient.get(`/api/quizresult/stats/${user._id}`);
+        const data = res.data?.data;
+        const overall = data?.overall || data;
+        if (overall && typeof overall === "object") {
+          setStats((prev) => ({
+            ...prev,
+            totalPoints: overall.totalPoints ?? prev.totalPoints,
+            totalAvailablePoints: overall.totalAvailablePoints ?? prev.totalAvailablePoints,
+            totalQuizzes: overall.totalQuizzes ?? prev.totalQuizzes,
+            totalAvailableQuizzes: overall.totalAvailableQuizzes ?? prev.totalAvailableQuizzes,
+            accuracy: overall.accuracy ?? overall.avgAccuracy ?? prev.accuracy,
+          }));
+        }
       } catch (err) {
         console.error("Error fetching stats", err);
       }
@@ -120,7 +123,7 @@ const UserDashboard = () => {
 
     const fetchTopicStats = async () => {
       try {
-        const res = await axios.get(`${API}/api/quizresult/stats-by-topic/${user._id}`, { headers });
+        const res = await apiClient.get(`/api/quizresult/stats-by-topic/${user._id}`);
         setTopicStats(res.data.data);
       } catch (err) {
         console.error("Error fetching topic stats", err);
@@ -129,7 +132,7 @@ const UserDashboard = () => {
 
     const fetchHistory = async () => {
       try {
-        const res = await axios.get(`${API}/api/quizresult/user/${user._id}`, { headers });
+        const res = await apiClient.get(`/api/quizresult/user/${user._id}`);
         setHistory(res.data.data);
         setFilteredHistory(res.data.data);
       } catch (err) {
@@ -140,7 +143,7 @@ const UserDashboard = () => {
     fetchStats();
     fetchTopicStats();
     fetchHistory();
-  }, [user, token]);
+  }, [user]);
 
   useEffect(() => {
     let filtered = [...history];
@@ -201,12 +204,15 @@ const UserDashboard = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
             {topicKeys.map((topic) => {
               const tStats = topicStats[topic];
+              if (!tStats) return null;
               const displayName =
                 topicDisplayNames[topic] ||
                 topic.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-              const accuracy = Math.round(tStats.accuracy);
-              const attemptedPercent = tStats.totalQuizzes
-                ? Math.round((tStats.completedQuizzes / tStats.totalQuizzes) * 100)
+              const accuracy = Math.round(tStats.accuracy || 0);
+              const totalQuizzes = tStats.totalQuizzes || 0;
+              const completedQuizzes = tStats.completedQuizzes || 0;
+              const attemptedPercent = totalQuizzes
+                ? Math.round((completedQuizzes / totalQuizzes) * 100)
                 : 0;
               let progressColor = "#ef4444";
               if (accuracy >= 80) progressColor = "#10b981";
@@ -223,7 +229,7 @@ const UserDashboard = () => {
                         {displayName}
                       </h3>
                       <p className="mt-1 text-xs font-medium text-slate-500">
-                        {tStats.completedQuizzes} of {tStats.totalQuizzes || 0} quizzes attempted
+                        {completedQuizzes} of {totalQuizzes} quizzes attempted
                       </p>
                     </div>
                     <div className="h-16 w-16 shrink-0">
@@ -648,15 +654,21 @@ const UserDashboard = () => {
   };
 
   // ── Root render ────────────────────────────────────────
-  const quizzesAttemptedText = `${stats.totalQuizzes} / ${stats.totalAvailableQuizzes || 0}`;
-  const pointsText = stats.totalAvailablePoints
-    ? `${stats.totalPoints} / ${stats.totalAvailablePoints}`
-    : `${stats.totalPoints}`;
-  const quizCompletion = stats.totalAvailableQuizzes
-    ? Math.round((stats.totalQuizzes / stats.totalAvailableQuizzes) * 100)
+  const totalQuizzes = stats?.totalQuizzes || 0;
+  const totalAvailableQuizzes = stats?.totalAvailableQuizzes || 0;
+  const totalPoints = stats?.totalPoints || 0;
+  const totalAvailablePoints = stats?.totalAvailablePoints || 0;
+  const accuracy = Math.round(stats?.accuracy || 0);
+
+  const quizzesAttemptedText = `${totalQuizzes} / ${totalAvailableQuizzes}`;
+  const pointsText = totalAvailablePoints
+    ? `${totalPoints} / ${totalAvailablePoints}`
+    : `${totalPoints}`;
+  const quizCompletion = totalAvailableQuizzes
+    ? Math.round((totalQuizzes / totalAvailableQuizzes) * 100)
     : 0;
-  const pointsCompletion = stats.totalAvailablePoints
-    ? Math.round((stats.totalPoints / stats.totalAvailablePoints) * 100)
+  const pointsCompletion = totalAvailablePoints
+    ? Math.round((totalPoints / totalAvailablePoints) * 100)
     : 0;
 
   return (
@@ -729,11 +741,11 @@ const UserDashboard = () => {
                 </span>
               </div>
               <div className="mt-5">
-                <p className="text-3xl font-extrabold text-slate-950 leading-tight">{Math.round(stats.accuracy)}%</p>
+                <p className="text-3xl font-extrabold text-slate-950 leading-tight">{accuracy}%</p>
                 <p className="mt-1 text-sm font-medium text-slate-500">Overall Accuracy</p>
               </div>
               <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-                <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(Math.round(stats.accuracy), 100)}%` }} />
+                <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(accuracy, 100)}%` }} />
               </div>
             </div>
           </div>

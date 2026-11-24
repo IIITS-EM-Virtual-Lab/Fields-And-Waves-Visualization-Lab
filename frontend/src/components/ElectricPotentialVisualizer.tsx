@@ -134,7 +134,7 @@ function ElectricPotentialVisualizer() {
         </div>
       </div>
 
-      <div className="relative overflow-hidden rounded-xl border border-gray-300 shadow-lg bg-white" style={{ height: 500, width: '100%', maxWidth: 800, zIndex: 0 }}>
+      <div className="relative overflow-hidden rounded-xl border border-gray-300 shadow-lg bg-white" style={{ height: "auto", width: "100%", maxWidth: 800, aspectRatio: "8 / 5", zIndex: 0 }}>
         <CanvasControlsToolbar
           interactionMode={interactionMode}
           setInteractionMode={setInteractionMode}
